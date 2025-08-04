@@ -1,31 +1,5 @@
-﻿  D3DResourceLeakChecker.cpp
-  DirectXCommon.cpp
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_dx12.cpp
-  imgui_impl_win32.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  Input.cpp
-  Logger.cpp
-  main.cpp
-  Model.cpp
-  ModelCommon.cpp
-  ModelManager.cpp
-  MyMath.cpp
-  Object3d.cpp
-  Object3dCommon.cpp
-  Sprite.cpp
-  SpriteCommon.cpp
-  StringUility.cpp
-  TextureManager.cpp
-  WinApp.cpp
-  コード生成しています。
-  3135 of 3158 functions (99.3%) were compiled, the rest were copied from previous compilation.
-    23 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
-  コード生成が終了しました。
-  CG2_setting.vcxproj -> C:\GameProject\generated\output\Release\CG2_setting.exe
-          1 file(s) copied.
-          1 file(s) copied.
+﻿  CG2_setting.vcxproj -> C:\GameProject\generated\output\Release\CG2_setting.exe
+  The syntax of the command is incorrect.
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: コマンド "copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\dxcompiler.dll" "C:\GameProject\generated\output\Release\dxcompiler.dll" && 
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\dxil.dll" "C:\GameProject\generated\output\Release\dxil.dll"
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :VCEnd" はコード 255 で終了しました。
