@@ -14,6 +14,8 @@
 #include "Engine/3D/ModelCommon.h"
 #include "Engine/3D/ModelManager.h"
 
+#include "Player.h"
+
 #pragma comment(lib,"dxcompiler.lib")
 
 //球
@@ -164,21 +166,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->Initialize(dxCommon);
 
 	ModelManager::GetInstance()->Initialize(dxCommon);
+	ModelManager::GetInstance()->LoadModel("box.obj");
 
-	// .ojbファイルからモデルを読み込む
-	ModelManager::GetInstance()->LoadModel("plane.obj");
-	ModelManager::GetInstance()->LoadModel("axis.obj");
+	Player* player = nullptr;
+	player = new Player;
+	player->Initialize(object3dCommon,input);
 
-	// 異なるモデルを持つオブジェクトを生成
-	Object3d* planeObject = new Object3d;
-	planeObject->Initialize(object3dCommon);
-	planeObject->SetModel("plane.obj");
-	planeObject->SetTranslate(Vector3(-2.0f, 0.0f, 0.0f));
-
-	Object3d* axisObject = new Object3d;
-	axisObject->Initialize(object3dCommon);
-	axisObject->SetModel("axis.obj");
-	axisObject->SetTranslate(Vector3(2.0f, 0.0f, 0.0f));
 #pragma endregion
 	
 	//スフィア用リソース
@@ -282,18 +275,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			object3dCommon->SettingCommonDraw();
 
-			Vector3 currentRotate[2];
-			currentRotate[0] = planeObject->GetRotate();
-			currentRotate[1] = axisObject->GetRotate();
-
-			currentRotate[0].y += 0.05f;
-			currentRotate[1].y = 0.0f;
-			currentRotate[1].z += 0.05f;
-
-			planeObject->SetRotate(currentRotate[0]);
-			planeObject->Updata();
-			axisObject->SetRotate(currentRotate[1]);
-			axisObject->Updata();
+			player->Update();
 
 			//uvTransform
 			Matrix4x4 uvTransformMatrix = MakeScalematrix(uvTransformSprite.scale);
@@ -334,6 +316,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 			//sprite->Draw();
 
+			player->Draw();
+
 			//planeObject->Draw();
 			//axisObject->Draw();
 
@@ -350,8 +334,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
-	delete axisObject;
-	delete planeObject;
+	delete player;
 	ModelManager::GetInstance()->Finalize();
 	delete object3dCommon;
 	delete model;

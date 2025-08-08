@@ -28,11 +28,6 @@ public:
 		float intensity;
 	};
 
-	struct Transform {
-		Vector3 scale;
-		Vector3 rotate;
-		Vector3 translate;
-	};
 public:
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon);
