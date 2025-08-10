@@ -166,7 +166,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->Initialize(dxCommon);
 
 	ModelManager::GetInstance()->Initialize(dxCommon);
-	ModelManager::GetInstance()->LoadModel("box.obj");
+
+	ModelManager::GetInstance()->LoadModel("plane.obj");
+	ModelManager::GetInstance()->LoadModel("axis.obj");
+	ModelManager::GetInstance()->LoadModel("Box.obj");
 
 	Player* player = nullptr;
 	player = new Player;

@@ -12,8 +12,8 @@ Player::~Player()
 void Player::Initialize(ObJect3dCommon* object3dCommon,Input* input) {
 	object3d = new Object3d();
 	object3d->Initialize(object3dCommon);
-	object3d->SetModel("box.obj");
-	object3d->SetTranslate(Vector3(0.0f, 0.0f, 0.0f));
+	object3d->SetModel("Box.obj");
+	object3d->SetTranslate(Vector3(0.0f, 0.0f, 5.0f));
 
 	input_ = new Input();
 	input_ = input;
