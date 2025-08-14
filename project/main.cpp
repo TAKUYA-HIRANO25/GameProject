@@ -13,6 +13,7 @@
 #include "Engine/3D/Model.h"
 #include "Engine/3D/ModelCommon.h"
 #include "Engine/3D/ModelManager.h"
+#include "Engine/3D/Camera.h"
 
 #pragma comment(lib,"dxcompiler.lib")
 
@@ -180,7 +181,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	axisObject->SetModel("axis.obj");
 	axisObject->SetTranslate(Vector3(2.0f, 0.0f, 0.0f));
 #pragma endregion
-	
+	//カメラ
+#pragma region
+	Camera* camera = new Camera;
+	camera->SetRotate({ 0.3f,0.0f,0.0f });
+	camera->SetTranslate({ 0.0f,4.0f,-10.0f });
+	object3dCommon->SetDefaultCamera(camera);
+#pragma endregion
 	//スフィア用リソース
 #pragma region
 	/*const uint32_t Subdivision = 16;
@@ -255,21 +262,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//imgui
-			/*
+			
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			//ImGui::ShowDemoWindow();
-			ImGui::Checkbox("useMonsterBall", &useMonsterball);
-			ImGui::DragFloat4("materialData", materialDataVector);
+			ImGui::ShowDemoWindow();
+			//ImGui::Checkbox("useMonsterBall", &useMonsterball);
+			//ImGui::DragFloat4("materialData", materialDataVector);
 			ImGui::DragFloat3("Scale", TransformScale);
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
-			ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
+			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-			*/
+			
+			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
+			camera->SetTransform(transform_);
+
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
 				OutputDebugStringA("HIT0\n");
@@ -311,7 +321,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
 			
-			//ImGui::Render();
+			ImGui::Render();
 
 			//画面色変更
 #pragma region
@@ -334,10 +344,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 			//sprite->Draw();
 
-			//planeObject->Draw();
-			//axisObject->Draw();
+			planeObject->Draw();
+			axisObject->Draw();
 
-			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 			dxCommon->PostDrow();
 #pragma endregion
 		}
@@ -357,9 +367,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete model;
 	delete modelCommon;
 	TextureManager::GetInstance()->Finalize();
-	//ImGui_ImplDX12_Shutdown();
-	//ImGui_ImplWin32_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
 #ifndef _DEBUG
 	
