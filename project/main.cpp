@@ -266,6 +266,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 			*/
+
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
 				OutputDebugStringA("HIT0\n");
@@ -274,6 +275,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			/*for (Sprite* sprite : sprites) {
 				sprite->Update();
 			}*/
+
 			sprite->Update();
 
 			object3dCommon->SettingCommonDraw();
