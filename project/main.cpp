@@ -234,6 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float TransformRotae[3] = { 0.0f, 3.14f, 0.0f };
 	float TransformTranslate[3] = { 0.0f,0.0f,0.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
+	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	//uvTransform
 	struct Sprite::Transform uvTransformSprite {
 		{ 1.0f, 1.0f, 1.0f },
@@ -250,22 +251,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		else {
+			playerPosition[0] = player->position.x;
+			playerPosition[1] = player->position.y;
+			playerPosition[1] = player->position.z;
 			//imgui
-			/*
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			//ImGui::ShowDemoWindow();
-			ImGui::Checkbox("useMonsterBall", &useMonsterball);
-			ImGui::DragFloat4("materialData", materialDataVector);
-			ImGui::DragFloat3("Scale", TransformScale);
-			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
-			ImGui::DragFloat3("Translate", TransformTranslate);
-			ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
+			ImGui::ShowDemoWindow();
+			//ImGui::Checkbox("useMonsterBall", &useMonsterball);
+			//ImGui::DragFloat4("materialData", materialDataVector);
+			//ImGui::DragFloat3("Scale", TransformScale);
+			//ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
+			//ImGui::DragFloat3("Translate", TransformTranslate);
+			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
+			ImGui::DragFloat3("Player", playerPosition);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-			*/
+			
 
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
@@ -298,7 +302,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
 			
-			//ImGui::Render();
+			ImGui::Render();
 
 			//画面色変更
 #pragma region
@@ -326,7 +330,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//planeObject->Draw();
 			//axisObject->Draw();
 
-			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 			dxCommon->PostDrow();
 #pragma endregion
 		}
@@ -345,9 +349,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete model;
 	delete modelCommon;
 	TextureManager::GetInstance()->Finalize();
-	//ImGui_ImplDX12_Shutdown();
-	//ImGui_ImplWin32_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
 #ifndef _DEBUG
 	

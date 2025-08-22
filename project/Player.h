@@ -19,11 +19,13 @@ public:
 	void Update();
 
 	void Draw();
+
+	Vector3 position = { -2.0f,0.0f,0.0f }; // 位置
 private:
 
 	Transform modelTransform_;
 	Object3d* object3d = nullptr; // 3Dオブジェクト
-	Vector3 position; // 位置
+	//Vector3 position = { -2.0f,0.0f,0.0f }; // 位置
 	Vector3 rotation; // 回転
 	Vector3 scale; // 拡大縮小
 	float speed; // 移動速度
