@@ -108,6 +108,9 @@
     <ClCompile Include="Engine\Math\MatuilityForText.cpp">
       <Filter>ソース ファイル\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Title.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -184,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Math\MatuilityForText.h">
       <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Title.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

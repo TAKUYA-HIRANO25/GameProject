@@ -1,12 +1,4 @@
-﻿  Sprite.cpp
-  Model.cpp
-  ModelManager.cpp
-  Object3d.cpp
-  MatuilityForText.cpp
-  MyMath.cpp
-  Player.cpp
-  main.cpp
-  LINK : 前回のインクリメンタル リンクで C:\GameProject\project\..\generated\output\Debug\CG2_setting.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
+﻿  Title.cpp
   CG2_setting.vcxproj -> C:\GameProject\generated\output\Debug\CG2_setting.exe
-          1 file(s) copied.
-          1 file(s) copied.
+          1 個のファイルをコピーしました。
+          1 個のファイルをコピーしました。
