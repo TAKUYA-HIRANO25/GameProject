@@ -140,6 +140,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Textureを読んで転送する
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 
+
 #pragma endregion
 	//スプライト
 #pragma region
@@ -150,6 +151,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* sprite = new Sprite();
 	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 
+#pragma endregion
+	//タイトル
+#pragma region
+	bool isTitle = true;
+	TextureManager::GetInstance()->LoadTexture("resources/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
+	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	Sprite* title = new Sprite();
+	title->Initialize(spriteCommon, "resources/title.png");
+	Sprite* titleUI = new Sprite();
+	titleUI->Initialize(spriteCommon, "resources/titleUI.png");
+	Sprite* backGround = new Sprite();
+	backGround->Initialize(spriteCommon, "resources/backGround.png");
 #pragma endregion
 	//モデル
 #pragma region
@@ -272,27 +286,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 
 			input->Update();
-			if (input->TriggerKey(DIK_0)) {
-				OutputDebugStringA("HIT0\n");
+			if (isTitle) {
+
+				title->Update();		
+				titleUI->Update();
+				backGround->Update();
+				//タイトルからゲームへ
+				if(input->TriggerKey(DIK_RETURN)) {
+					isTitle = false;
+				}
 			}
+			else {
+				if (input->TriggerKey(DIK_0)) {
+					OutputDebugStringA("HIT0\n");
+				}
 
-			/*for (Sprite* sprite : sprites) {
+				/*for (Sprite* sprite : sprites) {
+					sprite->Update();
+				}*/
+
 				sprite->Update();
-			}*/
 
-			sprite->Update();
+				object3dCommon->SettingCommonDraw();
 
-			object3dCommon->SettingCommonDraw();
+				player->Update();
 
-			player->Update();
+				//uvTransform
+				Matrix4x4 uvTransformMatrix = MakeScalematrix(uvTransformSprite.scale);
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 
-			//uvTransform
-			Matrix4x4 uvTransformMatrix = MakeScalematrix(uvTransformSprite.scale);
-			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
-			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 
-			
-
+			}
 			//球の３次元化 WVPスフィア用
 			/*transformSphere.rotate.y += 0.03f;
 			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
@@ -324,8 +349,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Draw();
 			}*/
 			//sprite->Draw();
-
-			player->Draw();
+			if(isTitle) {
+				backGround->Draw();
+				title->Draw();
+				titleUI->Draw();
+			}
+			else {
+				player->Draw();
+			}
 
 			//planeObject->Draw();
 			//axisObject->Draw();
@@ -344,6 +375,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete input;
 	delete dxCommon;
 	delete player;
+	delete title;
+	delete titleUI;
+	delete backGround;
 	ModelManager::GetInstance()->Finalize();
 	delete object3dCommon;
 	delete model;
