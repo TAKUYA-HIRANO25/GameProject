@@ -17,6 +17,8 @@ public:
 	void SetFarClipDistance(const float& farClip) { farClipDistance = farClip; }
 	void SetFovY(const float& fov) { fovY = fov; }
 	void SetTransform(const Transform& transform) { this->transform = transform; }
+	void SetAspect(const float& aspect) { this->aspect = aspect; }
+	void SetNearClipDistance(const float& nearClip) { nearClipDistance = nearClip; }
 
 	// Getter
 	const Matrix4x4& GetWorldMatrix() const {
@@ -45,4 +47,3 @@ private:
 
 	Matrix4x4 viewProjectionMatrix;
 };
-

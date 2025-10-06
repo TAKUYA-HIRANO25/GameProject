@@ -164,6 +164,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new ObJect3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
+	//カメラ
+#pragma region
+	Camera* camera = new Camera;
+	camera->SetRotate({ 0.3f,0.0f,0.0f });
+	camera->SetTranslate({ 0.0f,4.0f,-10.0f });
+	object3dCommon->SetDefaultCamera(camera);
+
+#pragma endregion
+
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	// .ojbファイルからモデルを読み込む
@@ -180,13 +189,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	axisObject->Initialize(object3dCommon);
 	axisObject->SetModel("axis.obj");
 	axisObject->SetTranslate(Vector3(2.0f, 0.0f, 0.0f));
-#pragma endregion
-	//カメラ
-#pragma region
-	Camera* camera = new Camera;
-	camera->SetRotate({ 0.3f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,-10.0f });
-	object3dCommon->SetDefaultCamera(camera);
 #pragma endregion
 	//スフィア用リソース
 #pragma region
@@ -243,7 +245,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float materialDataVector[4] = { 1,1,1,1 };
 	float TransformScale[3] = { 1.0f,1.0f,1.0f };
 	float TransformRotae[3] = { 0.0f, 3.14f, 0.0f };
-	float TransformTranslate[3] = { 0.0f,0.0f,0.0f };
+	float TransformTranslate[3] = { 0.0f,0.0f,20.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
 	//uvTransform
 	struct Sprite::Transform uvTransformSprite {
@@ -290,6 +292,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 			sprite->Update();
 
+			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
 			Vector3 currentRotate[2];
