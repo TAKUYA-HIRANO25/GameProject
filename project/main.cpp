@@ -14,7 +14,7 @@
 #include "Engine/3D/ModelCommon.h"
 #include "Engine/3D/ModelManager.h"
 
-#include "Player.h"
+#include "Application/Player.h"
 
 #pragma comment(lib,"dxcompiler.lib")
 

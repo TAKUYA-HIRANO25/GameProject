@@ -21,3 +21,5 @@ C:\GameProject\project\Engine\2D\SpriteCommon.cpp;C:\GameProject\generated\obj\C
 C:\GameProject\project\Engine\Base\StringUility.cpp;C:\GameProject\generated\obj\CG2_setting\Release\StringUility.obj
 C:\GameProject\project\Engine\Base\TextureManager.cpp;C:\GameProject\generated\obj\CG2_setting\Release\TextureManager.obj
 C:\GameProject\project\Engine\Base\WinApp.cpp;C:\GameProject\generated\obj\CG2_setting\Release\WinApp.obj
+C:\GameProject\project\Engine\Math\MatuilityForText.cpp;C:\GameProject\generated\obj\CG2_setting\Release\MatuilityForText.obj
+C:\GameProject\project\Application\Player.cpp;C:\GameProject\generated\obj\CG2_setting\Release\Player.obj
