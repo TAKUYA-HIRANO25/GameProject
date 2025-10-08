@@ -1,5 +1,0 @@
-﻿  CG2_setting.vcxproj -> C:\GameProject\generated\output\Release\CG2_setting.exe
-  The syntax of the command is incorrect.
-C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: コマンド "copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\dxcompiler.dll" "C:\GameProject\generated\output\Release\dxcompiler.dll" && 
-C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\dxil.dll" "C:\GameProject\generated\output\Release\dxil.dll"
-C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(166,5): error MSB3073: :VCEnd" はコード 255 で終了しました。
