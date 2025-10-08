@@ -279,7 +279,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			//ImGui::DragFloat3("Translate", TransformTranslate);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
-			ImGui::DragFloat3("Player", playerPosition);
+			//ImGui::DragFloat3("Player", playerPosition);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
@@ -327,7 +327,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
 			
-			ImGui::Render();
+			//ImGui::Render();
 
 			//画面色変更
 #pragma region
@@ -352,7 +352,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if(isTitle) {
 				backGround->Draw();
 				title->Draw();
-				titleUI->Draw();
+				//titleUI->Draw();
 			}
 			else {
 				player->Draw();
@@ -361,7 +361,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//planeObject->Draw();
 			//axisObject->Draw();
 
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 			dxCommon->PostDrow();
 #pragma endregion
 		}
