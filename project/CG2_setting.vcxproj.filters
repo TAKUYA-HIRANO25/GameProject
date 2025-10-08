@@ -31,6 +31,9 @@
     <Filter Include="シェーダーファイル">
       <UniqueIdentifier>{feb80806-a20a-4710-9cff-ba2e5cae7a02}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{43e92b61-88f1-4eea-8c1b-c69301982f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
