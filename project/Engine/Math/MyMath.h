@@ -50,7 +50,7 @@ namespace MyMath {
 	//積
 	Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 	//スカラ
-	Matrix4x4 MakeScalematrix(const Vector3& scale);
+	Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 	//移動
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 	// x軸

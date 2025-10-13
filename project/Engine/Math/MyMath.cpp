@@ -26,7 +26,7 @@ namespace MyMath {
 		return result;
 	}
 
-	Matrix4x4 MakeScalematrix(const Vector3& scale)
+	Matrix4x4 MakeScaleMatrix(const Vector3& scale)
 	{
 		Matrix4x4 result = { 0 };
 		result.m[0][0] = scale.x;
@@ -120,7 +120,7 @@ namespace MyMath {
 		Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
 		Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
 		Matrix4x4 rotateXYZMatrix = Multiply(Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
-		return Multiply(Multiply(MakeScalematrix(scale), rotateXYZMatrix), MakeTranslateMatrix(translate));
+		return Multiply(Multiply(MakeScaleMatrix(scale), rotateXYZMatrix), MakeTranslateMatrix(translate));
 	}
 
 	Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip, float farClip)

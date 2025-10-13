@@ -1,20 +1,20 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "Engine/Math/MyMath.h"
-#include "Engine/Base/Input.h"
-#include "Engine/Base/WinApp.h"
-#include "Engine/Base/DirectXCommon.h"
-#include "Engine/2D/Sprite.h"
-#include "Engine/2D/SpriteCommon.h"
-#include "Engine/Base/D3DResourceLeakChecker.h"
-#include "Engine/Base/TextureManager.h"
-#include "Engine/3D/Object3dCommon.h"
-#include "Engine/3D/Object3d.h"
-#include "Engine/3D/Model.h"
-#include "Engine/3D/ModelCommon.h"
-#include "Engine/3D/ModelManager.h"
-#include "Engine/3D/Camera.h"
-
+#include "MyMath.h"
+#include "Input.h"
+#include "WinApp.h"
+#include "DirectXCommon.h"
+#include "Sprite.h"
+#include "SpriteCommon.h"
+#include "D3DResourceLeakChecker.h"
+#include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
+#include "Model.h"
+#include "ModelCommon.h"
+#include "ModelManager.h"
+#include "Camera.h"
+#include "Player.h"
 #pragma comment(lib,"dxcompiler.lib")
 
 //球
@@ -178,17 +178,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// .ojbファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
+	ModelManager::GetInstance()->LoadModel("box.obj");
 
 	// 異なるモデルを持つオブジェクトを生成
 	Object3d* planeObject = new Object3d;
 	planeObject->Initialize(object3dCommon);
 	planeObject->SetModel("plane.obj");
-	planeObject->SetTranslate(Vector3(-2.0f, 0.0f, 0.0f));
+	planeObject->SetTranslate(Vector3(-2.0f, -1.0f, 0.0f));
 
 	Object3d* axisObject = new Object3d;
 	axisObject->Initialize(object3dCommon);
 	axisObject->SetModel("axis.obj");
-	axisObject->SetTranslate(Vector3(2.0f, 0.0f, 0.0f));
+	axisObject->SetTranslate(Vector3(2.0f, 1.0f, 0.0f));
+
+#pragma endregion
+	//プレイヤー
+#pragma region
+	Player* player = new Player();
+	player->Initialize(object3dCommon,input);
 #pragma endregion
 	//スフィア用リソース
 #pragma region
@@ -254,6 +261,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 0.0f,0.0f,0.0f },
 	};
 	bool useMonsterball = false;
+	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 #pragma endregion
 
 	//ゲーム処理
@@ -263,8 +271,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		else {
+
 			//imgui
-			
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -274,6 +282,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", TransformScale);
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
+			ImGui::DragFloat3("Player", playerPosition);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -295,6 +304,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
+			//プレイヤー更新
+			player->Update();
+			
 			Vector3 currentRotate[2];
 			currentRotate[0] = planeObject->GetRotate();
 			currentRotate[1] = axisObject->GetRotate();
@@ -309,11 +321,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			axisObject->Updata();
 
 			//uvTransform
-			Matrix4x4 uvTransformMatrix = MakeScalematrix(uvTransformSprite.scale);
+			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
-
-			
 
 			//球の３次元化 WVPスフィア用
 			/*transformSphere.rotate.y += 0.03f;
@@ -347,8 +357,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 			//sprite->Draw();
 
-			planeObject->Draw();
-			axisObject->Draw();
+			//3D描画
+
+			player->Draw();
+
+			//planeObject->Draw();
+			//axisObject->Draw();
 
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 			dxCommon->PostDrow();
@@ -363,9 +377,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
+	delete player;
 	delete axisObject;
 	delete planeObject;
 	ModelManager::GetInstance()->Finalize();
+	delete camera;
 	delete object3dCommon;
 	delete model;
 	delete modelCommon;

@@ -108,6 +108,12 @@
     <ClCompile Include="Engine\3D\Camera.cpp">
       <Filter>ソース ファイル\3D</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Player.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Math\MatuilityForText.cpp">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -181,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="Engine\3D\Camera.h">
       <Filter>ソース ファイル\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\MatuilityForText.h">
+      <Filter>ソース ファイル\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

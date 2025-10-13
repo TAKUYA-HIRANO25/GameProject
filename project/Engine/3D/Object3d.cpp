@@ -28,7 +28,7 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 	directionalLightData->intensity = light.intensity;
 
 	// Transform変数を作る
-	transform = { {1.0f,1.0f,1.0f},{0.0f,185.3f,0.0f},{0.0f,0.0f,0.0f} };
+	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 }
 
