@@ -16,6 +16,7 @@
 #include "Engine/3D/Camera.h"
 
 #include "Player.h"
+#include <algorithm>
 
 #pragma comment(lib,"dxcompiler.lib")
 
@@ -141,7 +142,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Textureを読んで転送する
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 
-
 #pragma endregion
 	//スプライト
 #pragma region
@@ -151,7 +151,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Sprite* sprite = new Sprite();
 	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
-
 #pragma endregion
 	//タイトル
 #pragma region
@@ -166,6 +165,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* backGround = new Sprite();
 	backGround->Initialize(spriteCommon, "resources/backGround.png");
 #pragma endregion
+	//フェード
+#pragma region
+	bool isFade = false;
+	bool endFade = false;
+	Sprite* fadeSprite = new Sprite();
+	Vector2 size = { 0,0 };
+	Vector2 position = { 630,360 };
+	float speedx = 16.0f;
+	float speedy = 10.0f;
+	float time = 0.0f;
+	TextureManager::GetInstance()->LoadTexture("resources/Fade.png");
+	fadeSprite->Initialize(spriteCommon, "resources/Fade.png");
+	fadeSprite->SetSize(Vector2(0, 0));
+	fadeSprite->SetPosition(Vector2(630,360));
+	//fadeSprite->SetColor(Vector4(0, 0, 0, 1));
+
+#pragma endregion
+	//ゲーム画面
+#pragma region
+	Sprite* gameSprite = new Sprite();
+	gameSprite->Initialize(spriteCommon, "resources/uvChecker.png");
+	gameSprite->SetSize(Vector2(1280, 720));
+#pragma endregion
+
 	//モデル
 #pragma region
 	ModelCommon* modelCommon = nullptr;
@@ -258,6 +281,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float TransformTranslate[3] = { 0.0f,0.0f,20.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
 	float playerPosition[3] = { 0.0f,0.0f,0.0f };
+	float fadePosition[2] = { 0.0f,0.0f };
+	float fadeSize[2] = { 0.0f,0.0f };
+	float sizea[2] = { 0.0f,0.0f };
 	//uvTransform
 	struct Sprite::Transform uvTransformSprite {
 		{ 1.0f, 1.0f, 1.0f },
@@ -277,8 +303,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			playerPosition[0] = player->position.x;
 			playerPosition[1] = player->position.y;
 			playerPosition[1] = player->position.z;
+
+			fadePosition[0] = fadeSprite->GetPosition().x;
+			fadePosition[1] = fadeSprite->GetPosition().y;
+			fadeSize[0] = fadeSprite->GetSize().x;
+			fadeSize[1] = fadeSprite->GetSize().y;
+			sizea[0] = size.x;
+			sizea[1] = size.y;
 			//imgui
-			
+			/*
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -288,24 +321,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", TransformScale);
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
+			ImGui::Checkbox("fade", &isFade);
+			ImGui::Checkbox("endFade", &endFade);
+			ImGui::DragFloat2("FadePosition", fadePosition);
+			ImGui::DragFloat2("FadeSize", fadeSize);
+			ImGui::DragFloat2("Size", sizea);
+
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-			
+			*/
+
 			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
 			camera->SetTransform(transform_);
 
 			input->Update();
+
 			if (isTitle) {
 
 				title->Update();		
 				titleUI->Update();
 				backGround->Update();
-				//タイトルからゲームへ
-				if(input->TriggerKey(DIK_RETURN)) {
-					isTitle = false;
+				if (input->TriggerKey(DIK_RETURN)) {
+					isFade = true;
 				}
+
+
 			}
 			else {
 				if (input->TriggerKey(DIK_0)) {
@@ -317,9 +359,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}*/
 
 				sprite->Update();
-
-			camera->Update();
-			object3dCommon->SettingCommonDraw();
+				gameSprite->Update();
+			    camera->Update();
+			    object3dCommon->SettingCommonDraw();
 
 				player->Update();
 
@@ -330,6 +372,41 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			}
+			fadeSprite->Update();
+			//フェード処理
+			if (isFade) {
+				if (!endFade) {
+					size.x += speedx;
+					size.y += speedy;
+					position.x -= speedx / 2;
+					position.y -= speedy / 2;
+
+					fadeSprite->SetSize(Vector2(size.x, size.y));
+					fadeSprite->SetPosition(Vector2(position.x , position.y ));
+
+					if (fadeSprite->GetSize().x >= 1800) {
+						isTitle = false;
+						endFade = true;
+					}
+				}
+			}
+			if (endFade) {
+				size.x -= speedx;
+				size.y -= speedy;
+				position.x += speedx / 2;
+				position.y += speedy / 2;
+				fadeSprite->SetSize(Vector2(size.x, size.y));
+				fadeSprite->SetPosition(Vector2(position.x , position.y));
+				if (fadeSprite->GetSize().x <= 0) {
+					endFade = false;
+					isFade = false;
+					size = { 0,0 };
+					position = { 630,360 };
+					fadeSprite->SetSize(Vector2(0, 0));
+					fadeSprite->SetPosition(Vector2(630, 360));
+				}
+			}
+
 			//球の３次元化 WVPスフィア用
 			/*transformSphere.rotate.y += 0.03f;
 			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
@@ -339,7 +416,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
 			
-			ImGui::Render();
+			//ImGui::Render();
 
 			//画面色変更
 #pragma region
@@ -367,13 +444,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				//titleUI->Draw();
 			}
 			else {
-				player->Draw();
+				//player->Draw();
+				gameSprite->Draw();
 			}
-
+			if(isFade || endFade) {
+				fadeSprite->Draw();
+			}
 			//planeObject->Draw();
 			//axisObject->Draw();
 
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 			dxCommon->PostDrow();
 #pragma endregion
 		}
@@ -387,6 +467,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete input;
 	delete dxCommon;
 	delete player;
+	delete camera;
+	delete gameSprite;
+	delete fadeSprite;
 	delete title;
 	delete titleUI;
 	delete backGround;
