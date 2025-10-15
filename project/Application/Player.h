@@ -8,6 +8,8 @@
 #include "Model.h"
 #include "ModelCommon.h"
 #include "Camera.h"
+#include "MatuilityForText.h"
+
 class Player
 {
 public:
@@ -29,7 +31,7 @@ private:
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	//プレイヤー
 	Transform modelTransform_;
-	Object3d* PlayerModel = nullptr; // 3Dオブジェクト
+	Object3d* Model_ = nullptr; // 3Dオブジェクト
 	Vector3 rotation; // 回転
 	Vector3 scale; // 拡大縮小
 	float speed; // 移動速度

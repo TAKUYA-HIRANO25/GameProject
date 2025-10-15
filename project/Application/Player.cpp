@@ -7,15 +7,15 @@ Player::Player()
 
 Player::~Player()
 {
-	delete PlayerModel;
+	delete Model_;
 }
 
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	object3dCommon_ = object3dCommon;
-	PlayerModel = new Object3d();
-	PlayerModel->Initialize(object3dCommon);
-	PlayerModel->SetModel("box.obj");
-	PlayerModel->SetTranslate(position);
+	Model_ = new Object3d();
+	Model_->Initialize(object3dCommon);
+	Model_->SetModel("box.obj");
+	Model_->SetTranslate(position);
 
 	input_ = new Input();
 	input_ = input;
@@ -48,14 +48,14 @@ void Player::Update()
 	}
 	position += move;
 
-	PlayerModel->SetTranslate(position);
+	Model_->SetTranslate(position);
 
-	PlayerModel->Updata();
+	Model_->Updata();
 }
 
 void Player::Draw()
 {
 
-	PlayerModel->Draw();
+	Model_->Draw();
 
 }
