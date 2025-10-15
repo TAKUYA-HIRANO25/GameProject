@@ -13,8 +13,8 @@ Player::~Player()
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	object3dCommon_ = object3dCommon;
 	PlayerModel = new Object3d();
-	PlayerModel->Initialize(object3dCommon_);
-	PlayerModel->SetModel("Box.obj");
+	PlayerModel->Initialize(object3dCommon);
+	PlayerModel->SetModel("axis.obj");
 	PlayerModel->SetTranslate(position);
 
 	input_ = new Input();
@@ -28,10 +28,10 @@ void Player::Update()
 	const float kCharacterSpeed = 0.2f;
 
 	if (input_->PushKey(DIK_A)) {
-		move.x -= kCharacterSpeed;
+		move.x += kCharacterSpeed;
 	}
 	else if (input_->PushKey(DIK_D)) {
-		move.x += kCharacterSpeed;
+		move.x -= kCharacterSpeed;
 	}
 	if (input_->PushKey(DIK_W)) {
 		move.y += kCharacterSpeed;

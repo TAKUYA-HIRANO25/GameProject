@@ -23,7 +23,7 @@ public:
 	// 描画
 	void Draw();
 
-	Vector3 position = { 0.0f,1.0f,0.0f }; // 位置
+	Vector3 position = { 2.0f, 1.0f, 0.0f }; // 位置
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
