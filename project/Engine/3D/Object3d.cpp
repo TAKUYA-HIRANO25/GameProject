@@ -9,7 +9,6 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 {
 	// 引数で受け取ってメンバ変数に記録する
 	this->object3dCommon = object3dCommon;
-	this->camera = object3dCommon->GetDefaultCamera();
 
 	// 座標変換行列リソースを作る
 	transformationMatrixResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix));
@@ -29,6 +28,7 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 
 	// Transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	this->camera = object3dCommon->GetDefaultCamera();
 
 }
 

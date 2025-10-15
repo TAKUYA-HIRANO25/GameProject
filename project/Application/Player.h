@@ -23,12 +23,11 @@ public:
 	// 描画
 	void Draw();
 
-
+	Vector3 position = { 0.0f,1.0f,0.0f }; // 位置
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	//プレイヤー
-	Vector3 position = { 0.0f,1.0f,0.0f }; // 位置
 	Transform modelTransform_;
 	Object3d* PlayerModel = nullptr; // 3Dオブジェクト
 	Vector3 rotation; // 回転

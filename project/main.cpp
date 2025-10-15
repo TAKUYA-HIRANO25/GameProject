@@ -181,6 +181,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("box.obj");
 
 	// 異なるモデルを持つオブジェクトを生成
+	/*
 	Object3d* planeObject = new Object3d;
 	planeObject->Initialize(object3dCommon);
 	planeObject->SetModel("plane.obj");
@@ -190,6 +191,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	axisObject->Initialize(object3dCommon);
 	axisObject->SetModel("axis.obj");
 	axisObject->SetTranslate(Vector3(2.0f, 1.0f, 0.0f));
+	*/
 
 #pragma endregion
 	//プレイヤー
@@ -271,6 +273,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		else {
+			playerPosition[0] = player->position.x;
+			playerPosition[1] = player->position.y;
+			playerPosition[2] = player->position.z;
 
 			//imgui
 			ImGui_ImplDX12_NewFrame();
@@ -308,17 +313,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			player->Update();
 			
 			Vector3 currentRotate[2];
+			/*
 			currentRotate[0] = planeObject->GetRotate();
 			currentRotate[1] = axisObject->GetRotate();
+			*/
 
 			currentRotate[0].y += 0.05f;
 			currentRotate[1].y = 0.0f;
 			currentRotate[1].z += 0.05f;
 
+			/*
 			planeObject->SetRotate(currentRotate[0]);
 			planeObject->Updata();
 			axisObject->SetRotate(currentRotate[1]);
 			axisObject->Updata();
+			*/
 
 			//uvTransform
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
@@ -378,8 +387,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete input;
 	delete dxCommon;
 	delete player;
-	delete axisObject;
-	delete planeObject;
+	//delete axisObject;
+	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
 	delete camera;
 	delete object3dCommon;

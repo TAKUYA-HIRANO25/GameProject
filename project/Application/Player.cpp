@@ -40,6 +40,12 @@ void Player::Update()
 		move.y -= kCharacterSpeed;
 	}
 
+	if(input_->PushKey(DIK_Q)) {
+		move.z += kCharacterSpeed;
+	}
+	else if (input_->PushKey(DIK_E)) {
+		move.z -= kCharacterSpeed;
+	}
 	position += move;
 
 	PlayerModel->SetTranslate(position);
