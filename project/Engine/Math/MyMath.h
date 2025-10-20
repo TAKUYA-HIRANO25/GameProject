@@ -71,6 +71,8 @@ namespace MyMath {
 	Matrix4x4 Inverse(const Matrix4x4& m);
 	//平行投影
 	Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+	//法線変換
+	static Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix);
 	//ノーマライズ
 	float Length(const Vector3& v);
 	Vector3 Normalize(const Vector3& v);

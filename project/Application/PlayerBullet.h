@@ -17,7 +17,7 @@ public:
 	~PlayerBullet();
 
 	// 初期化
-	void Initialize(ObJect3dCommon* object3dCommon, Input* input, const Vector3& position, const Vector3& velocity);
+	void Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity);
 
 	// 更新
 	void Update();
@@ -25,11 +25,11 @@ public:
 	// 描画
 	void Draw();
 
+	bool IsDead() const { return isDead_; }
+
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
-	// 入力関連
-	Input* input_;
 	// 3Dモデル関連
 	Transform modelTransform_;
 	Object3d* Model_ = nullptr; // 3Dオブジェクト

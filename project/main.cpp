@@ -179,7 +179,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
-
+	ModelManager::GetInstance()->LoadModel("Bullet.obj");
 	// 異なるモデルを持つオブジェクトを生成
 	/*
 	Object3d* planeObject = new Object3d;
@@ -264,6 +264,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 	bool useMonsterball = false;
 	float playerPosition[3] = { 0.0f,0.0f,0.0f };
+	bool bulletShot = false;
 #pragma endregion
 
 	//ゲーム処理
@@ -276,7 +277,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			playerPosition[0] = player->position.x;
 			playerPosition[1] = player->position.y;
 			playerPosition[2] = player->position.z;
-
+			bulletShot = player->bulletActive;
 			//imgui
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -288,6 +289,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
 			ImGui::DragFloat3("Player", playerPosition);
+			ImGui::Checkbox("bullet", &bulletShot);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
