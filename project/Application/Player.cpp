@@ -88,9 +88,12 @@ void Player::Move()
 
 void Player::Fire()
 {
-	if (input_->TriggerKey(DIK_SPACE)) {
+
+
+	if (input_->TriggerKey(DIK_SPACE) && bulletTime <= 0) {
 
 		bulletActive = true;
+		bulletTime = 10;
 
 		const float kBulletSpeed = -1.0f;
 
@@ -101,5 +104,10 @@ void Player::Fire()
 
 		bulletList_.push_back(newBullet);
 	}
-
+	else {
+		bulletTime--;
+		if (bulletTime <= 0) {
+			bulletTime = 0;
+		}
+	}
 }

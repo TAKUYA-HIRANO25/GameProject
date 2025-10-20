@@ -49,7 +49,7 @@ private:
 	//弾関連
 	PlayerBullet* Bullet_ = nullptr;
 	std::list<PlayerBullet*> bulletList_;
-	int bulletTime = 0;
+	int bulletTime = 0; //弾発射間隔用タイマー
 	int bulletFlag = 0;
 
 
