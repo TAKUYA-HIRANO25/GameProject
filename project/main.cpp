@@ -141,7 +141,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->Initialize(dxCommon);
 	// Textureを読んで転送する
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
-
+	TextureManager::GetInstance()->LoadTexture("resources/test.png");
 #pragma endregion
 	//スプライト
 #pragma region
@@ -187,6 +187,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* gameSprite = new Sprite();
 	gameSprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	gameSprite->SetSize(Vector2(1280, 720));
+	Sprite* test = new Sprite();
+	test->Initialize(spriteCommon, "resources/test.png");
+
 #pragma endregion
 
 	//モデル
@@ -360,6 +363,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				sprite->Update();
 				gameSprite->Update();
+				test->Update();
 			    camera->Update();
 			    object3dCommon->SettingCommonDraw();
 
@@ -446,6 +450,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else {
 				//player->Draw();
 				gameSprite->Draw();
+				test->Draw();
 			}
 			if(isFade || endFade) {
 				fadeSprite->Draw();
