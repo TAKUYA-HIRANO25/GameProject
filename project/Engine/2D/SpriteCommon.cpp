@@ -101,8 +101,24 @@ void SpriteCommon::GeneratePipelineInitialize()
 
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
-	// すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+
+	// レンダーターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC rtBlendDesc{};
+	rtBlendDesc.BlendEnable = TRUE; // ブレンドを有効化
+	rtBlendDesc.LogicOpEnable = FALSE;
+	rtBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA; // ソースのアルファ値
+	rtBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // デスティネーションの1-アルファ値
+	rtBlendDesc.BlendOp = D3D12_BLEND_OP_ADD; // 加算
+	rtBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	rtBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	rtBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	rtBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	// レンダーターゲットに適用
+	blendDesc.RenderTarget[0] = rtBlendDesc;
+
 	// RasiterzerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	// 裏面（時計回り）を表示しない
@@ -125,6 +141,7 @@ void SpriteCommon::GeneratePipelineInitialize()
 	pixelShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
+
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;

@@ -164,6 +164,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	titleUI->Initialize(spriteCommon, "resources/titleUI.png");
 	Sprite* backGround = new Sprite();
 	backGround->Initialize(spriteCommon, "resources/backGround.png");
+	backGround->SetSize(Vector2(1280, 720));
 #pragma endregion
 	//フェード
 #pragma region
@@ -474,6 +475,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete player;
 	delete camera;
 	delete gameSprite;
+	delete test;
 	delete fadeSprite;
 	delete title;
 	delete titleUI;
