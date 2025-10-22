@@ -18,7 +18,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	Model_ = new Object3d();
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("box.obj");
-	Model_->SetTranslate(position);
+	Model_->SetTranslate(position_);
 
 	input_ = new Input();
 	input_ = input;
@@ -42,7 +42,7 @@ void Player::Update()
 		bullet->Update();
 	}
 
-	Model_->SetTranslate(position);
+	Model_->SetTranslate(position_);
 
 	Model_->Updata();
 }
@@ -83,7 +83,7 @@ void Player::Move()
 		move.z -= kCharacterSpeed;
 	}
 
-	position += move;
+	position_ += move;
 }
 
 void Player::Fire()

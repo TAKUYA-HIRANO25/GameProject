@@ -15,6 +15,8 @@
 #include "ModelManager.h"
 #include "Camera.h"
 #include "Player.h"
+#include "Enemy.h"
+
 #pragma comment(lib,"dxcompiler.lib")
 
 //球
@@ -199,6 +201,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Player* player = new Player();
 	player->Initialize(object3dCommon,input);
 #pragma endregion
+	//敵
+#pragma region
+	Enemy* enemy = new Enemy();
+	Vector3 enemyPos = { 0.0f,0.0f,-30.0f };
+	enemy->Initialize(object3dCommon, enemyPos);
+#pragma endregion
 	//スフィア用リソース
 #pragma region
 	/*const uint32_t Subdivision = 16;
@@ -274,9 +282,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		else {
-			playerPosition[0] = player->position.x;
-			playerPosition[1] = player->position.y;
-			playerPosition[2] = player->position.z;
 			bulletShot = player->bulletActive;
 			//imgui
 			ImGui_ImplDX12_NewFrame();
@@ -313,7 +318,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//プレイヤー更新
 			player->Update();
-			
+			enemy->Update();
 			Vector3 currentRotate[2];
 			/*
 			currentRotate[0] = planeObject->GetRotate();
@@ -371,6 +376,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//3D描画
 
 			player->Draw();
+			enemy->Draw();
 
 			//planeObject->Draw();
 			//axisObject->Draw();
@@ -388,6 +394,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
+	delete enemy;
 	delete player;
 	//delete axisObject;
 	//delete planeObject;
