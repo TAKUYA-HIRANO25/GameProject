@@ -169,8 +169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//カメラ
 #pragma region
 	Camera* camera = new Camera;
-	camera->SetRotate({ 0.3f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,-10.0f });
+	camera->SetRotate({ 0.0f,0.314f,0.0f });
+	camera->SetTranslate({ 0.0f,4.0f,20.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
