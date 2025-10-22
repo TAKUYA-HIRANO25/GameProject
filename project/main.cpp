@@ -165,6 +165,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* backGround = new Sprite();
 	backGround->Initialize(spriteCommon, "resources/backGround.png");
 	backGround->SetSize(Vector2(1280, 720));
+	int titleTime = 0;
 #pragma endregion
 	//フェード
 #pragma region
@@ -181,15 +182,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	fadeSprite->SetSize(Vector2(0, 0));
 	fadeSprite->SetPosition(Vector2(630,360));
 	//fadeSprite->SetColor(Vector4(0, 0, 0, 1));
-
+#pragma endregion
+	// スタート演出
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Ready.png");
+	TextureManager::GetInstance()->LoadTexture("resources/GO.png");
+	Sprite* Ready = new Sprite();
+	Ready->Initialize(spriteCommon, "resources/Ready.png");
+	Sprite* Go = new Sprite();
+	Go->Initialize(spriteCommon, "resources/GO.png");
+	bool isStart = false;
+	bool isGo = false;
+	int startTime = 0;
+	int goTime = 0;
 #pragma endregion
 	//ゲーム画面
 #pragma region
 	Sprite* gameSprite = new Sprite();
 	gameSprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	gameSprite->SetSize(Vector2(1280, 720));
-	Sprite* test = new Sprite();
-	test->Initialize(spriteCommon, "resources/test.png");
 
 #pragma endregion
 
@@ -354,6 +365,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			}
 			else {
+				if(isStart) {
+					startTime++;
+					if (startTime >= 120 ) {
+						isStart = false;
+						isGo = true;
+					}
+				}
+				if (isGo) {
+					goTime++;
+					if( goTime >= 120 ) {
+						isGo = false;
+					}
+				}
+
+				else if(isStart == false && isGo == false){
+					titleTime++;
+				}
+
+				if (titleTime >= 300) {
+					isTitle = true;
+					titleTime = 0;
+
+				}
 				if (input->TriggerKey(DIK_0)) {
 					OutputDebugStringA("HIT0\n");
 				}
@@ -362,9 +396,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					sprite->Update();
 				}*/
 
+				
 				sprite->Update();
+				Ready->Update();
+				Go->Update();
 				gameSprite->Update();
-				test->Update();
 			    camera->Update();
 			    object3dCommon->SettingCommonDraw();
 
@@ -405,6 +441,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				if (fadeSprite->GetSize().x <= 0) {
 					endFade = false;
 					isFade = false;
+					isStart = true;
+					isGo = false;
+					startTime = 0;
+					goTime = 0;
 					size = { 0,0 };
 					position = { 630,360 };
 					fadeSprite->SetSize(Vector2(0, 0));
@@ -451,7 +491,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else {
 				//player->Draw();
 				gameSprite->Draw();
-				test->Draw();
+				if (isStart) {
+					Ready->Draw();
+				}
+				else if (isGo) {
+					Go->Draw();
+				}
 			}
 			if(isFade || endFade) {
 				fadeSprite->Draw();
@@ -475,7 +520,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete player;
 	delete camera;
 	delete gameSprite;
-	delete test;
+	delete Go;
+	delete Ready;
 	delete fadeSprite;
 	delete title;
 	delete titleUI;
