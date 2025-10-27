@@ -120,6 +120,9 @@
     <ClCompile Include="Application\Enemy.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="Application\EnemyBullet.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -204,6 +207,9 @@
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Application\Enemy.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\EnemyBullet.h">
       <Filter>Application</Filter>
     </ClInclude>
   </ItemGroup>

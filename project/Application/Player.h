@@ -46,7 +46,6 @@ private:
 	// 入力関連
 	Input* input_;
 	//弾関連
-	PlayerBullet* Bullet_ = nullptr;
 	std::list<PlayerBullet*> bulletList_;
 	int bulletTime = 0; //弾発射間隔用タイマー
 	int bulletFlag = 0;

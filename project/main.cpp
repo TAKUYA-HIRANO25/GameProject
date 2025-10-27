@@ -273,6 +273,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterball = false;
 	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	bool bulletShot = false;
+	bool EnemybulletShot = false;
 #pragma endregion
 
 	//ゲーム処理
@@ -283,6 +284,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			bulletShot = player->bulletActive;
+			EnemybulletShot = enemy->bulletActive;
 			//imgui
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -295,6 +297,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Translate", TransformTranslate);
 			ImGui::DragFloat3("Player", playerPosition);
 			ImGui::Checkbox("bullet", &bulletShot);
+			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -318,8 +321,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//プレイヤー更新
 			player->Update();
-			enemy->Update();
 			Vector3 currentRotate[2];
+
+			//敵更新
+			enemy->Update();
+
 			/*
 			currentRotate[0] = planeObject->GetRotate();
 			currentRotate[1] = axisObject->GetRotate();
