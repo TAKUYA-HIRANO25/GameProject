@@ -203,7 +203,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	gameSprite->SetSize(Vector2(1280, 720));
 
 #pragma endregion
+	//ゲームオーバー
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/GameOver.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Over.png");
+	Sprite* gameOver = new Sprite();
+	gameOver->Initialize(spriteCommon, "resources/GameOver.png");
+	bool isOver = false;
 
+	Sprite* over = new Sprite();
+	over->Initialize(spriteCommon, "resources/Over.png");
+	bool GameOverFlag = false;
+
+	Sprite* Black = new Sprite();
+	Black->Initialize(spriteCommon, "resources/backGround.png");
+	Black->SetSize(Vector2(1280, 720));
+	Black->SetColor(Vector4(1, 1, 1, 0));
+	float blackAlpha = 0.0f;
+#pragma endregion
 	//モデル
 #pragma region
 	ModelCommon* modelCommon = nullptr;
@@ -217,7 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ObJect3dCommon* object3dCommon = nullptr;
 	object3dCommon = new ObJect3dCommon;
 	object3dCommon->Initialize(dxCommon);
-
+#pragma endregion
 	//カメラ
 #pragma region
 	Camera* camera = new Camera;
@@ -226,7 +243,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
-
+	//モデル
+#pragma region
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	ModelManager::GetInstance()->LoadModel("plane.obj");
@@ -360,6 +378,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				backGround->Update();
 				if (input->TriggerKey(DIK_RETURN)) {
 					isFade = true;
+					isOver = false;
+					GameOverFlag = false;
 				}
 
 
@@ -376,30 +396,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					goTime++;
 					if( goTime >= 120 ) {
 						isGo = false;
+						GameOverFlag = true;
 					}
 				}
 
-				else if(isStart == false && isGo == false){
-					titleTime++;
+				if (GameOverFlag) {
+					if (input->TriggerKey(DIK_SPACE)) {
+						isOver = true;
+					}
+
+
+					if (isOver) {
+						// アルファ値を徐々に増加（最大値は1.0f）
+						blackAlpha += 0.01f;
+						if (blackAlpha > 1.0f) {
+							blackAlpha = 1.0f; // 最大値を超えないように制限
+						}
+
+						// Blackスプライトの色を更新
+						Black->SetColor(Vector4(1.0f, 1.0f, 1.0f, blackAlpha)); // 黒色でアルファ値を適用
+
+						if (input->TriggerKey(DIK_T)) {
+							isTitle = true;
+							blackAlpha = 0.0f; // アルファ値をリセット
+						}
+					}
 				}
-
-				if (titleTime >= 300) {
-					isTitle = true;
-					titleTime = 0;
-
-				}
-				if (input->TriggerKey(DIK_0)) {
-					OutputDebugStringA("HIT0\n");
-				}
-
-				/*for (Sprite* sprite : sprites) {
-					sprite->Update();
-				}*/
-
-				
 				sprite->Update();
 				Ready->Update();
 				Go->Update();
+				gameOver->Update();
+				over->Update();
+				Black->Update();
 				gameSprite->Update();
 			    camera->Update();
 			    object3dCommon->SettingCommonDraw();
@@ -491,11 +519,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else {
 				//player->Draw();
 				gameSprite->Draw();
+				if (GameOverFlag && isOver == false) {	
+					over->Draw();
+				}
 				if (isStart) {
 					Ready->Draw();
 				}
 				else if (isGo) {
 					Go->Draw();
+				}
+				if (isOver) {
+					Black->Draw();
+					gameOver->Draw();
 				}
 			}
 			if(isFade || endFade) {
@@ -522,6 +557,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete gameSprite;
 	delete Go;
 	delete Ready;
+	delete Black;
+	delete over;
+	delete gameOver;
 	delete fadeSprite;
 	delete title;
 	delete titleUI;
