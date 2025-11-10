@@ -26,7 +26,7 @@ namespace MyMath {
 		return result;
 	}
 
-	Matrix4x4 MakeScalematrix(const Vector3& scale)
+	Matrix4x4 MakeScaleMatrix(const Vector3& scale)
 	{
 		Matrix4x4 result = { 0 };
 		result.m[0][0] = scale.x;
@@ -120,7 +120,7 @@ namespace MyMath {
 		Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
 		Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
 		Matrix4x4 rotateXYZMatrix = Multiply(Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
-		return Multiply(Multiply(MakeScalematrix(scale), rotateXYZMatrix), MakeTranslateMatrix(translate));
+		return Multiply(Multiply(MakeScaleMatrix(scale), rotateXYZMatrix), MakeTranslateMatrix(translate));
 	}
 
 	Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip, float farClip)
@@ -254,6 +254,16 @@ namespace MyMath {
 		result.m[3][1] = (top + bottom) / (bottom - top);
 		result.m[3][2] = nearClip / (nearClip - farClip);
 		result.m[3][3] = 1.0f;
+		return result;
+	}
+
+	Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix)
+	{
+		Vector3 result;
+		result.x = matrix.m[0][0] * vector.x + matrix.m[1][0] * vector.y + matrix.m[2][0] * vector.z;
+		result.y = matrix.m[0][1] * vector.x + matrix.m[1][1] * vector.y + matrix.m[2][1] * vector.z;
+		result.z = matrix.m[0][2] * vector.x + matrix.m[1][2] * vector.y + matrix.m[2][2] * vector.z;
+
 		return result;
 	}
 

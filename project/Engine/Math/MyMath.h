@@ -28,17 +28,29 @@ namespace MyMath {
 	{
 		float m[3][3];
 	};
+	struct TransformationMatrix {
+		Matrix4x4 WVP;
+		Matrix4x4 World;
+	};
+
+	struct DirectionalLight {
+		Vector4 color;
+		Vector3 direction;
+		float intensity;
+	};
+
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;
 		Vector3 translate;
 	};
+
 	//単位行列
 	Matrix4x4 MakeIdentity4x4();
 	//積
 	Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 	//スカラ
-	Matrix4x4 MakeScalematrix(const Vector3& scale);
+	Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 	//移動
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 	// x軸
@@ -59,6 +71,8 @@ namespace MyMath {
 	Matrix4x4 Inverse(const Matrix4x4& m);
 	//平行投影
 	Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+	//法線変換
+	static Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix);
 	//ノーマライズ
 	float Length(const Vector3& v);
 	Vector3 Normalize(const Vector3& v);

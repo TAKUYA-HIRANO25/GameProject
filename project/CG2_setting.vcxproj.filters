@@ -31,6 +31,9 @@
     <Filter Include="シェーダーファイル">
       <UniqueIdentifier>{feb80806-a20a-4710-9cff-ba2e5cae7a02}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{43e92b61-88f1-4eea-8c1b-c69301982f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -102,12 +105,32 @@
     <ClCompile Include="Engine\Base\WinApp.cpp">
       <Filter>ソース ファイル\Base</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="Application\Player.cpp">
       <Filter>ソース ファイル</Filter>
+=======
+    <ClCompile Include="Engine\3D\Camera.cpp">
+      <Filter>ソース ファイル\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Player.cpp">
+      <Filter>Application</Filter>
+>>>>>>> collision
     </ClCompile>
     <ClCompile Include="Engine\Math\MatuilityForText.cpp">
       <Filter>ソース ファイル\Math</Filter>
     </ClCompile>
+<<<<<<< HEAD
+=======
+    <ClCompile Include="Application\PlayerBullet.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Enemy.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\EnemyBullet.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+>>>>>>> collision
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -179,12 +202,32 @@
     <ClInclude Include="Engine\Base\WinApp.h">
       <Filter>ソース ファイル\Base</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="Application\Player.h">
       <Filter>ヘッダー ファイル</Filter>
+=======
+    <ClInclude Include="Engine\3D\Camera.h">
+      <Filter>ソース ファイル\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player.h">
+      <Filter>Application</Filter>
+>>>>>>> collision
     </ClInclude>
     <ClInclude Include="Engine\Math\MatuilityForText.h">
       <Filter>ソース ファイル\Math</Filter>
     </ClInclude>
+<<<<<<< HEAD
+=======
+    <ClInclude Include="Application\PlayerBullet.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Enemy.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\EnemyBullet.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+>>>>>>> collision
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

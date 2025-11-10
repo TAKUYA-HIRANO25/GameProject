@@ -1,22 +1,26 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "Engine/Math/MyMath.h"
-#include "Engine/Base/Input.h"
-#include "Engine/Base/WinApp.h"
-#include "Engine/Base/DirectXCommon.h"
-#include "Engine/2D/Sprite.h"
-#include "Engine/2D/SpriteCommon.h"
-#include "Engine/Base/D3DResourceLeakChecker.h"
-#include "Engine/Base/TextureManager.h"
-#include "Engine/3D/Object3dCommon.h"
-#include "Engine/3D/Object3d.h"
-#include "Engine/3D/Model.h"
-#include "Engine/3D/ModelCommon.h"
-#include "Engine/3D/ModelManager.h"
+#include "MyMath.h"
+#include "Input.h"
+#include "WinApp.h"
+#include "DirectXCommon.h"
+#include "Sprite.h"
+#include "SpriteCommon.h"
+#include "D3DResourceLeakChecker.h"
+#include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
+#include "Model.h"
+#include "ModelCommon.h"
+#include "ModelManager.h"
+#include "Camera.h"
+#include "Player.h"
+#include "Enemy.h"
 
 #include "Application/Player.h"
 
 #pragma comment(lib,"dxcompiler.lib")
+
 
 //球
 struct Sphere {
@@ -159,24 +163,57 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Model* model = nullptr;
 	model = new Model;
-	model->Initialize(modelCommon, "resources", "plane.obj");
+	//model->Initialize(modelCommon, "resources", "plane.obj");
 
 	ObJect3dCommon* object3dCommon = nullptr;
 	object3dCommon = new ObJect3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
+	//カメラ
+#pragma region
+	Camera* camera = new Camera;
+	camera->SetRotate({ 0.0f,0.314f,0.0f });
+	camera->SetTranslate({ 0.0f,4.0f,20.0f });
+	object3dCommon->SetDefaultCamera(camera);
+
+#pragma endregion
+
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-	ModelManager::GetInstance()->LoadModel("Box.obj");
+	ModelManager::GetInstance()->LoadModel("box.obj");
+	ModelManager::GetInstance()->LoadModel("Bullet.obj");
+	// 異なるモデルを持つオブジェクトを生成
+	/*
+	Object3d* planeObject = new Object3d;
+	planeObject->Initialize(object3dCommon);
+	planeObject->SetModel("plane.obj");
+	planeObject->SetTranslate(Vector3(-2.0f, -1.0f, 0.0f));
 
-	Player* player = nullptr;
-	player = new Player;
-	player->Initialize(object3dCommon,input);
+	Object3d* axisObject = new Object3d;
+	axisObject->Initialize(object3dCommon);
+	axisObject->SetModel("axis.obj");
+	axisObject->SetTranslate(Vector3(2.0f, 1.0f, 0.0f));
+	*/
 
 #pragma endregion
-	
+	//プレイヤー
+#pragma region
+	Player* player = new Player();
+	player->Initialize(object3dCommon,input);
+#pragma endregion
+	//敵
+#pragma region
+	Enemy* enemy = new Enemy();
+	Vector3 enemyPos = { 0.0f,0.0f,-30.0f };
+	enemy->Initialize(object3dCommon, enemyPos);
+	enemy->setPlayer(player);
+#pragma endregion
+	//当たり判定
+#pragma region
+
+#pragma endregion
 	//スフィア用リソース
 #pragma region
 	/*const uint32_t Subdivision = 16;
@@ -232,7 +269,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float materialDataVector[4] = { 1,1,1,1 };
 	float TransformScale[3] = { 1.0f,1.0f,1.0f };
 	float TransformRotae[3] = { 0.0f, 3.14f, 0.0f };
-	float TransformTranslate[3] = { 0.0f,0.0f,0.0f };
+	float TransformTranslate[3] = { 0.0f,0.0f,20.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
 	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	//uvTransform
@@ -242,6 +279,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 0.0f,0.0f,0.0f },
 	};
 	bool useMonsterball = false;
+	bool bulletShot = false;
+	bool EnemybulletShot = false;
 #pragma endregion
 
 	//ゲーム処理
@@ -251,9 +290,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		else {
-			playerPosition[0] = player->position.x;
-			playerPosition[1] = player->position.y;
-			playerPosition[1] = player->position.z;
+			bulletShot = player->bulletActive;
+			EnemybulletShot = enemy->bulletActive;
 			//imgui
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -261,15 +299,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ShowDemoWindow();
 			//ImGui::Checkbox("useMonsterBall", &useMonsterball);
 			//ImGui::DragFloat4("materialData", materialDataVector);
-			//ImGui::DragFloat3("Scale", TransformScale);
-			//ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
-			//ImGui::DragFloat3("Translate", TransformTranslate);
-			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
+			ImGui::DragFloat3("Scale", TransformScale);
+			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
+			ImGui::DragFloat3("Translate", TransformTranslate);
 			ImGui::DragFloat3("Player", playerPosition);
+			ImGui::Checkbox("bullet", &bulletShot);
+			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
+			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 			
+			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
+			camera->SetTransform(transform_);
 
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
@@ -282,16 +324,72 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			sprite->Update();
 
+			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
+			//プレイヤー更新
 			player->Update();
 
+			//敵更新
+			enemy->Update();
+
+			//当たり判定
+			Vector3 posA, posB;
+			const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
+			const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
+#pragma region player
+			posA = player->GetWorldPosition();
+			for (EnemyBullet* bullet : enemyBullets)
+			{
+				posB = bullet->GetWorldPosition();
+				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+				//	半径は0.5
+				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+					player->OnCollision();
+
+					bullet->OnCollision();
+				}
+			}
+#pragma endregion
+#pragma region Enemy
+			posA = enemy->GetWorldPosition();
+			for (PlayerBullet* bullet : playerBullets)
+			{
+				posB = bullet->GetWorldPosition();
+				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+				//	半径は0.5
+				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+					enemy->OnCollision();
+					bullet->OnCollision();
+				}
+
+			}
+#pragma endregion
+#pragma region Bullet
+			for (PlayerBullet* bulletP : playerBullets)
+			{
+				posA = bulletP->GetWorldPosition();
+
+				for (EnemyBullet* bulletE : enemyBullets)
+				{
+					posA = bulletP->GetWorldPosition();
+					posB = bulletE->GetWorldPosition();
+
+					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+
+					//	半径0.5
+					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+						bulletE->OnCollision();
+						bulletP->OnCollision();
+
+					}
+				}
+			}
+#pragma endregion
 			//uvTransform
-			Matrix4x4 uvTransformMatrix = MakeScalematrix(uvTransformSprite.scale);
+			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
-
-			
 
 			//球の３次元化 WVPスフィア用
 			/*transformSphere.rotate.y += 0.03f;
@@ -325,7 +423,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 			//sprite->Draw();
 
+			//3D描画
+
 			player->Draw();
+			enemy->Draw();
 
 			//planeObject->Draw();
 			//axisObject->Draw();
@@ -343,8 +444,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
+	delete enemy;
 	delete player;
+	//delete axisObject;
+	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
+	delete camera;
 	delete object3dCommon;
 	delete model;
 	delete modelCommon;

@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary />
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,6 +104,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Enemy.cpp" />
+    <ClCompile Include="Application\EnemyBullet.cpp" />
+    <ClCompile Include="Engine\3D\Camera.cpp" />
     <ClCompile Include="Engine\Base\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Base\DirectXCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -127,10 +130,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\StringUility.cpp" />
     <ClCompile Include="Engine\Base\TextureManager.cpp" />
     <ClCompile Include="Engine\Base\WinApp.cpp" />
-    <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
     <ClCompile Include="Application\Player.cpp" />
+    <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
+    <ClCompile Include="Application\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Enemy.h" />
+    <ClInclude Include="Application\EnemyBullet.h" />
+    <ClInclude Include="Engine\3D\Camera.h" />
     <ClInclude Include="Engine\Base\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Base\DirectXCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -154,8 +161,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Base\StringUility.h" />
     <ClInclude Include="Engine\Base\TextureManager.h" />
     <ClInclude Include="Engine\Base\WinApp.h" />
-    <ClInclude Include="Engine\Math\MatuilityForText.h" />
     <ClInclude Include="Application\Player.h" />
+    <ClInclude Include="Engine\Math\MatuilityForText.h" />
+    <ClInclude Include="Application\PlayerBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

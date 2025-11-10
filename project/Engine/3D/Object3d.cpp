@@ -27,20 +27,29 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 	directionalLightData->intensity = light.intensity;
 
 	// Transform変数を作る
-	transform = { {1.0f,1.0f,1.0f},{0.0f,185.3f,0.0f},{0.0f,0.0f,0.0f} };
-	cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f},{0.0f,4.0f,-10.0f} };
+	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	this->camera = object3dCommon->GetDefaultCamera();
+
 }
 
 void Object3d::Updata()
 {
 	//transform.rotate.y += 0.05f;
 
-	transformationMatrixData->World = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrix = Multiply(transformationMatrixData->World, Multiply(viewMatrix, projectionMatrix));
+	// 3DのTransform処理
+	worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+
+	if (camera) {
+		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
+		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+	}
+	else {
+		worldViewProjectionMatrix = worldMatrix;
+	}
+
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
+	transformationMatrixData->World = worldMatrix;
+
 }
 
 void Object3d::Draw()
