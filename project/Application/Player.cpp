@@ -111,3 +111,16 @@ void Player::Fire()
 		}
 	}
 }
+
+Vector3 Player::GetWorldPosition()
+{
+	Vector3 worldPos;
+	worldPos = position_;
+
+	return worldPos;
+}
+
+void Player::OnCollision()
+{
+	PlayerHP -= 1;
+}

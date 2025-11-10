@@ -27,6 +27,9 @@ public:
 
 	bool IsDead() const { return isDead_; }
 
+	void OnCollision();
+
+	Vector3 GetWorldPosition();
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;

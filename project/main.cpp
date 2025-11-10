@@ -19,6 +19,7 @@
 
 #pragma comment(lib,"dxcompiler.lib")
 
+
 //球
 struct Sphere {
 	Vector3 center;
@@ -206,6 +207,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Enemy* enemy = new Enemy();
 	Vector3 enemyPos = { 0.0f,0.0f,-30.0f };
 	enemy->Initialize(object3dCommon, enemyPos);
+	enemy->setPlayer(player);
+#pragma endregion
+	//当たり判定
+#pragma region
+
 #pragma endregion
 	//スフィア用リソース
 #pragma region
@@ -321,27 +327,63 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//プレイヤー更新
 			player->Update();
-			Vector3 currentRotate[2];
 
 			//敵更新
 			enemy->Update();
 
-			/*
-			currentRotate[0] = planeObject->GetRotate();
-			currentRotate[1] = axisObject->GetRotate();
-			*/
+			//当たり判定
+			Vector3 posA, posB;
+			const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
+			const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
+#pragma region player
+			posA = player->GetWorldPosition();
+			for (EnemyBullet* bullet : enemyBullets)
+			{
+				posB = bullet->GetWorldPosition();
+				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+				//	半径は0.5
+				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+					player->OnCollision();
 
-			currentRotate[0].y += 0.05f;
-			currentRotate[1].y = 0.0f;
-			currentRotate[1].z += 0.05f;
+					bullet->OnCollision();
+				}
+			}
+#pragma endregion
+#pragma region Enemy
+			posA = enemy->GetWorldPosition();
+			for (PlayerBullet* bullet : playerBullets)
+			{
+				posB = bullet->GetWorldPosition();
+				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+				//	半径は0.5
+				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+					enemy->OnCollision();
+					bullet->OnCollision();
+				}
 
-			/*
-			planeObject->SetRotate(currentRotate[0]);
-			planeObject->Updata();
-			axisObject->SetRotate(currentRotate[1]);
-			axisObject->Updata();
-			*/
+			}
+#pragma endregion
+#pragma region Bullet
+			for (PlayerBullet* bulletP : playerBullets)
+			{
+				posA = bulletP->GetWorldPosition();
 
+				for (EnemyBullet* bulletE : enemyBullets)
+				{
+					posA = bulletP->GetWorldPosition();
+					posB = bulletE->GetWorldPosition();
+
+					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+
+					//	半径0.5
+					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+						bulletE->OnCollision();
+						bulletP->OnCollision();
+
+					}
+				}
+			}
+#pragma endregion
 			//uvTransform
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));

@@ -35,3 +35,16 @@ void PlayerBullet::Draw() {
     Model_->Draw();
 }
 
+void PlayerBullet::OnCollision()
+{
+    isDead_ = true;
+}
+
+Vector3 PlayerBullet::GetWorldPosition()
+{
+    Vector3 worldPos;
+	worldPos = position_;
+
+    return worldPos;
+}
+

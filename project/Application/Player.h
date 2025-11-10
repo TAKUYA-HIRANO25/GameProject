@@ -33,6 +33,14 @@ public:
 	void Fire();
 
 	bool bulletActive = false; //弾発射フラグ
+
+	Vector3 GetWorldPosition();
+
+	void OnCollision();
+
+	const std::list<PlayerBullet*>& GetBullets() const { return bulletList_; }
+
+	bool IsDead() const { return isDead_; }
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
@@ -50,6 +58,7 @@ private:
 	int bulletTime = 0; //弾発射間隔用タイマー
 	int bulletFlag = 0;
 
-
+	float PlayerHP = 5.0f;
+	bool isDead_ = false;
 };
 

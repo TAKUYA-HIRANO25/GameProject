@@ -34,3 +34,16 @@ void EnemyBullet::Update() {
 void EnemyBullet::Draw() {
     Model_->Draw();
 }
+
+void EnemyBullet::OnCollision()
+{
+    isDead_ = true;
+}
+
+Vector3 EnemyBullet::GetWorldPosition()
+{
+    Vector3 worldPos;
+    worldPos = position_;
+
+    return worldPos;
+}
