@@ -175,6 +175,75 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
+	//タイトル
+#pragma region
+	bool isTitle = true;
+	TextureManager::GetInstance()->LoadTexture("resources/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
+	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	Sprite* title = new Sprite();
+	title->Initialize(spriteCommon, "resources/title.png");
+	Sprite* titleUI = new Sprite();
+	titleUI->Initialize(spriteCommon, "resources/titleUI.png");
+	Sprite* backGround = new Sprite();
+	backGround->Initialize(spriteCommon, "resources/backGround.png");
+	backGround->SetSize(Vector2(1280, 720));
+	int titleTime = 0;
+#pragma endregion
+	//フェード
+#pragma region
+	bool isFade = false;
+	bool endFade = false;
+	Sprite* fadeSprite = new Sprite();
+	Vector2 size = { 0,0 };
+	Vector2 position = { 630,360 };
+	float speedx = 16.0f;
+	float speedy = 10.0f;
+	float time = 0.0f;
+	TextureManager::GetInstance()->LoadTexture("resources/Fade.png");
+	fadeSprite->Initialize(spriteCommon, "resources/Fade.png");
+	fadeSprite->SetSize(Vector2(0, 0));
+	fadeSprite->SetPosition(Vector2(630, 360));
+	//fadeSprite->SetColor(Vector4(0, 0, 0, 1));
+#pragma endregion
+	// スタート演出
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Ready.png");
+	TextureManager::GetInstance()->LoadTexture("resources/GO.png");
+	Sprite* Ready = new Sprite();
+	Ready->Initialize(spriteCommon, "resources/Ready.png");
+	Sprite* Go = new Sprite();
+	Go->Initialize(spriteCommon, "resources/GO.png");
+	bool isStart = false;
+	bool isGo = false;
+	int startTime = 0;
+	int goTime = 0;
+#pragma endregion
+	//ゲーム画面
+#pragma region
+	Sprite* gameSprite = new Sprite();
+	gameSprite->Initialize(spriteCommon, "resources/uvChecker.png");
+	gameSprite->SetSize(Vector2(1280, 720));
+	bool isGame = false;
+#pragma endregion
+	//ゲームオーバー
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/GameOver.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Over.png");
+	Sprite* gameOver = new Sprite();
+	gameOver->Initialize(spriteCommon, "resources/GameOver.png");
+	bool isOver = false;
+
+	Sprite* over = new Sprite();
+	over->Initialize(spriteCommon, "resources/Over.png");
+	bool GameOverFlag = false;
+
+	Sprite* Black = new Sprite();
+	Black->Initialize(spriteCommon, "resources/backGround.png");
+	Black->SetSize(Vector2(1280, 720));
+	Black->SetColor(Vector4(1, 1, 1, 0));
+	float blackAlpha = 0.0f;
+#pragma endregion
 	//モデル
 #pragma region
 	ModelManager::GetInstance()->Initialize(dxCommon);
@@ -329,73 +398,117 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			/*for (Sprite* sprite : sprites) {
 				sprite->Update();
 			}*/
-			sprite->Update();
 
 			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
-			//天球
-			skyDome->Updata();
+			if (isTitle) {
 
-			//プレイヤー更新
-			player->Update();
-
-			//敵更新
-			enemy->Update();
-
-			//当たり判定
-			Vector3 posA, posB;
-			const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
-			const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
-#pragma region player
-			posA = player->GetWorldPosition();
-			for (EnemyBullet* bullet : enemyBullets)
-			{
-				posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				//	半径は0.5
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					player->OnCollision();
-
-					bullet->OnCollision();
-				}
-			}
-#pragma endregion
-#pragma region Enemy
-			posA = enemy->GetWorldPosition();
-			for (PlayerBullet* bullet : playerBullets)
-			{
-				posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				//	半径は0.5
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					enemy->OnCollision();
-					bullet->OnCollision();
+				title->Update();
+				titleUI->Update();
+				backGround->Update();
+				if (input->TriggerKey(DIK_RETURN)) {
+					isFade = true;
+					isOver = false;
+					GameOverFlag = false;
 				}
 
+
 			}
-#pragma endregion
-#pragma region Bullet
-			for (PlayerBullet* bulletP : playerBullets)
-			{
-				posA = bulletP->GetWorldPosition();
+			else {
+				if (isStart) {
+					startTime++;
+					if (startTime >= 120) {
+						isStart = false;
+						isGo = true;
+					}
+				}
+				if (isGo) {
+					goTime++;
+					if (goTime >= 120) {
+						isGo = false;
+						GameOverFlag = true;
+					}
+				}
 
-				for (EnemyBullet* bulletE : enemyBullets)
-				{
-					posA = bulletP->GetWorldPosition();
-					posB = bulletE->GetWorldPosition();
+				if (GameOverFlag) {
+					if (input->TriggerKey(DIK_SPACE)) {
+						isOver = true;
+					}
 
-					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
 
-					//	半径0.5
-					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-						bulletE->OnCollision();
-						bulletP->OnCollision();
+					if (isOver) {
+						// アルファ値を徐々に増加（最大値は1.0f）
+						blackAlpha += 0.01f;
+						if (blackAlpha > 1.0f) {
+							blackAlpha = 1.0f; // 最大値を超えないように制限
+						}
 
+						// Blackスプライトの色を更新
+						Black->SetColor(Vector4(1.0f, 1.0f, 1.0f, blackAlpha)); // 黒色でアルファ値を適用
+
+						if (input->TriggerKey(DIK_T)) {
+							isTitle = true;
+							blackAlpha = 0.0f; // アルファ値をリセット
+						}
+					}
+				}
+				sprite->Update();
+				Ready->Update();
+				Go->Update();
+				gameOver->Update();
+				over->Update();
+				Black->Update();
+				gameSprite->Update();
+
+				player->Update();
+
+				//uvTransform
+				Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+
+
+			}
+			fadeSprite->Update();
+			//フェード処理
+			if (isFade) {
+				if (!endFade) {
+					size.x += speedx;
+					size.y += speedy;
+					position.x -= speedx / 2;
+					position.y -= speedy / 2;
+
+					fadeSprite->SetSize(Vector2(size.x, size.y));
+					fadeSprite->SetPosition(Vector2(position.x, position.y));
+
+					if (fadeSprite->GetSize().x >= 1800) {
+						isTitle = false;
+						endFade = true;
 					}
 				}
 			}
-#pragma endregion
+			if (endFade) {
+				size.x -= speedx;
+				size.y -= speedy;
+				position.x += speedx / 2;
+				position.y += speedy / 2;
+				fadeSprite->SetSize(Vector2(size.x, size.y));
+				fadeSprite->SetPosition(Vector2(position.x, position.y));
+				if (fadeSprite->GetSize().x <= 0) {
+					endFade = false;
+					isFade = false;
+					isStart = true;
+					isGo = false;
+					startTime = 0;
+					goTime = 0;
+					size = { 0,0 };
+					position = { 630,360 };
+					fadeSprite->SetSize(Vector2(0, 0));
+					fadeSprite->SetPosition(Vector2(630, 360));
+				}
+			}
+		
 			//uvTransform
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
