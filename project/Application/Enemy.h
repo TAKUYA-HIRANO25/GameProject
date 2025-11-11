@@ -67,7 +67,7 @@ private:
 	//プレイヤー情報
 	Player* player_ = nullptr;
 	//移動
-	Vector3 move = { 0.2f,0.0f,0.0f };
+	Vector3 move = { 0.1f,0.0f,0.0f };
 	int32_t moveTime = 0;
 };
 

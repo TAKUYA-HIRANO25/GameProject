@@ -175,7 +175,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
-
+	//モデル
+#pragma region
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	// .ojbファイルからモデルを読み込む
@@ -212,6 +213,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//当たり判定
 #pragma region
 
+#pragma endregion
+	//天球
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
+	ModelManager::GetInstance()->LoadModel("sphere.obj");
+	Object3d* skyDome = new Object3d;
+	skyDome->Initialize(object3dCommon);
+	skyDome->SetModel("sphere.obj");
 #pragma endregion
 	//スフィア用リソース
 #pragma region
@@ -325,6 +334,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
+			//天球
+			skyDome->Updata();
+
 			//プレイヤー更新
 			player->Update();
 
@@ -422,7 +434,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//sprite->Draw();
 
 			//3D描画
-
+			skyDome->Draw();
 			player->Draw();
 			enemy->Draw();
 
@@ -444,6 +456,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete dxCommon;
 	delete enemy;
 	delete player;
+	delete skyDome;
 	//delete axisObject;
 	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
