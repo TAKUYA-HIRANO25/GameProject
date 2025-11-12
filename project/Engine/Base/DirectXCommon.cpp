@@ -486,6 +486,7 @@ void DirectXCommon::DXCInitialize()
 
 void DirectXCommon::ImGuiInitialize()
 {
+#ifdef USE_IMGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -493,6 +494,7 @@ void DirectXCommon::ImGuiInitialize()
 	ImGui_ImplDX12_Init(device.Get(),swapChainDesc.BufferCount,rtvDesc.Format,
 		srvDescriptorHeap.Get(),srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+#endif 
 }
 
 void DirectXCommon::InitialiseFixFPS()

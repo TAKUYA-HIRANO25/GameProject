@@ -8,9 +8,10 @@ Player::Player()
 Player::~Player()
 {
 	delete Model_;
-	for (PlayerBullet* bullet : bulletList_) {
+	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
-	}
+		return true;
+		});
 }
 
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
@@ -19,9 +20,13 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("box.obj");
 	Model_->SetTranslate(position_);
-
+	PlayerHP = 5.0f;
 	input_ = new Input();
 	input_ = input;
+	bulletList_.remove_if([](PlayerBullet* bullet) {
+		delete bullet;
+		return true;
+	});
 }
 
 void Player::Update()
@@ -42,6 +47,9 @@ void Player::Update()
 		bullet->Update();
 	}
 
+	if (PlayerHP == 0) {
+		isDead_ = true;
+	}
 	Model_->SetTranslate(position_);
 
 	Model_->Updata();

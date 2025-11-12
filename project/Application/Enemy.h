@@ -44,7 +44,7 @@ public:
 
 	bool bulletActive = false; //弾発射フラグ
 
-	static const int kFireInterval = 90; //弾の間隔
+	static const int kFireInterval = 60; //弾の間隔
 
 	static const int kMoveInterval = 360; //移動切り替え
 private:

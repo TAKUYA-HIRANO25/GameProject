@@ -151,9 +151,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
-
 #pragma endregion
 	//モデル
 #pragma region
@@ -177,7 +174,80 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
+	//タイトル
+#pragma region
+	bool isTitle = true;
+	TextureManager::GetInstance()->LoadTexture("resources/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
+	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	Sprite* title = new Sprite();
+	title->Initialize(spriteCommon, "resources/title.png");
+	Sprite* titleUI = new Sprite();
+	titleUI->Initialize(spriteCommon, "resources/titleUI.png");
+	Sprite* backGround = new Sprite();
+	backGround->Initialize(spriteCommon, "resources/backGround.png");
+	backGround->SetSize(Vector2(1280, 720));
+	int titleTime = 0;
+#pragma endregion
+	//フェード
+#pragma region
+	bool isFade = false;
+	bool endFade = false;
+	Sprite* fadeSprite = new Sprite();
+	Vector2 size = { 0,0 };
+	Vector2 position = { 630,360 };
+	float speedx = 16.0f;
+	float speedy = 10.0f;
+	float time = 0.0f;
+	TextureManager::GetInstance()->LoadTexture("resources/Fade.png");
+	fadeSprite->Initialize(spriteCommon, "resources/Fade.png");
+	fadeSprite->SetSize(Vector2(0, 0));
+	fadeSprite->SetPosition(Vector2(630, 360));
+	//fadeSprite->SetColor(Vector4(0, 0, 0, 1));
+#pragma endregion
+	// スタート演出
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Ready.png");
+	TextureManager::GetInstance()->LoadTexture("resources/GO.png");
+	Sprite* Ready = new Sprite();
+	Ready->Initialize(spriteCommon, "resources/Ready.png");
+	Sprite* Go = new Sprite();
+	Go->Initialize(spriteCommon, "resources/GO.png");
+	bool isStart = false;
+	bool isGo = false;
+	int startTime = 0;
+	int goTime = 0;
+#pragma endregion
+	//ゲーム画面
+#pragma region
+	bool isGame = false;
+	bool reup = false;
+#pragma endregion
+	//ゲームオーバー
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/GameOver.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Over.png");
+	Sprite* gameOver = new Sprite();
+	gameOver->Initialize(spriteCommon, "resources/GameOver.png");
+	bool isOver = false;
 
+	bool GameOverFlag = false;
+
+	Sprite* Black = new Sprite();
+	Black->Initialize(spriteCommon, "resources/backGround.png");
+	Black->SetSize(Vector2(1280, 720));
+	Black->SetColor(Vector4(1, 1, 1, 0));
+	float blackAlpha = 0.0f;
+#pragma endregion
+	//クリア
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Clear.png");
+	Sprite* clear = new Sprite();
+	clear->Initialize(spriteCommon, "resources/Clear.png");
+	bool isClear = false;
+#pragma endregion
+	//モデル
+#pragma region
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	ModelManager::GetInstance()->LoadModel("plane.obj");
@@ -213,6 +283,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//当たり判定
 #pragma region
 
+#pragma endregion
+	//天球
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
+	ModelManager::GetInstance()->LoadModel("sphere.obj");
+	Object3d* skyDome = new Object3d;
+	skyDome->Initialize(object3dCommon);
+	skyDome->SetModel("sphere.obj");
 #pragma endregion
 	//スフィア用リソース
 #pragma region
@@ -293,6 +371,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			bulletShot = player->bulletActive;
 			EnemybulletShot = enemy->bulletActive;
 			//imgui
+#ifdef USE_IMGUI
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -309,7 +389,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-			
+#endif 
 			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
 			camera->SetTransform(transform_);
 
@@ -322,70 +402,198 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Update();
 			}*/
 
-			sprite->Update();
-
 			camera->Update();
 			object3dCommon->SettingCommonDraw();
 
-			//プレイヤー更新
-			player->Update();
+			if (isTitle) {
 
-			//敵更新
-			enemy->Update();
-
-			//当たり判定
-			Vector3 posA, posB;
-			const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
-			const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
-#pragma region player
-			posA = player->GetWorldPosition();
-			for (EnemyBullet* bullet : enemyBullets)
-			{
-				posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				//	半径は0.5
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					player->OnCollision();
-
-					bullet->OnCollision();
+				title->Update();
+				titleUI->Update();
+				backGround->Update();
+				if (input->TriggerKey(DIK_RETURN)) {
+					isFade = true;
+					isOver = false;
+					GameOverFlag = false;
 				}
+
+				if (reup) {
+					player->Initialize(object3dCommon, input);
+					enemy->Initialize(object3dCommon, enemyPos);
+				}
+
 			}
+			else {
+				if (isStart) {
+					startTime++;
+					if (startTime >= 120) {
+						isStart = false;
+						isGo = true;
+					}
+				}
+				if (isGo) {
+					goTime++;
+					if (goTime >= 120) {
+						isGo = false;
+						isGame = true;
+					}
+				}
+
+				if (isGame) {
+					//天球
+					skyDome->Updata();
+
+					if (isOver == false && isClear == false) {
+						//プレイヤー更新
+						player->Update();
+						//敵更新
+						enemy->Update();
+					}
+
+					//当たり判定
+					Vector3 posA, posB;
+					const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
+					const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
+#pragma region player
+					posA = player->GetWorldPosition();
+					for (EnemyBullet* bullet : enemyBullets)
+					{
+						posB = bullet->GetWorldPosition();
+						float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+						//	半径は0.5
+						if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+							player->OnCollision();
+
+							bullet->OnCollision();
+						}
+					}
 #pragma endregion
 #pragma region Enemy
-			posA = enemy->GetWorldPosition();
-			for (PlayerBullet* bullet : playerBullets)
-			{
-				posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				//	半径は0.5
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					enemy->OnCollision();
-					bullet->OnCollision();
-				}
+					posA = enemy->GetWorldPosition();
+					for (PlayerBullet* bullet : playerBullets)
+					{
+						posB = bullet->GetWorldPosition();
+						float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+						//	半径は0.5
+						if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+							enemy->OnCollision();
+							bullet->OnCollision();
+						}
 
-			}
+					}
 #pragma endregion
 #pragma region Bullet
-			for (PlayerBullet* bulletP : playerBullets)
-			{
-				posA = bulletP->GetWorldPosition();
+					for (PlayerBullet* bulletP : playerBullets)
+					{
+						posA = bulletP->GetWorldPosition();
 
-				for (EnemyBullet* bulletE : enemyBullets)
-				{
-					posA = bulletP->GetWorldPosition();
-					posB = bulletE->GetWorldPosition();
+						for (EnemyBullet* bulletE : enemyBullets)
+						{
+							posA = bulletP->GetWorldPosition();
+							posB = bulletE->GetWorldPosition();
 
-					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+							float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
 
-					//	半径0.5
-					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-						bulletE->OnCollision();
-						bulletP->OnCollision();
+							//	半径0.5
+							if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+								bulletE->OnCollision();
+								bulletP->OnCollision();
 
+							}
+						}
+					}
+#pragma endregion
+					if (player->IsDead()) {
+						isOver = true;
+						// アルファ値を徐々に増加（最大値は1.0f）
+						blackAlpha += 0.01f;
+						if (blackAlpha > 1.0f) {
+							blackAlpha = 1.0f; // 最大値を超えないように制限
+						}
+
+						// Blackスプライトの色を更新
+						Black->SetColor(Vector4(1.0f, 1.0f, 1.0f, blackAlpha)); // 黒色でアルファ値を適用
+
+						if (input->TriggerKey(DIK_T)) {
+							isTitle = true;
+							isGame = false;
+							isOver = false;
+							reup = true;
+							blackAlpha = 0.0f; // アルファ値をリセット
+						}
+					}
+					if(enemy->IsDead()){
+						isClear = true;
+						// アルファ値を徐々に増加（最大値は1.0f）
+						blackAlpha += 0.01f;
+						if (blackAlpha > 1.0f) {
+							blackAlpha = 1.0f; // 最大値を超えないように制限
+						}
+
+						// Blackスプライトの色を更新
+						Black->SetColor(Vector4(1.0f, 1.0f, 1.0f, blackAlpha)); // 黒色でアルファ値を適用
+
+						if (input->TriggerKey(DIK_T)) {
+							isTitle = true;
+							isGame = false;
+							isClear = false;
+							reup = true;
+							blackAlpha = 0.0f; // アルファ値をリセット
+						}
+					}
+
+				}
+				Ready->Update();
+				Go->Update();
+				gameOver->Update();
+				clear->Update();
+				Black->Update();
+
+				//uvTransform
+				Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+				uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+
+
+			}
+			fadeSprite->Update();
+			//フェード処理
+			if (isFade) {
+				if (!endFade) {
+					size.x += speedx;
+					size.y += speedy;
+					position.x -= speedx / 2;
+					position.y -= speedy / 2;
+
+					fadeSprite->SetSize(Vector2(size.x, size.y));
+					fadeSprite->SetPosition(Vector2(position.x, position.y));
+
+					if (fadeSprite->GetSize().x >= 1800) {
+						isTitle = false;
+						endFade = true;
 					}
 				}
 			}
-#pragma endregion
+			if (endFade) {
+				size.x -= speedx;
+				size.y -= speedy;
+				position.x += speedx / 2;
+				position.y += speedy / 2;
+				fadeSprite->SetSize(Vector2(size.x, size.y));
+				fadeSprite->SetPosition(Vector2(position.x, position.y));
+				if (fadeSprite->GetSize().x <= 0) {
+					endFade = false;
+					isFade = false;
+					isStart = true;
+					isGo = false;
+					startTime = 0;
+					goTime = 0;
+					size = { 0,0 };
+					position = { 630,360 };
+					fadeSprite->SetSize(Vector2(0, 0));
+					fadeSprite->SetPosition(Vector2(630, 360));
+				}
+			}
+		
 			//uvTransform
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
@@ -399,9 +607,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrixSphere, projectionMatrixSphere));
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
-			
+#ifdef USE_IMGUI
 			ImGui::Render();
-
+#endif 
 			//画面色変更
 #pragma region
 
@@ -409,29 +617,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			spriteCommon->SettingCommonDraw();
 
-			//スフィア描画
-			/*dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			dxCommon->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
-			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSphere->GetGPUVirtualAddress());
-			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterball ? texturSrvHandleGPU2 : texturSrvHandleGPU);
-			//dxCommon->GetCommandList()->DrawInstanced(Subdivision * Subdivision * 6, 1, 0, 0);*/
-
-			//スプライト描画
-			/*for (Sprite* sprite : sprites) {
-				sprite->Draw();
-			}*/
-			//sprite->Draw();
-
-			//3D描画
-
-			player->Draw();
-			enemy->Draw();
+			if (isTitle) {
+				backGround->Draw();
+				title->Draw();
+			}
+			else {
+				//3D描画
+				skyDome->Draw();
+				if (isOver == false) {
+					player->Draw();
+				}
+				if (isClear == false) {
+					enemy->Draw();
+				}
+				if (isStart) {
+					Ready->Draw();
+				}
+				else if (isGo) {
+					Go->Draw();
+				}
+				if (isOver) {
+					Black->Draw();
+					gameOver->Draw();
+				}
+				if (isClear)
+				{
+					Black->Draw();
+					clear->Draw();
+				}
+			}
+			if (isFade || endFade) {
+				fadeSprite->Draw();
+			}
 
 			//planeObject->Draw();
 			//axisObject->Draw();
-
+#ifdef USE_IMGUI
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+#endif 
 			dxCommon->PostDrow();
 #pragma endregion
 		}
@@ -440,12 +663,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*for (Sprite* sprite : sprites) {
 		delete sprite;
 	}*/
-	delete sprite;
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
 	delete enemy;
 	delete player;
+	delete skyDome;
+	delete clear;
+	delete Go;
+	delete Ready;
+	delete Black;
+	delete gameOver;
+	delete fadeSprite;
+	delete title;
+	delete titleUI;
+	delete backGround;
 	//delete axisObject;
 	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
@@ -454,13 +686,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete model;
 	delete modelCommon;
 	TextureManager::GetInstance()->Finalize();
+
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+#endif 
 
 #ifndef _DEBUG
 	
 #endif _DEBUG
+
 	winApp->Finalize();
 	delete winApp;
 
