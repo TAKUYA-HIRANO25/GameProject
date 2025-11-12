@@ -149,9 +149,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
-
 #pragma endregion
 	//モデル
 #pragma region
@@ -221,10 +218,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 	//ゲーム画面
 #pragma region
-	Sprite* gameSprite = new Sprite();
-	gameSprite->Initialize(spriteCommon, "resources/uvChecker.png");
-	gameSprite->SetSize(Vector2(1280, 720));
 	bool isGame = false;
+	bool reup = false;
 #pragma endregion
 	//ゲームオーバー
 #pragma region
@@ -234,8 +229,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	gameOver->Initialize(spriteCommon, "resources/GameOver.png");
 	bool isOver = false;
 
-	Sprite* over = new Sprite();
-	over->Initialize(spriteCommon, "resources/Over.png");
 	bool GameOverFlag = false;
 
 	Sprite* Black = new Sprite();
@@ -243,6 +236,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Black->SetSize(Vector2(1280, 720));
 	Black->SetColor(Vector4(1, 1, 1, 0));
 	float blackAlpha = 0.0f;
+#pragma endregion
+	//クリア
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Clear.png");
+	Sprite* clear = new Sprite();
+	clear->Initialize(spriteCommon, "resources/Clear.png");
+	bool isClear = false;
 #pragma endregion
 	//モデル
 #pragma region
@@ -413,6 +413,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					GameOverFlag = false;
 				}
 
+				if (reup) {
+					player->Initialize(object3dCommon, input);
+					enemy->Initialize(object3dCommon, enemyPos);
+				}
 
 			}
 			else {
@@ -427,17 +431,76 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					goTime++;
 					if (goTime >= 120) {
 						isGo = false;
-						GameOverFlag = true;
+						isGame = true;
 					}
 				}
 
-				if (GameOverFlag) {
-					if (input->TriggerKey(DIK_SPACE)) {
-						isOver = true;
+				if (isGame) {
+					//天球
+					skyDome->Updata();
+
+					if (isOver == false && isClear == false) {
+						//プレイヤー更新
+						player->Update();
+						//敵更新
+						enemy->Update();
 					}
 
+					//当たり判定
+					Vector3 posA, posB;
+					const std::list<PlayerBullet*>& playerBullets = player->GetBullets();
+					const std::list<EnemyBullet*>& enemyBullets = enemy->GetBullets();
+#pragma region player
+					posA = player->GetWorldPosition();
+					for (EnemyBullet* bullet : enemyBullets)
+					{
+						posB = bullet->GetWorldPosition();
+						float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+						//	半径は0.5
+						if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+							player->OnCollision();
 
-					if (isOver) {
+							bullet->OnCollision();
+						}
+					}
+#pragma endregion
+#pragma region Enemy
+					posA = enemy->GetWorldPosition();
+					for (PlayerBullet* bullet : playerBullets)
+					{
+						posB = bullet->GetWorldPosition();
+						float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+						//	半径は0.5
+						if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+							enemy->OnCollision();
+							bullet->OnCollision();
+						}
+
+					}
+#pragma endregion
+#pragma region Bullet
+					for (PlayerBullet* bulletP : playerBullets)
+					{
+						posA = bulletP->GetWorldPosition();
+
+						for (EnemyBullet* bulletE : enemyBullets)
+						{
+							posA = bulletP->GetWorldPosition();
+							posB = bulletE->GetWorldPosition();
+
+							float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
+
+							//	半径0.5
+							if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+								bulletE->OnCollision();
+								bulletP->OnCollision();
+
+							}
+						}
+					}
+#pragma endregion
+					if (player->IsDead()) {
+						isOver = true;
 						// アルファ値を徐々に増加（最大値は1.0f）
 						blackAlpha += 0.01f;
 						if (blackAlpha > 1.0f) {
@@ -449,19 +512,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 						if (input->TriggerKey(DIK_T)) {
 							isTitle = true;
+							isGame = false;
+							isOver = false;
+							reup = true;
 							blackAlpha = 0.0f; // アルファ値をリセット
 						}
 					}
+					if(enemy->IsDead()){
+						isClear = true;
+						// アルファ値を徐々に増加（最大値は1.0f）
+						blackAlpha += 0.01f;
+						if (blackAlpha > 1.0f) {
+							blackAlpha = 1.0f; // 最大値を超えないように制限
+						}
+
+						// Blackスプライトの色を更新
+						Black->SetColor(Vector4(1.0f, 1.0f, 1.0f, blackAlpha)); // 黒色でアルファ値を適用
+
+						if (input->TriggerKey(DIK_T)) {
+							isTitle = true;
+							isGame = false;
+							isClear = false;
+							reup = true;
+							blackAlpha = 0.0f; // アルファ値をリセット
+						}
+					}
+
 				}
-				sprite->Update();
 				Ready->Update();
 				Go->Update();
 				gameOver->Update();
-				over->Update();
+				clear->Update();
 				Black->Update();
-				gameSprite->Update();
-
-				player->Update();
 
 				//uvTransform
 				Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
@@ -532,24 +614,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			spriteCommon->SettingCommonDraw();
 
-			//スフィア描画
-			/*dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			dxCommon->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
-			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSphere->GetGPUVirtualAddress());
-			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterball ? texturSrvHandleGPU2 : texturSrvHandleGPU);
-			//dxCommon->GetCommandList()->DrawInstanced(Subdivision * Subdivision * 6, 1, 0, 0);*/
-
-			//スプライト描画
-			/*for (Sprite* sprite : sprites) {
-				sprite->Draw();
-			}*/
-			//sprite->Draw();
-
-			//3D描画
-			skyDome->Draw();
-			player->Draw();
-			enemy->Draw();
+			if (isTitle) {
+				backGround->Draw();
+				title->Draw();
+			}
+			else {
+				//3D描画
+				skyDome->Draw();
+				if (isOver == false) {
+					player->Draw();
+				}
+				if (isClear == false) {
+					enemy->Draw();
+				}
+				if (isStart) {
+					Ready->Draw();
+				}
+				else if (isGo) {
+					Go->Draw();
+				}
+				if (isOver) {
+					Black->Draw();
+					gameOver->Draw();
+				}
+				if (isClear)
+				{
+					Black->Draw();
+					clear->Draw();
+				}
+			}
+			if (isFade || endFade) {
+				fadeSprite->Draw();
+			}
 
 			//planeObject->Draw();
 			//axisObject->Draw();
@@ -563,13 +659,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*for (Sprite* sprite : sprites) {
 		delete sprite;
 	}*/
-	delete sprite;
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
 	delete enemy;
 	delete player;
 	delete skyDome;
+	delete clear;
+	delete Go;
+	delete Ready;
+	delete Black;
+	delete gameOver;
+	delete fadeSprite;
+	delete title;
+	delete titleUI;
+	delete backGround;
 	//delete axisObject;
 	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
@@ -585,6 +689,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifndef _DEBUG
 	
 #endif _DEBUG
+
 	winApp->Finalize();
 	delete winApp;
 

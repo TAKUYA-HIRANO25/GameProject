@@ -7,10 +7,11 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
-	for (EnemyBullet* bullet : bullets_) {
-		delete bullet;
-	}
 	delete Model_;
+	bullets_.remove_if([](EnemyBullet* bullet) {
+		delete bullet;
+		return true;
+		});
 }
 
 void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
@@ -32,6 +33,10 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	FireTime();
 	MoveTime();
 
+	bullets_.remove_if([](EnemyBullet* bullet) {
+		delete bullet;
+		return true;
+	});
 }
 
 void Enemy::Update()
