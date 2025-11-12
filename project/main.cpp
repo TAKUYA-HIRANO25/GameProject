@@ -370,6 +370,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			bulletShot = player->bulletActive;
 			EnemybulletShot = enemy->bulletActive;
 			//imgui
+#ifdef USE_IMGUI
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -386,7 +388,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-			
+#endif 
 			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
 			camera->SetTransform(transform_);
 
@@ -604,9 +606,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrixSphere, projectionMatrixSphere));
 			transformationMatrixDataSphere->WVP = worldViewProjectionMatrixSphere;
 			transformationMatrixDataSphere->World = worldMatrixSphere;*/
-			
+#ifdef USE_IMGUI
 			ImGui::Render();
-
+#endif 
 			//画面色変更
 #pragma region
 
@@ -649,8 +651,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//planeObject->Draw();
 			//axisObject->Draw();
-
+#ifdef USE_IMGUI
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+#endif 
 			dxCommon->PostDrow();
 #pragma endregion
 		}
@@ -682,9 +685,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete model;
 	delete modelCommon;
 	TextureManager::GetInstance()->Finalize();
+
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+#endif 
 
 #ifndef _DEBUG
 	
