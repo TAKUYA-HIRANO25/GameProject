@@ -1,14 +1,14 @@
 #pragma once
 #include "MyMath.h"
 
-MyMath::Vector3& operator+=(MyMath::Vector3& lhv, const MyMath::Vector3& rhv);
+Vector3& operator+=(Vector3& lhv, const Vector3& rhv);
 
-const MyMath::Vector3 operator+(const MyMath::Vector3& v1, const MyMath::Vector3& v2);
+const Vector3 operator+(const Vector3& v1, const Vector3& v2);
 
-MyMath::Vector3& operator*=(MyMath::Vector3& v, float s);
+Vector3& operator*=(Vector3& v, float s);
 
-const MyMath::Vector3 operator*(const MyMath::Vector3& v, float s);
+const Vector3 operator*(const Vector3& v, float s);
 
-MyMath::Vector3& operator-=(MyMath::Vector3& lhv, const MyMath::Vector3& rhv);
+Vector3& operator-=(Vector3& lhv, const Vector3& rhv);
 
-const MyMath::Vector3 operator-(const MyMath::Vector3& v1, const MyMath::Vector3& v2);
+const Vector3 operator-(const Vector3& v1, const Vector3& v2);

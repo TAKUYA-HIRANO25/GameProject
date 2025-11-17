@@ -358,6 +358,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	bool bulletShot = false;
 	bool EnemybulletShot = false;
+	float mousePos[3] = {};
+	bool mouseLeft = false;
+	bool mouseRight = false;
 #pragma endregion
 
 	//ゲーム処理
@@ -371,7 +374,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			EnemybulletShot = enemy->bulletActive;
 			//imgui
 #ifdef USE_IMGUI
-
+			playerPosition[0] = player->GetWorldPosition().x;
+			playerPosition[1] = player->GetWorldPosition().y;
+			playerPosition[2] = player->GetWorldPosition().z;
+			mousePos[0] = input->GetCursorClientPos3().x;
+			mousePos[1] = input->GetCursorClientPos3().y;
+			mousePos[2] = input->GetCursorClientPos3().z;
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -382,8 +390,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
 			ImGui::DragFloat3("Player", playerPosition);
+			ImGui::DragFloat3("MousePos", mousePos);
 			ImGui::Checkbox("bullet", &bulletShot);
 			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
+			ImGui::Checkbox("mouseLeft", &mouseLeft);
+			ImGui::Checkbox("mouseRight", &mouseRight);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -403,6 +414,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			camera->Update();
 			object3dCommon->SettingCommonDraw();
+
+			if(input->PushMouse(0)){
+				mouseLeft = true;
+			}
+			else if(input->PushMouse(1)){
+				mouseRight = true;
+			}
 
 			if (isTitle) {
 
