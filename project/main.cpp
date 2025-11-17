@@ -168,7 +168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	Camera* camera = new Camera;
 	camera->SetRotate({ 0.0f,0.314f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,20.0f });
+	camera->SetTranslate({ 0.0f,4.0f,-20.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
@@ -275,7 +275,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//敵
 #pragma region
 	Enemy* enemy = new Enemy();
-	Vector3 enemyPos = { 0.0f,0.0f,-30.0f };
+	Vector3 enemyPos = { 0.0f,0.0f,40.0f };
 	enemy->Initialize(object3dCommon, enemyPos);
 	enemy->setPlayer(player);
 #pragma endregion
@@ -345,8 +345,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	float materialDataVector[4] = { 1,1,1,1 };
 	float TransformScale[3] = { 1.0f,1.0f,1.0f };
-	float TransformRotae[3] = { 0.0f, 3.14f, 0.0f };
-	float TransformTranslate[3] = { 0.0f,0.0f,20.0f };
+	float TransformRotae[3] = { 0.0f, 6.28f, 0.0f };
+	float TransformTranslate[3] = { 0.0f,0.0f,-20.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
 	//uvTransform
 	struct Sprite::Transform uvTransformSprite {

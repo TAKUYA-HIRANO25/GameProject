@@ -72,10 +72,10 @@ void Player::Move()
 	const float kCharacterSpeed = 0.2f; // キャラクターの移動速度
 
 	if (input_->PushKey(DIK_A)) {
-		move.x += kCharacterSpeed;
+		move.x -= kCharacterSpeed;
 	}
 	else if (input_->PushKey(DIK_D)) {
-		move.x -= kCharacterSpeed;
+		move.x += kCharacterSpeed;
 	}
 	if (input_->PushKey(DIK_W)) {
 		move.y += kCharacterSpeed;
@@ -103,7 +103,7 @@ void Player::Fire()
 		bulletActive = true;
 		bulletTime = 10;
 
-		const float kBulletSpeed = -1.0f;
+		const float kBulletSpeed = 1.0f;
 
 		Vector3 velocity(0, 0, kBulletSpeed);
 
@@ -131,4 +131,11 @@ Vector3 Player::GetWorldPosition()
 void Player::OnCollision()
 {
 	PlayerHP -= 1;
+}
+
+void Player::Reticle()
+{
+	float kDistance = 50.0f;
+
+	Vector3 offset = { 0.0f, 0.0f, -1.0f };
 }

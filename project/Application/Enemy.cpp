@@ -59,7 +59,7 @@ void Enemy::Update()
 	Time--;
 	if (Time == 0) {
 		Time = kFireInterval;
-		Fire();
+		//Fire();
 	}
 
 	for (EnemyBullet* bullet : bullets_) {
@@ -87,13 +87,13 @@ void Enemy::Draw()
 void Enemy::Fire() {
 
 	bulletActive = true;
-	const float kBulletSpeed = 0.5f;
+	const float kBulletSpeed = -0.5f;
 	Vector3 velocity(0, 0, 0);
 
 	//弾の軌道
 	Vector3 playerPosition = player_->GetWorldPosition();
 	Vector3 enemyPosition = GetWorldPosition();
-	Vector3 goalPosition = playerPosition - enemyPosition;
+	Vector3 goalPosition = enemyPosition - playerPosition ;
 	velocity = MyMath::Normalize(goalPosition);
 	velocity = { velocity.x * kBulletSpeed,velocity.y * kBulletSpeed, velocity.z * kBulletSpeed };
 	EnemyBullet* newBullet = new EnemyBullet();

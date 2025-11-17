@@ -40,6 +40,8 @@ public:
 
 	const std::list<PlayerBullet*>& GetBullets() const { return bulletList_; }
 
+	void Reticle();
+
 	bool IsDead() const { return isDead_; }
 private:
 	// 基盤
@@ -47,7 +49,7 @@ private:
 	//プレイヤー
 	Transform modelTransform_;
 	Object3d* Model_ = nullptr; // 3Dオブジェクト
-	Vector3 position_ = { 0.0f, 1.0f, -10.0f }; // 位置
+	Vector3 position_ = { 0.0f, 1.0f, 10.0f }; // 位置
 	Vector3 rotation; // 回転
 	Vector3 scale; // 拡大縮小
 	float speed; // 移動速度
