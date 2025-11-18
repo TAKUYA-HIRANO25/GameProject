@@ -135,7 +135,6 @@ void Player::OnCollision()
 
 void Player::Reticle()
 {
-	float kDistance = 50.0f;
 
-	Vector3 offset = { 0.0f, 0.0f, -1.0f };
+
 }
