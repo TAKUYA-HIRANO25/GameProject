@@ -60,7 +60,11 @@ private:
 	int bulletTime = 0; //弾発射間隔用タイマー
 	int bulletFlag = 0;
 
+	// --- レティクル関連 ---
+	Object3d* reticleModel_ = nullptr;    // 画面上の3Dレティクル表示用
+	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f }; // レティクルのワールド位置
+	float reticleDistance_ = 100.0f; // レティクルまでの距離（代替ターゲット距離）
+
 	float PlayerHP = 5.0f;
 	bool isDead_ = false;
 };
-
