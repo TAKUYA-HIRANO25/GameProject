@@ -11,6 +11,10 @@ class Model;
 
 class ModelCommon;
 
+/// <summary>
+/// 読み込んだ3Dモデルを管理するクラス
+/// </summary>
+
 // モデルマネージャー
 class ModelManager {
 private:

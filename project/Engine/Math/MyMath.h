@@ -5,20 +5,26 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
+/// <summary>
+/// ゲームで使う数学関数や構造体をまとめたクラス
+/// </summary>
 
 namespace MyMath {
 	
+	//変換行列
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
 
+	// 平行光源
 	struct DirectionalLight {
 		Vector4 color;
 		Vector3 direction;
 		float intensity;
 	};
 
+	//変換情報
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;

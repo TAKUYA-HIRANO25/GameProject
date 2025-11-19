@@ -10,7 +10,9 @@
 #include "Camera.h"
 #include "MatuilityForText.h"
 #include "PlayerBullet.h"
-
+/// <summary>
+/// プレイヤーのを動かすクラス
+/// </summary>
 class Player
 {
 public:

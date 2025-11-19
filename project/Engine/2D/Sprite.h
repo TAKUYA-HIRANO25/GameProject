@@ -6,17 +6,23 @@
 #include "TextureManager.h"
 using namespace MyMath;
 
+/// <summary>
+/// スプライトクラス
+/// </summary>
+
 class SpriteCommon;
 class TextureManager;
 
 class Sprite {
 public:
+	// 頂点データ構造体
 	struct VertexData
 	{
 		Vector4 position;
 		Vector2 texcoord;
 		Vector3 normal;
 	};
+	// マテリアル構造体
 	struct Material
 	{
 		Vector4 color;
@@ -24,11 +30,13 @@ public:
 		float padding[3];
 		Matrix4x4 uvTransform;
 	};
+	// 座標変換行列構造体
 	struct TransformationMatrix
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
+	// アフィン変換用構造体
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;

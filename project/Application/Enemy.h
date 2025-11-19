@@ -11,6 +11,10 @@
 #include "MatuilityForText.h"
 #include "EnemyBullet.h"
 
+/// <summary>
+/// 敵を動かすクラス
+/// </summary>
+
 class Player;
 
 class Enemy

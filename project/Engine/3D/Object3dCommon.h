@@ -1,8 +1,10 @@
 #pragma once
 #include "DirectXCommon.h"
 #include "Camera.h"
+/// /// <summary>
+/// 3Dオブジェクト共通部
+///	</summary>
 
-// 3Dオブジェクト共通部
 class ObJect3dCommon {
 public:
 	// 初期化

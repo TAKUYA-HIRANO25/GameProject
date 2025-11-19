@@ -1,6 +1,10 @@
 #pragma once
 #include "DirectXCommon.h"
 
+/// <summary>
+/// スプライトの共通部分
+/// </summary>
+
 class SpriteCommon{
 public:
 	void Initialize(DirectXCommon* dxCommon);

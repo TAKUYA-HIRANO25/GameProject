@@ -1,6 +1,10 @@
 #pragma once
 #include "MyMath.h"
 
+/// <summary>
+/// 計算子オーバーロード
+/// </summary>
+
 Vector3& operator+=(Vector3& lhv, const Vector3& rhv);
 
 const Vector3 operator+(const Vector3& v1, const Vector3& v2);

@@ -13,6 +13,10 @@ using namespace MyMath;
 class ObJect3dCommon;
 class Model;
 
+/// <summary>
+/// 3Dモデルを読み込むクラス
+/// </summary>
+
 // 3Dオブジェクト
 class Object3d {
 public:

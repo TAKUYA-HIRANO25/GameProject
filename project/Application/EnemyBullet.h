@@ -9,6 +9,11 @@
 #include "ModelCommon.h"
 #include "Camera.h"
 #include "MatuilityForText.h"
+
+/// <summary>
+/// 敵の弾を生成するクラス
+/// </summary>
+
 class EnemyBullet
 {
 public:

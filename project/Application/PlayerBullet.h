@@ -10,6 +10,10 @@
 #include "Camera.h"
 #include "MatuilityForText.h"
 
+/// <summary>
+/// プレイヤーの弾を生成するクラス
+/// </summary>
+
 class PlayerBullet
 {
 public:

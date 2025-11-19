@@ -7,6 +7,10 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
+/// <summary>
+/// 入力管理クラス
+/// </summary>
+
 class Input {
 
 public:

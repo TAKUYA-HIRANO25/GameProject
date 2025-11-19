@@ -7,25 +7,33 @@
 #include <sstream>
 #include "MyMath.h"
 
+/// <summary>
+/// 3Dモデルを扱うクラス
+/// </summary>
 using namespace MyMath;
 
 class ModelCommon;
 
+// 頂点データ構造体
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
 };
+// マテリアル構造体
 struct Material {
 	Vector4 color;
 	int32_t enableLighting;
 	float padding[3];
 	Matrix4x4 uvTransform;
 };
+// マテリアルデータ構造体
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;
 };
+
+// モデルデータ構造体
 struct ModelData {
 	std::vector<VertexData> vertices;
 	MaterialData material;

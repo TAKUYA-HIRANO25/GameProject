@@ -1,6 +1,8 @@
 #pragma once
 #include "Mymath.h"
-
+/// <summary>
+/// ゲームのカメラを管理するクラス
+/// </summary>
 using namespace MyMath;
 
 class Camera
