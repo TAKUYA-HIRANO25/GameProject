@@ -10,6 +10,23 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 
+/// <summary>
+/// Win32 ウィンドウとメッセージループを管理するユーティリティ.
+/// 
+/// 責務:
+/// - アプリケーションウィンドウの作成と破棄を行う。
+/// - メッセージ取得と処理のラッパーを提供する（__ProcessMessage__）。
+/// - ウィンドウプロシージャへの静的アクセスを提供する（__WindowProc__）。
+/// 
+/// インターフェース:
+/// - __Initialize__: ウィンドウを作成して初期化する。
+/// - __Finalize__: ウィンドウと関連リソースを解放する。
+/// - __ProcessMessage__: メッセージループを進め、ウィンドウが閉じられたかを判定する。
+/// 
+/// 備考:
+/// - クライアント領域のサイズは静的定数で定義されており、レンダリングの基準解像度として使用される。
+/// - スレッドセーフではない（UI スレッドでのみ使用する前提）。
+/// </summary>
 class WinApp {
 public:
 	void Initialize();

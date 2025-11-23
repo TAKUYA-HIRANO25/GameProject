@@ -11,12 +11,26 @@
 #include "MatuilityForText.h"
 #include "EnemyBullet.h"
 
-/// <summary>
-/// 敵を動かすクラス
-/// </summary>
-
 class Player;
-
+/// <summary>
+/// 敵キャラクターを表すクラス。
+/// 
+/// 概要:
+/// - 3Dモデルを保持し、単純な移動・射撃・当たり判定を行うエンティティ。
+/// - 自身で弾 (`EnemyBullet`) を生成して管理し、プレイヤーへの追尾射撃などの簡易的な攻撃を行う。
+/// 
+/// 主な責務:
+/// - `Initialize` でモデルと初期位置を設定する。
+/// - `Update` で移動・射撃タイマー・弾の更新・死亡判定を行う。
+/// - `Draw` で自身と弾を描画する。
+/// - `Fire` で弾を生成してリストへ追加する（発射間隔は `kFireInterval`）。
+/// - `OnCollision` で被弾処理（HP 減少）を行う。
+/// - `setPlayer` によりプレイヤー参照を受け取り、発射時にプレイヤー位置を参照して狙うことができる。
+/// 
+/// 注意事項:
+/// - 本クラスはレンダリング / 更新をメインスレッドで行う前提でスレッドセーフではない。
+/// - 弾はポインタで管理され、デストラクタ / 更新時に削除されるため、外部からの参照は破棄に注意すること。
+/// </summary>
 class Enemy
 {
 public:
@@ -65,7 +79,7 @@ private:
 	std::list<EnemyBullet*> bullets_;
 	int Time = 0; //弾発射間隔用タイマー
 	// 敵のHP
-	float EnemyHp = 10.0f;
+	float EnemyHp = 1.0f;
 	//死亡フラグ
 	bool isDead_ = false;
 	//プレイヤー情報

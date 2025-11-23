@@ -26,7 +26,7 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	Model_->SetModel("box.obj");
 	Model_->SetTranslate(position);
 	//HP
-	EnemyHp = 10.0f;
+	EnemyHp = 1.0f;
 	//死亡フラグ
 	isDead_ = false;
 	//初期設定
@@ -59,7 +59,7 @@ void Enemy::Update()
 	Time--;
 	if (Time == 0) {
 		Time = kFireInterval;
-		//Fire();
+		Fire();
 	}
 
 	for (EnemyBullet* bullet : bullets_) {
@@ -123,7 +123,7 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::OnCollision() {
 
-	EnemyHp -= 1;
+	//EnemyHp -= 1;
 
 }
 

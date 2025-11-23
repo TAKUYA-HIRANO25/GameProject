@@ -17,14 +17,29 @@
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "dxcompiler.lib")
 
-class DirectXCommon 
+/// <summary>
+/// DirectX 12 共通ユーティリティクラス.
+/// 
+/// 役割:
+/// - Direct3D12 デバイス、スワップチェーン、コマンド関連オブジェクトの初期化と管理を行う。
+/// - レンダーターゲット / デプスステンシルバッファ、デスクリプタヒープなど共通リソースを生成する。
+/// - シェーダーコンパイル（DXC）や ImGui の初期化、フレーム前後の処理ラッパー（__PreDraw__/__PostDrow__）を提供する。
+/// - テクスチャ用のアロケータや一時転送リソースを管理するヘルパーも兼ねる。
+/// 
+/// 使用上の注意:
+/// - 初期化はアプリケーションの起動時に一度だけ行い、終了時に後片付けを行うこと。
+/// - スレッドセーフではなく、レンダリングスレッド（通常はメインスレッド）で操作する。
+/// - リソース作成系メソッド（CreateBufferResource, CreateTextureResourece 等）を通して
+///   GPU リソースを一元管理することでメモリ管理を簡素化する。
+/// </summary>
+class DirectXCommon
 {
 public:
 	void Initialize(WinApp* winApp);
 
 	/// DepthStencilTextureの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const int32_t& width, const int32_t& height);
-	
+
 	/// デスクリプタヒープの生成
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, const UINT& numDescriptors, bool shaderVisible);
 
@@ -39,20 +54,20 @@ public:
 
 	/// SRVのしてh番号のGPUデスクリプタハンドルを取得する
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
-	
+
 	//ゲッター
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() const { return device.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 
 	// シェーダーコンパイル
-	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(const std::wstring& filePath,const wchar_t* profile);
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(const std::wstring& filePath, const wchar_t* profile);
 
 	/// バッファリソースの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
-	
+
 	//テクスチャーリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResourece(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata);
-	
+
 	//リソースのデータ転送
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
@@ -84,7 +99,7 @@ private:
 
 	/// レンダーターゲットビューの初期化
 	void RenderTargetViewInitialize();
-	
+
 	/// 深度ステンシルビューの初期化
 	void DepthStencilViewInitialize();
 
@@ -135,10 +150,10 @@ private:
 	// RTV用のディスクリプタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 
-	// SRV用のディスクリプタヒープ
+	// SRV用のデスクリプタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
 
-	// DSV用のディスクリプタヒープ
+	// DSV用のデスクリプタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 
 	// 各種DescroptorSize

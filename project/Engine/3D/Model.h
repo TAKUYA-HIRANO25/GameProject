@@ -8,8 +8,22 @@
 #include "MyMath.h"
 
 /// <summary>
-/// 3Dモデルを扱うクラス
+/// 3Dモデル
+///
+/// 概要:
+/// - .obj ファイルなどから頂点／マテリアルを読み込み、GPU バッファを作成して描画を行うクラス。
+/// - ModelCommon 経由で DirectX の共通機能にアクセスする。
+///
+/// 主なメソッド:
+/// - Initialize: ファイル読み込みとバッファ作成を行う。
+/// - Draw: 作成済みバッファを使って描画コマンドを発行する。
+/// - static LoadObjFile / LoadMaterialTemplateFile: ファイル読み込みユーティリティ（静的）。
+///
+/// 注意:
+/// - Initialize で GPU リソースを確保するため、Finalize 相当の処理（管理側での解放）が必要。
+/// - 大きなモデルの読み込みは I/O と GPU リソース確保のコストがあるため起動時や非同期化を検討すること。
 /// </summary>
+// 3Dモデル
 using namespace MyMath;
 
 class ModelCommon;

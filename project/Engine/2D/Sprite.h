@@ -6,13 +6,24 @@
 #include "TextureManager.h"
 using namespace MyMath;
 
-/// <summary>
-/// スプライトクラス
-/// </summary>
 
 class SpriteCommon;
 class TextureManager;
-
+/// <summary>
+/// 2D スプライトクラス
+///
+/// 概要:
+/// - テクスチャを持った矩形スプライトを表現し、描画用頂点バッファ・インデックス・マテリアルを管理する。
+/// - スプライト単位で位置・回転・スケール（サイズ）・色・UV を設定できる。
+///
+/// 主な使い方:
+/// - Initialize でテクスチャを指定して初期化する。
+/// - Update で変換行列を更新し、Draw で描画する。
+///
+/// 注意:
+/// - テクスチャ管理は TextureManager を利用する想定。
+/// - スプライトの座標系は画面左上原点（必要に応じて変換して使用）。
+/// </summary>
 class Sprite {
 public:
 	// 頂点データ構造体
