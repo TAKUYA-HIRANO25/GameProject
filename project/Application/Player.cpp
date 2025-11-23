@@ -117,7 +117,6 @@ void Player::Move()
 void Player::Fire()
 {
 
-
 	if (input_->TriggerKey(DIK_SPACE) && bulletTime <= 0) {
 
 		bulletActive = true;

@@ -119,16 +119,45 @@ bool Input::TriggerMouse(uint8_t button) const noexcept
 
 Vector2 Input::GetCursorClientPos2()
 {
-	POINT pos;
-	GetCursorPos(&pos);
-	Vector2 result = { float(pos.x), float(pos.y) };
-	return result;
+	// WinApp がセットされていない場合は (0,0) を返す
+	if (!winApp) {
+		return Vector2{ 0.0f, 0.0f };
+	}
+
+	POINT pt{};
+	// スクリーン座標でカーソル位置を取得
+	if (!GetCursorPos(&pt)) {
+		return Vector2{ 0.0f, 0.0f };
+	}
+
+	HWND hwnd = winApp->GetHwnd();
+	if (!hwnd) {
+		return Vector2{ 0.0f, 0.0f };
+	}
+
+	// スクリーン座標 -> クライアント座標に変換
+	ScreenToClient(hwnd, &pt);
+
+	// クライアント矩形を取得（ウィンドウの実際のサイズに基づく）
+	RECT rc{};
+	if (!GetClientRect(hwnd, &rc)) {
+		// 取得できなければ静的定数をフォールバック
+		rc.left = 0;
+		rc.top = 0;
+		rc.right = WinApp::kClientWidth;
+		rc.bottom = WinApp::kClientHeight;
+	}
+
+	// クライアント領域内にクランプ（境界は inclusive -> exclusive）
+	int cx = std::clamp(pt.x, rc.left, rc.right - 1);
+	int cy = std::clamp(pt.y, rc.top, rc.bottom - 1);
+
+	return Vector2{ static_cast<float>(cx), static_cast<float>(cy) };
 }
 
 Vector3 Input::GetCursorClientPos3()
 {
-	POINT pos;
-	GetCursorPos(&pos);
-	Vector3 result = { float(pos.x), float(pos.y), 0.0f };
-	return result;
+	Vector2 p2 = GetCursorClientPos2();
+	// Z は用途に応じて設定してください（ここでは 0）
+	return Vector3{ p2.x, p2.y, 0.0f };
 }
