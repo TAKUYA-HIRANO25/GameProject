@@ -129,6 +129,9 @@
     <ClCompile Include="Application\ParticleManager.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="Application\RailCamera.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -237,6 +240,9 @@
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Application\ParticleManager.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\RailCamera.h">
       <Filter>Application</Filter>
     </ClInclude>
   </ItemGroup>
