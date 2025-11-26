@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "MatuilityForText.h"
 #include "EnemyBullet.h"
+#include "ParticleManager.h"
 
 class Player;
 /// <summary>
@@ -60,6 +61,9 @@ public:
 
 	void setPlayer(Player* player) { player_ = player; }
 
+	// パーティクルマネージャのセット
+	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
+
 	bool bulletActive = false; //弾発射フラグ
 
 	static const int kFireInterval = 60; //弾の間隔
@@ -78,6 +82,7 @@ private:
 	//弾
 	std::list<EnemyBullet*> bullets_;
 	int Time = 0; //弾発射間隔用タイマー
+	Vector3 bulletVel = { 0.0f,0.0f,0.0f };
 	// 敵のHP
 	float EnemyHp = 1.0f;
 	//死亡フラグ
@@ -87,5 +92,10 @@ private:
 	//移動
 	Vector3 move = { 0.1f,0.0f,0.0f };
 	int32_t moveTime = 0;
+
+	//パーティクル
+	ParticleManager* particleManager_ = nullptr;
+	Vector3 particleVel = { 0.0f,0.0f,0.0f };
+	int particleTimer_ = 0;
 };
 

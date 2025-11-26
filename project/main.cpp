@@ -16,7 +16,7 @@
 #include "Camera.h"
 #include "Player.h"
 #include "Enemy.h"
-
+#include "ParticleManager.h"
 #pragma comment(lib,"dxcompiler.lib")
 
 
@@ -168,7 +168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	Camera* camera = new Camera;
 	camera->SetRotate({ 0.0f,0.314f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,-20.0f });
+	camera->SetTranslate({ 0.0f,4.0f,-25.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion
@@ -253,6 +253,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
 	ModelManager::GetInstance()->LoadModel("Bullet.obj");
+	ModelManager::GetInstance()->LoadModel("Particle.obj");
 	// 異なるモデルを持つオブジェクトを生成
 	/*
 	Object3d* planeObject = new Object3d;
@@ -275,13 +276,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//敵
 #pragma region
 	Enemy* enemy = new Enemy();
-	Vector3 enemyPos = { 0.0f,0.0f,40.0f };
+	Vector3 enemyPos = { 0.0f,-4.0f,40.0f };
 	enemy->Initialize(object3dCommon, enemyPos);
 	enemy->setPlayer(player);
 #pragma endregion
 	//当たり判定
 #pragma region
 
+#pragma endregion
+	//パーティクル
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Particle.png");
+	ParticleManager* particleManager = new ParticleManager(object3dCommon);
+	player->SetParticleManager(particleManager);
+	enemy->SetParticleManager(particleManager);
 #pragma endregion
 	//天球
 #pragma region
@@ -464,6 +472,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						player->Update();
 						//敵更新
 						enemy->Update();
+						//パーティクル更新
+						particleManager->Update();
 					}
 
 					//当たり判定
@@ -662,6 +672,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					Black->Draw();
 					clear->Draw();
 				}
+
+				particleManager->Draw();
 			}
 			if (isFade || endFade) {
 				fadeSprite->Draw();
@@ -683,6 +695,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
+	delete particleManager;
 	delete enemy;
 	delete player;
 	delete skyDome;

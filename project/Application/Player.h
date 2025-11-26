@@ -10,7 +10,7 @@
 #include "Camera.h"
 #include "MatuilityForText.h"
 #include "PlayerBullet.h"
-
+#include "ParticleManager.h"
 /// <summary>
 /// プレイヤーを表すクラス
 /// 
@@ -61,6 +61,9 @@ public:
 
 	void Reticle();
 
+	// パーティクルマネージャのセット
+	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
+
 	bool IsDead() const { return isDead_; }
 private:
 	// 基盤
@@ -68,7 +71,7 @@ private:
 	//プレイヤー
 	Transform modelTransform_;
 	Object3d* Model_ = nullptr; // 3Dオブジェクト
-	Vector3 position_ = { 0.0f, 1.0f, 10.0f }; // 位置
+	Vector3 position_ = { 0.0f, -4.0f, 10.0f }; // 位置
 	Vector3 rotation; // 回転
 	Vector3 scale; // 拡大縮小
 	float speed; // 移動速度
@@ -78,6 +81,7 @@ private:
 	std::list<PlayerBullet*> bulletList_;
 	int bulletTime = 0; //弾発射間隔用タイマー
 	int bulletFlag = 0;
+	Vector3 dir = { 0.0f, 0.0f, 1.0f };
 
 	// --- レティクル関連 ---
 	Object3d* reticleModel_ = nullptr;    // 画面上の3Dレティクル表示用
@@ -86,4 +90,8 @@ private:
 
 	float PlayerHP = 5.0f;
 	bool isDead_ = false;
+
+	//パーティクル
+	ParticleManager* particleManager_ = nullptr; 
+	int particleTimer_ = 0;
 };

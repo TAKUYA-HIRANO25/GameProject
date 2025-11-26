@@ -147,6 +147,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
     <ClCompile Include="Application\PlayerBullet.cpp" />
+    <ClCompile Include="Application\Particle.cpp" />
+    <ClCompile Include="Application\ParticleManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -183,6 +185,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\Math\Vector4.h" />
+    <ClInclude Include="Application\Particle.h" />
+    <ClInclude Include="Application\ParticleManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

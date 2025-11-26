@@ -126,7 +126,7 @@ void Player::Fire()
 
 		// レティクル位置に向かう方向を計算して速度にする
 		Vector3 startPos = Model_->GetTranslate();
-		Vector3 dir = { 0.0f, 0.0f, 1.0f };
+		dir = { 0.0f, 0.0f, 1.0f };
 		// reticleWorldPos_ が有効ならそれを使って方向を計算
 		dir = { reticleWorldPos_.x - startPos.x, reticleWorldPos_.y - startPos.y, reticleWorldPos_.z - startPos.z };
 		dir = Normalize(dir);
@@ -136,6 +136,7 @@ void Player::Fire()
 		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
 
 		bulletList_.push_back(newBullet);
+
 	}
 	else {
 		bulletTime--;
@@ -156,6 +157,23 @@ Vector3 Player::GetWorldPosition()
 void Player::OnCollision()
 {
 	//PlayerHP -= 1;
+
+	// --- ここからパーティクル生成（発射エフェクト） ---
+	if (particleManager_) {
+		const int kSpawn = 10;
+		Vector3 spawnBase = Model_->GetTranslate();
+		for (int i = 0; i < kSpawn; ++i) {
+			// 少しランダムなオフセットと速度
+			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
+			float ry = (std::rand() % 100 - 50) / 150.0f;
+			float rz = (std::rand() % 50) / 150.0f + 0.2f; // 0.2 .. ~0.866
+			Vector3 vel = { dir.x * (0.4f + (std::rand() % 100) / 200.0f) + rx,
+							dir.y * (0.4f + (std::rand() % 100) / 200.0f) + ry,
+							dir.z * (0.4f + (std::rand() % 100) / 200.0f) + rz };
+			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", { 0.8f,0.8f,0.8f });
+		}
+	}
+	// --- パーティクル生成ここまで ---
 }
 
 void Player::Reticle()

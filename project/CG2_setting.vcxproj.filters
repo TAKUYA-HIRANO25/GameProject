@@ -123,6 +123,12 @@
     <ClCompile Include="Application\EnemyBullet.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Particle.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\ParticleManager.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -226,6 +232,12 @@
     </ClInclude>
     <ClInclude Include="Engine\Math\Vector4.h">
       <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Particle.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\ParticleManager.h">
+      <Filter>Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
