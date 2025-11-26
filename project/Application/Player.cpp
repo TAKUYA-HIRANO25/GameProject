@@ -156,7 +156,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	//PlayerHP -= 1;
+	PlayerHP -= 1;
 
 	// --- ここからパーティクル生成（発射エフェクト） ---
 	if (particleManager_) {

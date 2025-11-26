@@ -26,7 +26,7 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	Model_->SetModel("box.obj");
 	Model_->SetTranslate(position);
 	//HP
-	EnemyHp = 1.0f;
+	EnemyHp = 5.0f;
 	//死亡フラグ
 	isDead_ = false;
 	//初期設定
@@ -124,7 +124,7 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::OnCollision() {
 
-	//EnemyHp -= 1;
+	EnemyHp -= 1;
 
 	// --- ここからパーティクル生成（発射エフェクト） ---
 	if (particleManager_) {

@@ -84,7 +84,7 @@ private:
 	int Time = 0; //弾発射間隔用タイマー
 	Vector3 bulletVel = { 0.0f,0.0f,0.0f };
 	// 敵のHP
-	float EnemyHp = 1.0f;
+	float EnemyHp = 5.0f;
 	//死亡フラグ
 	bool isDead_ = false;
 	//プレイヤー情報
