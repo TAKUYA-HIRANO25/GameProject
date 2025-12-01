@@ -17,8 +17,8 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "ParticleManager.h"
+#include "RailCamera.h"
 #pragma comment(lib,"dxcompiler.lib")
-
 
 //球
 struct Sphere {
@@ -163,14 +163,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ObJect3dCommon* object3dCommon = nullptr;
 	object3dCommon = new ObJect3dCommon;
 	object3dCommon->Initialize(dxCommon);
-
+#pragma endregion
 	//カメラ
 #pragma region
-	Camera* camera = new Camera;
-	camera->SetRotate({ 0.0f,0.314f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,-25.0f });
-	object3dCommon->SetDefaultCamera(camera);
+	Camera* camera_ = new Camera;
+	camera_->SetRotate({ 0.0f,0.314f,0.0f });
+	camera_->SetTranslate({ 0.0f,4.0f,-25.0f });
+	object3dCommon->SetDefaultCamera(camera_);
 
+#pragma endregion
+	//レールカメラ
+#pragma region
+	RailCamera* railCamera = new RailCamera();
+	railCamera->Initialize(camera_->GetTranslate(),camera_->GetRotate());
 #pragma endregion
 	//タイトル
 #pragma region
@@ -409,7 +414,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 #endif 
 			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
-			camera->SetTransform(transform_);
+			camera_->SetTransform(transform_);
 
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
@@ -420,7 +425,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Update();
 			}*/
 
-			camera->Update();
+			camera_->Update();
 			object3dCommon->SettingCommonDraw();
 
 			if(input->PushMouse(0)){
@@ -711,7 +716,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//delete axisObject;
 	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
-	delete camera;
+	delete camera_;
 	delete object3dCommon;
 	delete model;
 	delete modelCommon;

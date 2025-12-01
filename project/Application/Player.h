@@ -65,6 +65,7 @@ public:
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
 
 	bool IsDead() const { return isDead_; }
+
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
