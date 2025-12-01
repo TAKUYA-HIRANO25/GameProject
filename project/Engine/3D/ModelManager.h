@@ -26,9 +26,10 @@ class ModelCommon;
 class ModelManager {
 private:
 	static ModelManager* instance;
-
+	// コンストラクタ・デストラクタ
 	ModelManager() = default;
 	~ModelManager() = default;
+	// コピーコンストラクタ・代入演算子削除
 	ModelManager(const ModelManager&) = delete;
 	ModelManager& operator=(const ModelManager& other) = delete;
 

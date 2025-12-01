@@ -17,7 +17,9 @@
 class PlayerBullet
 {
 public:
+	// コンストラクタ
 	PlayerBullet();
+	// デストラクタ
 	~PlayerBullet();
 
 	// 初期化
@@ -29,10 +31,13 @@ public:
 	// 描画
 	void Draw();
 
+	// プレイヤーの生死判定
 	bool IsDead() const { return isDead_; }
 
+	// 当たり判定
 	void OnCollision();
 
+	// ワールド位置取得
 	Vector3 GetWorldPosition();
 private:
 	// 基盤

@@ -35,6 +35,7 @@ public:
 	// 終了
 	void Finalize();
 
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
 	// テクスチャファイルのパス

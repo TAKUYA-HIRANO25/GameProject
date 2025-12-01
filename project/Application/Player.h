@@ -35,44 +35,39 @@ class Player
 public:
 	Player();
 	~Player();
-
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, Input* input);
-
 	// 更新
 	void Update();
-
 	// 描画
 	void Draw();
-
 	//移動
 	void Move();
-
 	//弾発射
 	void Fire();
-
-	bool bulletActive = false; //弾発射フラグ
-
+	// プレイヤーのワールド位置取得
 	Vector3 GetWorldPosition();
-
+	// 当たり判定
 	void OnCollision();
-
+	// プレイヤーの弾リスト取得
 	const std::list<PlayerBullet*>& GetBullets() const { return bulletList_; }
-
+	// レティクル更新
 	void Reticle();
-
 	// パーティクルマネージャのセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
-
+	// プレイヤーの生死判定
 	bool IsDead() const { return isDead_; }
+	//レールカメラ用にプレイヤーのTransformをセット
+	void SetRailCamera(const Transform railCamera);
 
+	bool bulletActive = false; //弾発射フラグ
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	//プレイヤー
-	Transform modelTransform_;
 	Object3d* Model_ = nullptr; // 3Dオブジェクト
 	Vector3 position_ = { 0.0f, -4.0f, 10.0f }; // 位置
+	Vector3 translation; // 位置
 	Vector3 rotation; // 回転
 	Vector3 scale; // 拡大縮小
 	float speed; // 移動速度

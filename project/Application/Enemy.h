@@ -38,29 +38,28 @@ public:
 	Enemy();
 	
 	~Enemy();
-	
+	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, Vector3 position);
-	
+	// 更新
 	void Update();
-	
+	// 描画
 	void Draw();
-
+	//移動
 	void Fire();
-
+	//弾発射
 	void FireTime();
-
+	//移動切り替え
 	void MoveTime();
-
+	// プレイヤーのワールド位置取得
 	Vector3 GetWorldPosition();
-
+	// 当たり判定
 	void OnCollision();
-
+	// 敵の弾リスト取得
 	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
-
+	// 敵の生死判定
 	bool IsDead() const { return isDead_; }
-
+	// プレイヤー情報セット
 	void setPlayer(Player* player) { player_ = player; }
-
 	// パーティクルマネージャのセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
 

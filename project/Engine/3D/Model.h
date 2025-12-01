@@ -58,12 +58,11 @@ class Model {
 public:
 	// 初期化
 	void Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename);
-
 	// 描画
 	void Draw();
-
+	// 頂点バッファビュー取得
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
-
+	// OBJファイル読み込み
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
 private:

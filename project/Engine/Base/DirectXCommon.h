@@ -35,11 +35,10 @@
 class DirectXCommon
 {
 public:
+	/// コンストラクタ
 	void Initialize(WinApp* winApp);
-
 	/// DepthStencilTextureの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const int32_t& width, const int32_t& height);
-
 	/// デスクリプタヒープの生成
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, const UINT& numDescriptors, bool shaderVisible);
 
@@ -74,8 +73,10 @@ public:
 	//テクスチャー関数
 	DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
+	// フレーム前処理
 	void PreDraw();
 
+	// フレーム後処理
 	void PostDrow();
 
 	//最大テクスチャ枚数

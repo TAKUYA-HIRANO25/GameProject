@@ -16,5 +16,6 @@
 /// </summary>
 
 namespace Logger {
+	// メッセージをログ出力する
 	void Log(const std::string& message);
 }

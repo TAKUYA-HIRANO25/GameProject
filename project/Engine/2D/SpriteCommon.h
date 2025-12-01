@@ -21,10 +21,13 @@
 
 class SpriteCommon{
 public:
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
+	// 描画共通設定
 	void SettingCommonDraw();
 
+	// DirectXCommon取得
 	DirectXCommon* getDxCommon()const { return dxCommon_; }
 
 private:

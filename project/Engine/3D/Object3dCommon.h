@@ -22,14 +22,12 @@ class ObJect3dCommon {
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// DirectXCommon 取得
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
-
+	// 描画共通設定
 	void SettingCommonDraw();
-
 	// Setter(Camera)
 	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
-
 	// Getter(Camera)
 	Camera* GetDefaultCamera() const { return defaultCamera; }
 

@@ -13,8 +13,9 @@
 /// </summary>
 class ModelCommon {
 public:
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// DirectXCommon 取得
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
 private:

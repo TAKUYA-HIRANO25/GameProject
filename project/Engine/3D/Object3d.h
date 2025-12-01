@@ -38,9 +38,9 @@ public:
 public:
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon);
-
+	// 更新
 	void Updata();
-
+	// 描画
 	void Draw();
 
 	// setter

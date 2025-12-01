@@ -33,13 +33,13 @@ class Input {
 
 public:
 	template <class T>using ComPtr = Microsoft::WRL::ComPtr<T>;
-
+	// 初期化
 	void Initialize(WinApp* winApp);
-
+	// 更新
 	void Update();
-
+	// --- キーボード関連 ---
 	bool PushKey(BYTE keyNumber);
-
+	// 押した瞬間
 	bool TriggerKey(BYTE keyNumber);
 
 	// --- マウス関連 ---

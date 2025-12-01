@@ -13,7 +13,9 @@
 /// </summary>
 
 namespace StringUtility {
+	// std::string を std::wstring に変換
 	std::wstring ConvertString(const std::string& str);
 
+	// std::wstring を std::string に変換
 	std::string ConvertString(const std::wstring& str);
 }

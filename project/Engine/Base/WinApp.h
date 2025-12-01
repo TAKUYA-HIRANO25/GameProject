@@ -29,16 +29,22 @@
 /// </summary>
 class WinApp {
 public:
+	// 初期化
 	void Initialize();
 
+	// 終了
 	void Finalize();
 
+	// ウィンドウプロシージャ
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
+	// ウィンドウハンドル取得
 	HWND GetHwnd() const { return hwnd; }
 
+	// インスタンスハンドル取得
 	HINSTANCE GetWCInStance() const { return wc.hInstance; }
 
+	// メッセージ処理
 	bool ProcessMessage();
 
 public:

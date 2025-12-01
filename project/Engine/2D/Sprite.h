@@ -53,12 +53,16 @@ public:
 		Vector3 rotate;
 		Vector3 translate;
 	};
+	// 初期化
 	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath);
 
+	// 更新
 	void Update();
 
+	// 描画
 	void Draw();
 
+	// Getter Setter
 	const Vector2& GetPosition() const { return position; }
 	void SetPosition(const Vector2& position) { this->position = position; }
 

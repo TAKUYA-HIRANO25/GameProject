@@ -5,12 +5,13 @@
 class RailCamera
 {
 public:
+	//初期化
 	void Initialize(Vector3& translate, Vector3& rotate);
-
+	//更新
 	void Update();
-
+	//カメラ取得
 	Camera& GetCamera() { return camera_; }
-
+	//変換情報取得
 	Transform& GetTransform() { return  transform_; }
 
 private:

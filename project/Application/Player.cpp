@@ -60,6 +60,7 @@ void Player::Update()
 	if (PlayerHP == 0) {
 		isDead_ = true;
 	}
+
 	Model_->SetTranslate(position_);
 
 	Model_->Updata();
@@ -219,4 +220,11 @@ void Player::Reticle()
 	if (reticleModel_) {
 		reticleModel_->SetTranslate(reticleWorldPos_);
 	}
+}
+
+void Player::SetRailCamera(const Transform railCamera)
+{
+	translation = railCamera.translate;
+	rotation = railCamera.rotate;
+	scale = railCamera.scale;
 }

@@ -174,8 +174,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 	//レールカメラ
 #pragma region
-	RailCamera* railCamera = new RailCamera();
-	railCamera->Initialize(camera_->GetTranslate(),camera_->GetRotate());
+
 #pragma endregion
 	//タイトル
 #pragma region
@@ -277,6 +276,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	Player* player = new Player();
 	player->Initialize(object3dCommon,input);
+
 #pragma endregion
 	//敵
 #pragma region
@@ -426,6 +426,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 
 			camera_->Update();
+
 			object3dCommon->SettingCommonDraw();
 
 			if(input->PushMouse(0)){
