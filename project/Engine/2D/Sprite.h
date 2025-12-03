@@ -6,17 +6,34 @@
 #include "TextureManager.h"
 using namespace MyMath;
 
+
 class SpriteCommon;
 class TextureManager;
-
+/// <summary>
+/// 2D スプライトクラス
+///
+/// 概要:
+/// - テクスチャを持った矩形スプライトを表現し、描画用頂点バッファ・インデックス・マテリアルを管理する。
+/// - スプライト単位で位置・回転・スケール（サイズ）・色・UV を設定できる。
+///
+/// 主な使い方:
+/// - Initialize でテクスチャを指定して初期化する。
+/// - Update で変換行列を更新し、Draw で描画する。
+///
+/// 注意:
+/// - テクスチャ管理は TextureManager を利用する想定。
+/// - スプライトの座標系は画面左上原点（必要に応じて変換して使用）。
+/// </summary>
 class Sprite {
 public:
+	// 頂点データ構造体
 	struct VertexData
 	{
 		Vector4 position;
 		Vector2 texcoord;
 		Vector3 normal;
 	};
+	// マテリアル構造体
 	struct Material
 	{
 		Vector4 color;
@@ -24,22 +41,28 @@ public:
 		float padding[3];
 		Matrix4x4 uvTransform;
 	};
+	// 座標変換行列構造体
 	struct TransformationMatrix
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
+	// アフィン変換用構造体
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;
 		Vector3 translate;
 	};
+	// 初期化
 	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath);
 
+	// 更新
 	void Update();
 
+	// 描画
 	void Draw();
 
+	// Getter Setter
 	const Vector2& GetPosition() const { return position; }
 	void SetPosition(const Vector2& position) { this->position = position; }
 

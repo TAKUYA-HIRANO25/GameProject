@@ -130,7 +130,15 @@
     <ClCompile Include="Application\EnemyBullet.cpp">
       <Filter>Application</Filter>
     </ClCompile>
->>>>>>> collision
+    <ClCompile Include="Application\Particle.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\ParticleManager.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\RailCamera.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -202,22 +210,15 @@
     <ClInclude Include="Engine\Base\WinApp.h">
       <Filter>ソース ファイル\Base</Filter>
     </ClInclude>
-<<<<<<< HEAD
-    <ClInclude Include="Application\Player.h">
-      <Filter>ヘッダー ファイル</Filter>
-=======
     <ClInclude Include="Engine\3D\Camera.h">
       <Filter>ソース ファイル\3D</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player.h">
       <Filter>Application</Filter>
->>>>>>> collision
     </ClInclude>
     <ClInclude Include="Engine\Math\MatuilityForText.h">
       <Filter>ソース ファイル\Math</Filter>
     </ClInclude>
-<<<<<<< HEAD
-=======
     <ClInclude Include="Application\PlayerBullet.h">
       <Filter>Application</Filter>
     </ClInclude>
@@ -227,7 +228,30 @@
     <ClInclude Include="Application\EnemyBullet.h">
       <Filter>Application</Filter>
     </ClInclude>
->>>>>>> collision
+    <ClInclude Include="Engine\Math\Matrix3x3.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Matrix4x4.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Vector2.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Vector3.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Vector4.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Particle.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\ParticleManager.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\RailCamera.h">
+      <Filter>Application</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

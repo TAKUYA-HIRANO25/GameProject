@@ -1,44 +1,38 @@
 #pragma once
+#include "Matrix3x3.h"
+#include "Matrix4x4.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 
+/// <summary>
+/// ゲーム用数学ユーティリティ名前空間 (MyMath)
+///
+/// 概要:
+/// - 行列・ベクトルの生成や変換、行列演算、正規化など、ゲームで頻繁に使用する数学関数を提供する。
+/// - MakeAffineMatrix / MakePerspectiveFovMatrix / Inverse など、3D レンダリング向けの関数群を含む。
+///
+/// 注意:
+/// - 関数の多くは行列やベクトルの乗算・逆行列計算を行うため、数値安定性に注意して使用すること。
+/// - パフォーマンスが重要な箇所では呼び出し回数やコピー回数を最適化してください。
+/// </summary>
 namespace MyMath {
-	struct Vector4
-	{
-		float x;
-		float y;
-		float z;
-		float w;
-	};
-	struct Vector3
-	{
-		float x;
-		float y;
-		float z;
-	};
-	struct Vector2
-	{
-		float x;
-		float y;
-	};
-	struct Matrix4x4
-	{
-		float m[4][4];
-	};
-	struct Matrix3x3
-	{
-		float m[3][3];
-	};
+	
+	//変換行列
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
 
+	// 平行光源
 	struct DirectionalLight {
 		Vector4 color;
 		Vector3 direction;
 		float intensity;
 	};
 
+	//変換情報
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;

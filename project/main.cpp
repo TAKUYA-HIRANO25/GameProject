@@ -16,11 +16,9 @@
 #include "Camera.h"
 #include "Player.h"
 #include "Enemy.h"
-
-#include "Application/Player.h"
-
+#include "ParticleManager.h"
+#include "RailCamera.h"
 #pragma comment(lib,"dxcompiler.lib")
-
 
 //球
 struct Sphere {
@@ -165,14 +163,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ObJect3dCommon* object3dCommon = nullptr;
 	object3dCommon = new ObJect3dCommon;
 	object3dCommon->Initialize(dxCommon);
-
+#pragma endregion
 	//カメラ
 #pragma region
-	Camera* camera = new Camera;
-	camera->SetRotate({ 0.0f,0.314f,0.0f });
-	camera->SetTranslate({ 0.0f,4.0f,20.0f });
-	object3dCommon->SetDefaultCamera(camera);
+	Camera* camera_ = new Camera;
+	camera_->SetRotate({ 0.0f, 6.28f,0.0f });
+	camera_->SetTranslate({ 0.0f,0.0f,-20.0f });
+	object3dCommon->SetDefaultCamera(camera_);
 
+#pragma endregion
+	//レールカメラ
+#pragma region
+	RailCamera* railCamera = new RailCamera();
+	railCamera->Initialize(camera_);
+	object3dCommon->SetDefaultCamera(railCamera->GetCamera());
 #pragma endregion
 	//タイトル
 #pragma region
@@ -254,6 +258,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
 	ModelManager::GetInstance()->LoadModel("Bullet.obj");
+	ModelManager::GetInstance()->LoadModel("Particle.obj");
 	// 異なるモデルを持つオブジェクトを生成
 	/*
 	Object3d* planeObject = new Object3d;
@@ -272,17 +277,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	Player* player = new Player();
 	player->Initialize(object3dCommon,input);
+	player->SetRailCameraVelocity(railCamera->GetVelocity());
 #pragma endregion
 	//敵
 #pragma region
 	Enemy* enemy = new Enemy();
-	Vector3 enemyPos = { 0.0f,0.0f,-30.0f };
+	Vector3 enemyPos = { 0.0f,-4.0f,40.0f };
 	enemy->Initialize(object3dCommon, enemyPos);
 	enemy->setPlayer(player);
 #pragma endregion
 	//当たり判定
 #pragma region
 
+#pragma endregion
+	//パーティクル
+#pragma region
+	TextureManager::GetInstance()->LoadTexture("resources/Particle.png");
+	ParticleManager* particleManager = new ParticleManager(object3dCommon);
+	player->SetParticleManager(particleManager);
+	enemy->SetParticleManager(particleManager);
 #pragma endregion
 	//天球
 #pragma region
@@ -346,10 +359,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	float materialDataVector[4] = { 1,1,1,1 };
 	float TransformScale[3] = { 1.0f,1.0f,1.0f };
-	float TransformRotae[3] = { 0.0f, 3.14f, 0.0f };
-	float TransformTranslate[3] = { 0.0f,0.0f,20.0f };
+	float TransformRotae[3] = { 0.0f, 6.28f, 0.0f };
+	float TransformTranslate[3] = { 0.0f,0.0f,-20.0f };
 	float directionalLight[3] = { 0.0f,-1.0f,0.0f };
-	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	//uvTransform
 	struct Sprite::Transform uvTransformSprite {
 		{ 1.0f, 1.0f, 1.0f },
@@ -359,6 +371,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterball = false;
 	bool bulletShot = false;
 	bool EnemybulletShot = false;
+	float mousePos[3] = {};
+	bool mouseLeft = false;
+	bool mouseRight = false;
 #pragma endregion
 
 	//ゲーム処理
@@ -372,7 +387,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			EnemybulletShot = enemy->bulletActive;
 			//imgui
 #ifdef USE_IMGUI
-
+			mousePos[0] = input->GetCursorClientPos3().x;
+			mousePos[1] = input->GetCursorClientPos3().y;
+			mousePos[2] = input->GetCursorClientPos3().z;
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -382,16 +399,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", TransformScale);
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
-			ImGui::DragFloat3("Player", playerPosition);
+			ImGui::DragFloat3("MousePos", mousePos);
 			ImGui::Checkbox("bullet", &bulletShot);
 			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
+			ImGui::Checkbox("mouseLeft", &mouseLeft);
+			ImGui::Checkbox("mouseRight", &mouseRight);
 			//ImGui::DragFloat3("directionalLight", directionalLight, 0.1f);
 			//ImGui::DragFloat2("UVTransform", &uvTransformSprite.transform.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 #endif 
-			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
-			camera->SetTransform(transform_);
+			TransformScale[0] = railCamera->GetTransform().scale.x;
+			TransformScale[1] = railCamera->GetTransform().scale.y;
+			TransformScale[2] = railCamera->GetTransform().scale.z;
+			TransformRotae[0] = railCamera->GetTransform().rotate.x;
+			TransformRotae[1] = railCamera->GetTransform().rotate.y;
+			TransformRotae[2] = railCamera->GetTransform().rotate.z;
+			TransformTranslate[0] = railCamera->GetTransform().translate.x;
+			TransformTranslate[1] = railCamera->GetTransform().translate.y;
+			TransformTranslate[2] = railCamera->GetTransform().translate.z;
+			//camera_->SetTransform(transform_);
 
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
@@ -402,8 +429,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Update();
 			}*/
 
-			camera->Update();
 			object3dCommon->SettingCommonDraw();
+
+			if(input->PushMouse(0)){
+				mouseLeft = true;
+			}
+			else if(input->PushMouse(1)){
+				mouseRight = true;
+			}
 
 			if (isTitle) {
 
@@ -440,6 +473,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				if (isGame) {
 					//天球
+					railCamera->Update();
 					skyDome->Updata();
 
 					if (isOver == false && isClear == false) {
@@ -447,6 +481,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						player->Update();
 						//敵更新
 						enemy->Update();
+						//パーティクル更新
+						particleManager->Update();
 					}
 
 					//当たり判定
@@ -645,6 +681,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					Black->Draw();
 					clear->Draw();
 				}
+
+				particleManager->Draw();
 			}
 			if (isFade || endFade) {
 				fadeSprite->Draw();
@@ -666,6 +704,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete spriteCommon;
 	delete input;
 	delete dxCommon;
+	delete particleManager;
 	delete enemy;
 	delete player;
 	delete skyDome;
@@ -681,7 +720,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//delete axisObject;
 	//delete planeObject;
 	ModelManager::GetInstance()->Finalize();
-	delete camera;
+	delete camera_;
 	delete object3dCommon;
 	delete model;
 	delete modelCommon;

@@ -26,7 +26,7 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	Model_->SetModel("box.obj");
 	Model_->SetTranslate(position);
 	//HP
-	EnemyHp = 10.0f;
+	EnemyHp = 5.0f;
 	//死亡フラグ
 	isDead_ = false;
 	//初期設定
@@ -87,17 +87,18 @@ void Enemy::Draw()
 void Enemy::Fire() {
 
 	bulletActive = true;
-	const float kBulletSpeed = 0.5f;
-	Vector3 velocity(0, 0, 0);
+	const float kBulletSpeed = -0.5f;
+	bulletVel = { 0, 0, 0 };
 
 	//弾の軌道
 	Vector3 playerPosition = player_->GetWorldPosition();
 	Vector3 enemyPosition = GetWorldPosition();
-	Vector3 goalPosition = playerPosition - enemyPosition;
-	velocity = MyMath::Normalize(goalPosition);
-	velocity = { velocity.x * kBulletSpeed,velocity.y * kBulletSpeed, velocity.z * kBulletSpeed };
+	Vector3 goalPosition = enemyPosition - playerPosition ;
+	bulletVel = MyMath::Normalize(goalPosition);
+	particleVel = bulletVel;
+	bulletVel = { bulletVel.x * kBulletSpeed,bulletVel.y * kBulletSpeed, bulletVel.z * kBulletSpeed };
 	EnemyBullet* newBullet = new EnemyBullet();
-	newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
+	newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), bulletVel);
 	
 	bullets_.push_back(newBullet);
 
@@ -125,5 +126,21 @@ void Enemy::OnCollision() {
 
 	EnemyHp -= 1;
 
+	// --- ここからパーティクル生成（発射エフェクト） ---
+	if (particleManager_) {
+		const int kSpawn = 10;
+		Vector3 spawnBase = Model_->GetTranslate();
+		for (int i = 0; i < kSpawn; ++i) {
+			// 少しランダムなオフセットと速度
+			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
+			float ry = (std::rand() % 100 - 50) / 150.0f;
+			float rz = (std::rand() % 50) / 150.0f + 0.2f; // 0.2 .. ~0.866
+			Vector3 vel = { bulletVel.x * (0.4f + (std::rand() % 100) / 200.0f) + rx,
+							bulletVel.y * (0.4f + (std::rand() % 100) / 200.0f) + ry,
+							bulletVel.z * (0.4f + (std::rand() % 100) / 200.0f) + rz };
+			vel *= -1.0f; // 敵なので下向きに飛ばす
+			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", { 0.8f,0.8f,0.8f });
+		}
+	}
 }
 

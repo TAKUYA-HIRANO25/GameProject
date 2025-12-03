@@ -9,7 +9,23 @@
 
 class DirectXCommon;
 
-
+/// <summary>
+/// テクスチャ管理シングルトン.
+/// 
+/// 機能:
+/// - テクスチャファイルを読み込み、GPU へアップロードして SRV を作成する。
+/// - ファイルパスからテクスチャインデックスを取得できるマップ機能を提供する。
+/// - テクスチャのメタデータ（幅・高さなど）を提供する。
+/// 
+/// 使用手順:
+/// 1. アプリ起動時に __Initialize__ を呼び、DirectXCommon を渡す。
+/// 2. __LoadTexture(filePath)__ でテクスチャを登録する（複数回呼び出し可）。
+/// 3. 描画時に __GetSrvHandleGPU(index)__ や __GetMetaData(index)__ を参照する。
+/// 
+/// 備考:
+/// - シングルトンなのでグローバルにアクセス可能。Finalize で後片付けを行うこと。
+/// - スレッドセーフではないため、起動シーケンスやリソース登録はメインスレッドで行うことを推奨。
+/// </summary>
 class TextureManager {
 public:
 
@@ -19,6 +35,7 @@ public:
 	// 終了
 	void Finalize();
 
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
 	// テクスチャファイルのパス
