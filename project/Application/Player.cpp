@@ -112,7 +112,7 @@ void Player::Move()
 		move.z -= kCharacterSpeed;
 	}
 
-	position_ += move;
+	position_ += move + railCameraVelocity_;
 }
 
 void Player::Fire()
@@ -132,7 +132,9 @@ void Player::Fire()
 		dir = { reticleWorldPos_.x - startPos.x, reticleWorldPos_.y - startPos.y, reticleWorldPos_.z - startPos.z };
 		dir = Normalize(dir);
 		Vector3 velocity = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
+		velocity += railCameraVelocity_;
 
+		// 弾を生成してリストに追加
 		PlayerBullet* newBullet = new PlayerBullet();
 		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
 
@@ -222,9 +224,8 @@ void Player::Reticle()
 	}
 }
 
-void Player::SetRailCamera(const Transform railCamera)
+void Player::SetRailCameraVelocity(Vector3 velocity)
 {
-	translation = railCamera.translate;
-	rotation = railCamera.rotate;
-	scale = railCamera.scale;
+	railCameraVelocity_ = velocity;
 }
+

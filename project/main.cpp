@@ -167,14 +167,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//カメラ
 #pragma region
 	Camera* camera_ = new Camera;
-	camera_->SetRotate({ 0.0f,0.314f,0.0f });
-	camera_->SetTranslate({ 0.0f,4.0f,-25.0f });
+	camera_->SetRotate({ 0.0f, 6.28f,0.0f });
+	camera_->SetTranslate({ 0.0f,0.0f,-20.0f });
 	object3dCommon->SetDefaultCamera(camera_);
 
 #pragma endregion
 	//レールカメラ
 #pragma region
-
+	RailCamera* railCamera = new RailCamera();
+	railCamera->Initialize(camera_);
+	object3dCommon->SetDefaultCamera(railCamera->GetCamera());
 #pragma endregion
 	//タイトル
 #pragma region
@@ -276,7 +278,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	Player* player = new Player();
 	player->Initialize(object3dCommon,input);
-
+	player->SetRailCameraVelocity(railCamera->GetVelocity());
 #pragma endregion
 	//敵
 #pragma region
@@ -413,8 +415,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 #endif 
-			Transform transform_ = { {TransformScale[0], TransformScale[1], TransformScale[2]}, {TransformRotae[0], TransformRotae[1], TransformRotae[2]}, {TransformTranslate[0], TransformTranslate[1], TransformTranslate[2]} };
-			camera_->SetTransform(transform_);
+			TransformScale[0] = railCamera->GetTransform().scale.x;
+			TransformScale[1] = railCamera->GetTransform().scale.y;
+			TransformScale[2] = railCamera->GetTransform().scale.z;
+			TransformRotae[0] = railCamera->GetTransform().rotate.x;
+			TransformRotae[1] = railCamera->GetTransform().rotate.y;
+			TransformRotae[2] = railCamera->GetTransform().rotate.z;
+			TransformTranslate[0] = railCamera->GetTransform().translate.x;
+			TransformTranslate[1] = railCamera->GetTransform().translate.y;
+			TransformTranslate[2] = railCamera->GetTransform().translate.z;
+			//camera_->SetTransform(transform_);
 
 			input->Update();
 			if (input->TriggerKey(DIK_0)) {
@@ -424,8 +434,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			/*for (Sprite* sprite : sprites) {
 				sprite->Update();
 			}*/
-
-			camera_->Update();
 
 			object3dCommon->SettingCommonDraw();
 
@@ -471,6 +479,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				if (isGame) {
 					//天球
+					railCamera->Update();
 					skyDome->Updata();
 
 					if (isOver == false && isClear == false) {

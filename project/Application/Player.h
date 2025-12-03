@@ -58,7 +58,7 @@ public:
 	// プレイヤーの生死判定
 	bool IsDead() const { return isDead_; }
 	//レールカメラ用にプレイヤーのTransformをセット
-	void SetRailCamera(const Transform railCamera);
+	void SetRailCameraVelocity(Vector3 velocity);
 
 	bool bulletActive = false; //弾発射フラグ
 private:
@@ -90,4 +90,7 @@ private:
 	//パーティクル
 	ParticleManager* particleManager_ = nullptr; 
 	int particleTimer_ = 0;
+
+	//レールカメラ速度
+	Vector3 railCameraVelocity_ = { 0.0f, 0.0f, 0.0f };
 };
