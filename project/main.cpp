@@ -487,8 +487,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						player->Update();
 						//敵更新
 						enemy->Update();
-						//パーティクル更新
-						particleManager->Update();
 					}
 
 					//当たり判定
@@ -583,6 +581,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						}
 					}
 
+					//パーティクル更新
+					particleManager->Update();
 				}
 				Ready->Update();
 				Go->Update();
