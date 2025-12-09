@@ -28,6 +28,9 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	reticleModel_->SetScale({ 0.1f, 0.1f, 0.1f });
 	reticleModel_->SetTranslate(position_);
 
+	// 初期色を保存（Object3d のデフォルトと合わせる）
+	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 	PlayerHP = 5.0f;
 	input_ = new Input();
 	input_ = input;
@@ -39,6 +42,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 
 void Player::Update()
 {
+	// 弾の解放
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		if (bullet->IsDead()) {
 			delete bullet;
@@ -46,6 +50,9 @@ void Player::Update()
 		}
 		return false;
 		});
+
+	// 点滅処理（被弾時の色切替）
+	ChangeColor();
 
 	Move();
 
@@ -159,7 +166,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	PlayerHP -= 1;
+	//PlayerHP -= 1;
 
 	// --- ここからパーティクル生成（発射エフェクト） ---
 	if (particleManager_) {
@@ -176,7 +183,15 @@ void Player::OnCollision()
 			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", { 0.8f,0.8f,0.8f });
 		}
 	}
-	// --- パーティクル生成ここまで ---
+
+	// 被弾点滅を開始する（任意でHP減少も有効化）
+	if (Model_) {
+		// 総トグルフレーム数 = flashDuration_ * flashRepeat_ * 2 (点滅色と元色の切替で1回)
+		flashTimer_ = flashDuration_ * flashRepeat_ * 2;
+		flashToggleCounter_ = flashDuration_;
+		// 最初に点滅色にする
+		Model_->SetDiffuseColor(flashColor_);
+	}
 }
 
 void Player::Reticle()
@@ -227,5 +242,32 @@ void Player::Reticle()
 void Player::SetRailCameraVelocity(Vector3 velocity)
 {
 	railCameraVelocity_ = velocity;
+}
+
+// --- 点滅処理の実装 ---
+void Player::ChangeColor()
+{
+	if (flashTimer_ > 0 && Model_) {
+		--flashTimer_;
+		--flashToggleCounter_;
+
+		if (flashToggleCounter_ <= 0) {
+			flashToggleCounter_ = flashDuration_;
+
+			int remainingToggles = (flashTimer_ + flashDuration_ - 1) / flashDuration_;
+			if (remainingToggles % 2 == 0) {
+				// 偶数なら点滅色
+				Model_->SetDiffuseColor(flashColor_);
+			}
+			else {
+				// 奇数なら元の色
+				Model_->SetDiffuseColor(originalColor_);
+			}
+		}
+
+		if (flashTimer_ == 0) {
+			Model_->SetDiffuseColor(originalColor_);
+		}
+	}
 }
 

@@ -34,13 +34,7 @@ struct VertexData {
 	Vector2 texcoord;
 	Vector3 normal;
 };
-// マテリアル構造体
-struct Material {
-	Vector4 color;
-	int32_t enableLighting;
-	float padding[3];
-	Matrix4x4 uvTransform;
-};
+
 // マテリアルデータ構造体
 struct MaterialData {
 	std::string textureFilePath;
@@ -60,6 +54,8 @@ public:
 	void Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename);
 	// 描画
 	void Draw();
+	// マテリアル色を外部から変更する
+	void SetMaterialColor(const Vector4& color);
 	// 頂点バッファビュー取得
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// OBJファイル読み込み

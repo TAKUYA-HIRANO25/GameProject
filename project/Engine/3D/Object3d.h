@@ -49,6 +49,7 @@ public:
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 	void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetDiffuseColor(const Vector4& color);
 
 	// Getter
 	const Vector3& GetScale()const { return transform.scale; }
@@ -62,6 +63,11 @@ private:
 	// バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
+
+	// インスタンス毎のマテリアル
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+	Material* materialData = nullptr;
+
 	// バッファリソース内のデータをさすポインタ
 	TransformationMatrix* transformationMatrixData = nullptr;
 	DirectionalLight* directionalLightData = nullptr;

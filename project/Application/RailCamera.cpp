@@ -1,7 +1,7 @@
 #include "RailCamera.h"
 RailCamera::RailCamera()
 	: transform_({ {1.0f,1.0f,1.0f}, { 0.0f, 6.28f,0.0f }, { 0.0f,0.0f,-20.0f } })
-	, velocity_{ 0.0f, 0.0f, 0.1f }
+	, velocity_{ 0.0f, 0.0f, 0.0f }
 	, camera_(nullptr)
 {
 }
