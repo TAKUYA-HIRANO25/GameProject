@@ -4,8 +4,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
-
-
+#include <cstdint>
 /// <summary>
 /// ゲーム用数学ユーティリティ名前空間 (MyMath)
 ///
@@ -37,6 +36,14 @@ namespace MyMath {
 		Vector3 scale;
 		Vector3 rotate;
 		Vector3 translate;
+	};
+
+	// マテリアル構造体
+	struct Material {
+		Vector4 color;
+		int32_t enableLighting;
+		float padding[3];
+		Matrix4x4 uvTransform;
 	};
 
 	//単位行列

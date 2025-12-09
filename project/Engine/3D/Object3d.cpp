@@ -26,6 +26,16 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 	directionalLightData->direction = light.direction;
 	directionalLightData->intensity = light.intensity;
 
+	// インスタンス用マテリアルリソースを作成
+	materialResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Material));
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+	// デフォルトのマテリアル値
+	Vector4 defaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	materialData->color = defaultColor;
+	materialData->enableLighting = false;
+	materialData->uvTransform = MakeIdentity4x4();
+
 	// Transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	this->camera = object3dCommon->GetDefaultCamera();
@@ -58,6 +68,12 @@ void Object3d::Draw()
 	object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 	// 平行光源CBufferの場所を設定
 	object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+
+	// インスタンス毎マテリアルをルート 0 にセット（これで個別色制御）
+	if (materialResource) {
+		object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	}
+
 	// 3Dモデルが割り当てられていれば描画する
 	if (model) {
 		model->Draw();
@@ -68,4 +84,18 @@ void Object3d::SetModel(const std::string& filePath)
 {
 	// モデルを検索してセットする
 	model = ModelManager::GetInstance()->FindModel(filePath);
+
+	// もしモデル側がテクスチャ情報を持っているならそのまま利用して描画（SRV は model->Draw() が設定する）
+}
+
+void Object3d::SetDiffuseColor(const Vector4& color)
+{
+	// ライト用色（インスタンスライト CBuffer）
+	if (directionalLightData) {
+		directionalLightData->color = color;
+	}
+	// インスタンスマテリアルの色を更新
+	if (materialData) {
+		materialData->color = color;
+	}
 }

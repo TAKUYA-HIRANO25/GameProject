@@ -62,12 +62,20 @@ public:
 	void setPlayer(Player* player) { player_ = player; }
 	// パーティクルマネージャのセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
+	//色変え
+	void ChangeColor();
 
 	bool bulletActive = false; //弾発射フラグ
 
 	static const int kFireInterval = 60; //弾の間隔
 
 	static const int kMoveInterval = 360; //移動切り替え
+
+	static const int kFlashDuration = 10; // 点滅時間（フレーム）
+
+	// 点滅を何回繰り返すか
+	static const int kFlashRepeat = 4;
+
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
@@ -96,5 +104,14 @@ private:
 	ParticleManager* particleManager_ = nullptr;
 	Vector3 particleVel = { 0.0f,0.0f,0.0f };
 	int particleTimer_ = 0;
+
+	// 被弾点滅用タイマー（フレーム） : 残りトグル用総フレーム数
+	int flashTimer_ = 0;
+
+	// 点滅で色を切り替える間隔カウンタ
+	int flashToggleCounter_ = 0;
+
+	// 元の色を保持して復帰するための値（初期は白）
+	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 };
 

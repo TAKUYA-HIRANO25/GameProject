@@ -61,6 +61,12 @@ public:
 	void SetRailCameraVelocity(Vector3 velocity);
 
 	bool bulletActive = false; //弾発射フラグ
+
+	// 点滅設定 API（任意で外部から変更可能）
+	void SetFlashColor(const Vector4& color) { flashColor_ = color; }
+	void SetFlashDuration(int frames) { flashDuration_ = frames; }
+	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
+
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
@@ -93,4 +99,17 @@ private:
 
 	//レールカメラ速度
 	Vector3 railCameraVelocity_ = { 0.0f, 0.0f, 0.0f };
+
+	// --- 被弾点滅関連 ---
+	static const int kDefaultFlashDuration = 10;
+	static const int kDefaultFlashRepeat = 4;
+	int flashTimer_ = 0;               // 残りフレーム数
+	int flashToggleCounter_ = 0;       // トグル間隔カウンタ
+	int flashDuration_ = kDefaultFlashDuration;
+	int flashRepeat_ = kDefaultFlashRepeat;
+	Vector4 flashColor_ = { 1.0f, 0.25f, 0.25f, 1.0f }; // デフォルト赤
+	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // 元の色保持
+
+	// 点滅処理ヘルパ
+	void ChangeColor();
 };
