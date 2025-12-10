@@ -376,7 +376,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float mousePos[3] = {};
 	bool mouseLeft = false;
 	bool mouseRight = false;
-	float playerHP = 0.0f;
 #pragma endregion
 
 	//ゲーム処理
@@ -396,7 +395,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			mousePos[0] = input->GetCursorClientPos3().x;
 			mousePos[1] = input->GetCursorClientPos3().y;
 			mousePos[2] = input->GetCursorClientPos3().z;
-			playerHP = player->GetPlayerHP();
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -408,7 +406,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Translate", TransformTranslate);
 			ImGui::DragFloat3("Player", playerPosition);
 			ImGui::DragFloat3("MousePos", mousePos);
-			ImGui::DragFloat("PlayerHP", &playerHP);
 			ImGui::Checkbox("bullet", &bulletShot);
 			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
 			ImGui::Checkbox("mouseLeft", &mouseLeft);
