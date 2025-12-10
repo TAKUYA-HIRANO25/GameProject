@@ -105,15 +105,22 @@
     <ClCompile Include="Engine\Base\WinApp.cpp">
       <Filter>ソース ファイル\Base</Filter>
     </ClCompile>
+<<<<<<< HEAD
+    <ClCompile Include="Application\Player.cpp">
+      <Filter>ソース ファイル</Filter>
+=======
     <ClCompile Include="Engine\3D\Camera.cpp">
       <Filter>ソース ファイル\3D</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player.cpp">
       <Filter>Application</Filter>
+>>>>>>> collision
     </ClCompile>
     <ClCompile Include="Engine\Math\MatuilityForText.cpp">
       <Filter>ソース ファイル\Math</Filter>
     </ClCompile>
+<<<<<<< HEAD
+=======
     <ClCompile Include="Application\PlayerBullet.cpp">
       <Filter>Application</Filter>
     </ClCompile>

@@ -254,7 +254,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
-	// .ojbファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
@@ -370,7 +369,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 0.0f,0.0f,0.0f },
 	};
 	bool useMonsterball = false;
-	float playerPosition[3] = { 0.0f,0.0f,0.0f };
 	bool bulletShot = false;
 	bool EnemybulletShot = false;
 	float mousePos[3] = {};
@@ -389,9 +387,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			EnemybulletShot = enemy->bulletActive;
 			//imgui
 #ifdef USE_IMGUI
-			playerPosition[0] = player->GetWorldPosition().x;
-			playerPosition[1] = player->GetWorldPosition().y;
-			playerPosition[2] = player->GetWorldPosition().z;
 			mousePos[0] = input->GetCursorClientPos3().x;
 			mousePos[1] = input->GetCursorClientPos3().y;
 			mousePos[2] = input->GetCursorClientPos3().z;
@@ -404,7 +399,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", TransformScale);
 			ImGui::DragFloat3("Rotae", TransformRotae, 0.1f);
 			ImGui::DragFloat3("Translate", TransformTranslate);
-			ImGui::DragFloat3("Player", playerPosition);
 			ImGui::DragFloat3("MousePos", mousePos);
 			ImGui::Checkbox("bullet", &bulletShot);
 			ImGui::Checkbox("enemyBullet", &EnemybulletShot);
