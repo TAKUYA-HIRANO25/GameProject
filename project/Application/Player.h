@@ -59,7 +59,8 @@ public:
 	bool IsDead() const { return isDead_; }
 	//レールカメラ用にプレイヤーのTransformをセット
 	void SetRailCameraVelocity(Vector3 velocity);
-
+	//プレイヤーのHP
+	float GetPlayerHP() { return PlayerHP; }
 	bool bulletActive = false; //弾発射フラグ
 
 	// 点滅設定 API（任意で外部から変更可能）

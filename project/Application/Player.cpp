@@ -30,7 +30,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 
 	// 初期色を保存（Object3d のデフォルトと合わせる）
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
-
+	isDead_ = false;
 	PlayerHP = 5.0f;
 	input_ = new Input();
 	input_ = input;
@@ -166,7 +166,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	//PlayerHP -= 1;
+	PlayerHP -= 1;
 
 	// --- ここからパーティクル生成（発射エフェクト） ---
 	if (particleManager_) {
@@ -244,7 +244,6 @@ void Player::SetRailCameraVelocity(Vector3 velocity)
 	railCameraVelocity_ = velocity;
 }
 
-// --- 点滅処理の実装 ---
 void Player::ChangeColor()
 {
 	if (flashTimer_ > 0 && Model_) {

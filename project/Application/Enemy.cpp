@@ -128,7 +128,7 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::OnCollision() {
 
-	//EnemyHp -= 1;
+	EnemyHp -= 1;
 
 	// --- ここからパーティクル生成（発射エフェクト） ---
 	if (particleManager_) {
