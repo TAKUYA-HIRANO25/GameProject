@@ -1,5 +1,15 @@
 #include "Engine/3D/Object3dCommon.h"
 
+ObJect3dCommon* ObJect3dCommon::instance = nullptr;
+
+ObJect3dCommon* ObJect3dCommon::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = new ObJect3dCommon();
+	}
+	return instance;
+}
+
 void ObJect3dCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;

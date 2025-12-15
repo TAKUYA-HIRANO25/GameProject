@@ -20,6 +20,9 @@
 /// </summary>
 class ObJect3dCommon {
 public:
+	// シングルトン取得（Meyers）
+	static ObJect3dCommon* GetInstance();
+
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 	// DirectXCommon 取得
@@ -32,6 +35,14 @@ public:
 	Camera* GetDefaultCamera() const { return defaultCamera; }
 
 private:
+	// プライベート化（シングルトン）
+	ObJect3dCommon() = default;
+	~ObJect3dCommon() = default;
+	ObJect3dCommon(const ObJect3dCommon&) = delete;
+	ObJect3dCommon& operator=(const ObJect3dCommon&) = delete;
+	ObJect3dCommon(ObJect3dCommon&&) = delete;
+	ObJect3dCommon& operator=(ObJect3dCommon&&) = delete;
+
 	// ルートシグネチャの作成
 	void createRootSignature();
 	// グラフィックスパイプラインの生成
@@ -42,4 +53,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 	Camera* defaultCamera = nullptr;
+
+	static ObJect3dCommon* instance;
 };

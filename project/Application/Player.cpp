@@ -32,8 +32,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 	isDead_ = false;
 	PlayerHP = 5.0f;
-	input_ = new Input();
-	input_ = input;
+	input_ = Input::GetInstance();
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;

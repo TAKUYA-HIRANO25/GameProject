@@ -33,6 +33,10 @@ class Input {
 
 public:
 	template <class T>using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+	// シングルトン取得（Meyers）
+	static Input* GetInstance();
+
 	// 初期化
 	void Initialize(WinApp* winApp);
 	// 更新
@@ -59,6 +63,13 @@ public:
 
 	Vector3 GetCursorClientPos3();
 private:
+	// プライベート化（シングルトン）
+	Input() = default;
+	~Input() = default;
+	Input(const Input&) = delete;
+	Input& operator=(const Input&) = delete;
+	Input(Input&&) = delete;
+	Input& operator=(Input&&) = delete;
 
 	ComPtr<IDirectInputDevice8>keyboard;
 
@@ -81,4 +92,6 @@ private:
 	int mouseMoveX = 0;
 	int mouseMoveY = 0;
 	int mouseWheel = 0;
+
+	static Input* instance;
 };

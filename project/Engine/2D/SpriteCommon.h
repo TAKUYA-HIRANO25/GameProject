@@ -19,8 +19,11 @@
 /// - パイプライン生成に失敗した場合はアサート等で検出する実装になっている可能性があるため、呼び出し側で適切に扱うこと。
 /// </summary>
 
-class SpriteCommon{
+class SpriteCommon {
 public:
+	// シングルトン取得（Meyers）
+	static SpriteCommon* GetInstance();
+
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -31,12 +34,21 @@ public:
 	DirectXCommon* getDxCommon()const { return dxCommon_; }
 
 private:
+	// プライベート化（シングルトン）
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+	SpriteCommon(const SpriteCommon&) = delete;
+	SpriteCommon& operator=(const SpriteCommon&) = delete;
+	SpriteCommon(SpriteCommon&&) = delete;
+	SpriteCommon& operator=(SpriteCommon&&) = delete;
 
 	void RootSignatureInitialize();
 
 	void GeneratePipelineInitialize();
 
-	DirectXCommon* dxCommon_;
+	DirectXCommon* dxCommon_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
+
+	static SpriteCommon* instance;
 };

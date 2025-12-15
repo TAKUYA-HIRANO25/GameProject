@@ -4,6 +4,16 @@
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
+Input* Input::instance = nullptr;
+
+Input* Input::GetInstance()
+{
+
+	if (instance == nullptr) {
+		instance = new Input;
+	}
+	return instance;
+}
 
 void Input::Initialize(WinApp* winApp)
 {
@@ -39,47 +49,47 @@ void Input::Initialize(WinApp* winApp)
 
 void Input::Update()
 {
-	// --- キーボード ---
-	// 前回状態を保存
+	// キーボード前回保存
 	memcpy(keyPre, key, sizeof(key));
-	//キーボード情報の取得開始
+
 	if (keyboard)
 	{
 		HRESULT hr = keyboard->Acquire();
-		if (FAILED(hr))
-		{
-			// Acquire に失敗しても継続（アプリのフォーカス外など）
+		if (FAILED(hr)) {
+			// 失敗時にログ出力（デバッガ出力 or ログファイル）
+			// OutputDebugString などでエラーコードを確認する
+			char buf[128];
+			sprintf_s(buf, "Keyboard Acquire failed: 0x%08X\n", static_cast<unsigned>(hr));
+			OutputDebugStringA(buf);
 		}
-		// 一度に大量のエラーが出る場合もあるので戻り値はチェックするが assert しない
 		hr = keyboard->GetDeviceState(sizeof(key), key);
 		if (FAILED(hr))
 		{
-			// 取得失敗時はキー配列をゼロにしておく（安全策）
 			ZeroMemory(key, sizeof(key));
+			char buf[128];
+			sprintf_s(buf, "Keyboard GetDeviceState failed: 0x%08X\n", static_cast<unsigned>(hr));
+			OutputDebugStringA(buf);
 		}
 	}
 
-	// --- マウス ---
 	if (mouse)
 	{
-		// 前回状態を保存
 		mouseStatePrev = mouseState;
-
 		HRESULT hr = mouse->Acquire();
-		if (FAILED(hr))
-		{
-			// Acquire に失敗しても継続
+		if (FAILED(hr)) {
+			char buf[128];
+			sprintf_s(buf, "Mouse Acquire failed: 0x%08X\n", static_cast<unsigned>(hr));
+			OutputDebugStringA(buf);
 		}
-
 		hr = mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 		if (FAILED(hr))
 		{
-			// 取得失敗時は移動量をゼロクリア
 			mouseState.lX = mouseState.lY = mouseState.lZ = 0;
 			mouseState.rgbButtons[0] = mouseState.rgbButtons[1] = mouseState.rgbButtons[2] = 0;
+			char buf[128];
+			sprintf_s(buf, "Mouse GetDeviceState failed: 0x%08X\n", static_cast<unsigned>(hr));
+			OutputDebugStringA(buf);
 		}
-
-		// 相対移動・ホイールをキャッシュ
 		mouseMoveX = mouseState.lX;
 		mouseMoveY = mouseState.lY;
 		mouseWheel = mouseState.lZ;
