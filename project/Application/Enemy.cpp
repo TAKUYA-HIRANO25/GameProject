@@ -81,7 +81,10 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
-	Model_->Draw();
+	if (isDead_ == false) 
+	{
+		Model_->Draw();
+	}
 	for (EnemyBullet* bullet : bullets_) {
 		bullet->Draw();
 	}

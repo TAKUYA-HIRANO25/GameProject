@@ -44,7 +44,7 @@ public:
 	Vector2 GetPosition() const { return position_; }
 
 	// 設定
-	void SetCenterPosition(const Vector2& center) { position_ = center; if (sprite_) sprite_->SetPosition(center); }
+	void SetCenterPosition(const Vector2& center);
 	void SetSpeed(float sx, float sy) { speedX_ = sx; speedY_ = sy; }
 	void SetMaxSize(float w, float h) { maxWidth_ = w; maxHeight_ = h; }
 
@@ -67,5 +67,5 @@ private:
 	float maxHeight_ = 1000.0f; // 任意
 
 	// フェード色（デフォルト: 黒）
-	Vector4 color_{ 0.0f, 0.0f, 0.0f, 1.0f };
+	Vector4 color_{ 1.0f, 1.0f, 1.0f, 1.0f };
 };

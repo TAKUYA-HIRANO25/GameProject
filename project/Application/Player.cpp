@@ -79,9 +79,9 @@ void Player::Update()
 
 void Player::Draw()
 {
-
-	Model_->Draw();
-
+	if (isDead_ == false) {
+		Model_->Draw();
+	}
 	// レティクルを先に描画しても問題ない（Depthテストあり）
 	if (reticleModel_) {
 		reticleModel_->Draw();
