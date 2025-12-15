@@ -3,10 +3,12 @@
 
 Player::Player()
 {
+	// コンストラクタ: メンバは Initialize() で初期化する想定
 }
 
 Player::~Player()
 {
+	// デストラクタ: 所有する Model/reticleModel と弾を解放する
 	delete Model_;
 	delete reticleModel_;
 	bulletList_.remove_if([](PlayerBullet* bullet) {
@@ -16,11 +18,15 @@ Player::~Player()
 }
 
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
+	// 3D 共通参照を保持
 	object3dCommon_ = object3dCommon;
+
+	// プレイヤーモデル生成・初期化
 	Model_ = new Object3d();
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("box.obj");
 	Model_->SetTranslate(position_);
+
 	// レティクルモデル（小さく表示する）を作成
 	reticleModel_ = new Object3d();
 	reticleModel_->Initialize(object3dCommon);
@@ -28,11 +34,15 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	reticleModel_->SetScale({ 0.1f, 0.1f, 0.1f });
 	reticleModel_->SetTranslate(position_);
 
-	// 初期色を保存（Object3d のデフォルトと合わせる）
+	// 初期色・ステータスを保存
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 	isDead_ = false;
 	PlayerHP = 5.0f;
+
+	// 入力はシングルトンから取得（引数 input が nullptr の場合でも安全に扱うため）
 	input_ = Input::GetInstance();
+
+	// bulletList_ を念のためクリア（初期化時の安全措置）
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
@@ -41,7 +51,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 
 void Player::Update()
 {
-	// 弾の解放
+	// 死亡した弾の解放
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		if (bullet->IsDead()) {
 			delete bullet;
@@ -50,27 +60,33 @@ void Player::Update()
 		return false;
 		});
 
-	// 点滅処理（被弾時の色切替）
+	// 被弾時の点滅処理（色の切替）
 	ChangeColor();
 
+	// 入力に基づく移動処理
 	Move();
 
+	// マウス位置からレティクル位置を決定して更新
 	Reticle();
 
+	// 発射処理（スペースキー）
 	Fire();
 
+	// 所有弾の更新
 	for (PlayerBullet* bullet : bulletList_) {
 		bullet->Update();
 	}
 
+	// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
 	if (PlayerHP == 0) {
 		isDead_ = true;
 	}
 
+	// モデルに位置を反映して行列更新（Object3d 側で World 行列等を作る想定）
 	Model_->SetTranslate(position_);
-
 	Model_->Updata();
-	// reticle の更新（Object3d の行列更新）
+
+	// reticle の更新（視認性のため常に行列更新しておく）
 	if (reticleModel_) {
 		reticleModel_->SetTranslate(reticleWorldPos_);
 		reticleModel_->Updata();
@@ -82,7 +98,7 @@ void Player::Draw()
 	if (isDead_ == false) {
 		Model_->Draw();
 	}
-	// レティクルを先に描画しても問題ない（Depthテストあり）
+	// レティクルはプレイヤーより先に描画しても問題ない（Depth テスト等の扱いに依存）
 	if (reticleModel_) {
 		reticleModel_->Draw();
 	}
@@ -90,14 +106,14 @@ void Player::Draw()
 	for (PlayerBullet* bullet : bulletList_) {
 		bullet->Draw();
 	}
-
 }
 
 void Player::Move()
 {
-	Vector3 move = { 0,0,0 }; //移動量
+	Vector3 move = { 0,0,0 }; // 移動量
 	const float kCharacterSpeed = 0.2f; // キャラクターの移動速度
 
+	// 左右上下・前後移動（Q/E で Z 軸）
 	if (input_->PushKey(DIK_A)) {
 		move.x -= kCharacterSpeed;
 	}
@@ -118,6 +134,7 @@ void Player::Move()
 		move.z -= kCharacterSpeed;
 	}
 
+	// カメラの移動量を加算してワールド位置へ適用
 	position_ += move + railCameraVelocity_;
 }
 
@@ -131,23 +148,21 @@ void Player::Fire()
 
 		const float kBulletSpeed = 1.0f;
 
-		// レティクル位置に向かう方向を計算して速度にする
+		// 発射元の位置と方向を決定（reticleWorldPos_ を目標にする）
 		Vector3 startPos = Model_->GetTranslate();
 		dir = { 0.0f, 0.0f, 1.0f };
-		// reticleWorldPos_ が有効ならそれを使って方向を計算
 		dir = { reticleWorldPos_.x - startPos.x, reticleWorldPos_.y - startPos.y, reticleWorldPos_.z - startPos.z };
 		dir = Normalize(dir);
 		Vector3 velocity = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
-		velocity += railCameraVelocity_;
+		velocity += railCameraVelocity_; // カメラ移動を弾速に加味
 
-		// 弾を生成してリストに追加
+		// 弾オブジェクト生成・初期化
 		PlayerBullet* newBullet = new PlayerBullet();
 		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
-
 		bulletList_.push_back(newBullet);
-
 	}
 	else {
+		// 発射インターバルのカウントダウン（下限 0）
 		bulletTime--;
 		if (bulletTime <= 0) {
 			bulletTime = 0;
@@ -167,12 +182,12 @@ void Player::OnCollision()
 {
 	PlayerHP -= 1;
 
-	// --- ここからパーティクル生成（発射エフェクト） ---
+	// パーティクルの生成（被弾エフェクト）
 	if (particleManager_) {
 		const int kSpawn = 10;
 		Vector3 spawnBase = Model_->GetTranslate();
 		for (int i = 0; i < kSpawn; ++i) {
-			// 少しランダムなオフセットと速度
+			// ランダムなオフセットと速度を付与
 			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
 			float ry = (std::rand() % 100 - 50) / 150.0f;
 			float rz = (std::rand() % 50) / 150.0f + 0.2f; // 0.2 .. ~0.866
@@ -183,19 +198,18 @@ void Player::OnCollision()
 		}
 	}
 
-	// 被弾点滅を開始する（任意でHP減少も有効化）
+	// 被弾点滅を開始（flashTimer_ / flashToggleCounter_ を用いる）
 	if (Model_) {
-		// 総トグルフレーム数 = flashDuration_ * flashRepeat_ * 2 (点滅色と元色の切替で1回)
 		flashTimer_ = flashDuration_ * flashRepeat_ * 2;
 		flashToggleCounter_ = flashDuration_;
-		// 最初に点滅色にする
 		Model_->SetDiffuseColor(flashColor_);
 	}
 }
 
+
 void Player::Reticle()
 {
-	// マウス位置からワールドへのレイを作り、遠方点をレティクル位置にする
+	// 必要な参照が無ければ早期リターン
 	if (!input_ || !object3dCommon_) return;
 	Camera* camera = object3dCommon_->GetDefaultCamera();
 	if (!camera) return;
@@ -209,40 +223,43 @@ void Player::Reticle()
 	float nx = (cursor.x / width) * 2.0f - 1.0f;
 	float ny = -((cursor.y / height) * 2.0f - 1.0f); // 上下反転
 
-	// 近クリップ・遠クリップでワールド座標に逆変換（逆射影）
+	// 近クリップ・遠クリップの NDC を定義
 	Vector3 ndcNear = { nx, ny, 0.0f };
 	Vector3 ndcFar = { nx, ny, 1.0f };
 
-	// 逆行列取得
+	// カメラの逆行列を取得して NDC -> ワールド変換
 	Matrix4x4 invProj = Inverse(camera->GetProjectionMatrix());
 	Matrix4x4 invView = Inverse(camera->GetViewMatrix());
 
-	// NDC -> eye -> world（TransformS を連続で使う）
 	Vector3 pNear = TransformS(ndcNear, invProj); // -> eye space (then w division)
 	pNear = TransformS(pNear, invView);           // -> world space
 
 	Vector3 pFar = TransformS(ndcFar, invProj);
 	pFar = TransformS(pFar, invView);
 
-	// レイを作成
+	// レイを作成して正規化
 	Vector3 rayDir = { pFar.x - pNear.x, pFar.y - pNear.y, pFar.z - pNear.z };
 	rayDir = Normalize(rayDir);
 
-	// レティクル位置はレイ上の一定距離に置く（必要なら地面との交差計算に置き換える）
+	// レティクル位置はカメラ位置 + rayDir * 距離
 	Vector3 camPos = camera->GetTranslate();
 	reticleWorldPos_ = { camPos.x + rayDir.x * reticleDistance_, camPos.y + rayDir.y * reticleDistance_, camPos.z + rayDir.z * reticleDistance_ };
 
-	// reticleModel_ に設定（視認性のため少しプレイヤー側に寄せた短い距離も扱える）
+	// reticleModel_ にセット（描画時に Updata() しているためここでは SetTranslate のみ）
 	if (reticleModel_) {
 		reticleModel_->SetTranslate(reticleWorldPos_);
 	}
 }
 
+// レールカメラの移動速度を受け取り、プレイヤーの動きに反映するために保持する。
 void Player::SetRailCameraVelocity(Vector3 velocity)
 {
 	railCameraVelocity_ = velocity;
 }
 
+// ChangeColor:
+// 被弾点滅ロジック。flashTimer_ と flashToggleCounter_ で赤/元色を切り替える。
+// Model_->SetDiffuseColor() を使って表示色を変更する。
 void Player::ChangeColor()
 {
 	if (flashTimer_ > 0 && Model_) {
@@ -263,6 +280,7 @@ void Player::ChangeColor()
 			}
 		}
 
+		// 点滅終了時に確実に元色へ戻す
 		if (flashTimer_ == 0) {
 			Model_->SetDiffuseColor(originalColor_);
 		}

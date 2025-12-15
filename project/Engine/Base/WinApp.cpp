@@ -10,6 +10,11 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif 
 
+// WindowProc:
+// - アプリケーションのウィンドウプロシージャ。
+// - ImGui を使用している場合は最初に ImGui のハンドラにメッセージを渡し、
+//   処理済みであればここで終了する。
+// - WM_DESTROY を受け取ったら PostQuitMessage を呼び、アプリケーション終了フラグを送出する。
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 #ifdef USE_IMGUI
@@ -30,6 +35,11 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
+// ProcessMessage:
+// - 非ブロッキングでメッセージを取得してディスパッチする。
+// - WM_QUIT が来ていれば true を返してアプリケーションループに終了指示を伝える。
+// - 注意: PeekMessage によるポーリングはメインループに組み込まれているため、CPU 使用率に
+//   配慮する場合はスリープやタイミング制御を検討する。
 bool WinApp::ProcessMessage()
 {
 	MSG msg{};
@@ -49,6 +59,10 @@ bool WinApp::ProcessMessage()
 	return false;
 }
 
+// Initialize:
+// - ウィンドウクラスの登録とウィンドウ生成、表示を行う。
+// - timeBeginPeriod(1) を呼んでタイマー精度を上げている（全体影響に注意）。
+// - 注意: COM 初期化や WinAPI の前提が別箇所である場合はここで行うか呼び出し元で保証すること。
 void WinApp::Initialize()
 {
 
@@ -78,10 +92,14 @@ void WinApp::Initialize()
 
 	ShowWindow(hwnd, SW_SHOW);
 
+	// 高精度タイマー要求（1ms 単位）
 	timeBeginPeriod(1);
 
 }
 
+// Finalize:
+// - ウィンドウを閉じ、COM 等の後片付けを行う（ここでは CoUninitialize を呼んでいる）。
+// - 注意: CreateWindow で確保したリソースがある場合は適切に解放する。
 void WinApp::Finalize()
 {
 

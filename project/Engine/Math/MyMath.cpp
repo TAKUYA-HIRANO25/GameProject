@@ -4,6 +4,9 @@
 #include <math.h>
 
 namespace MyMath {
+	// MakeIdentity4x4:
+	// - 単位行列を生成して返すヘルパ。
+	// - 注意: ファイル内に duplicate return 文があるが動作上は後続の return に到達しない（無害）。
 	Matrix4x4 MyMath::MakeIdentity4x4()
 	{
 		Matrix4x4 result{ 0 };
@@ -15,6 +18,9 @@ namespace MyMath {
 		return result;
 	}
 
+	// Multiply:
+	// - 4x4 行列の掛け算。標準的な行列積を計算する。
+	// - パフォーマンス要件がある場合はループ順やSIMD最適化を検討する。
 	Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2)
 	{
 		Matrix4x4 result{};
@@ -26,6 +32,10 @@ namespace MyMath {
 		return result;
 	}
 
+	// MakeScaleMatrix / MakeTranslateMatrix / MakeRotateX/Y/Z:
+	// - 基本的なアフィン変換行列を作成するユーティリティ群。
+	// - 右手系 / 行列の配置（行優先 or 列優先）はプロジェクト全体の実装に依存するため、
+	//   使用時は他の行列生成と整合すること。
 	Matrix4x4 MakeScaleMatrix(const Vector3& scale)
 	{
 		Matrix4x4 result = { 0 };
@@ -98,6 +108,10 @@ namespace MyMath {
 		return result;
 	}
 
+	// TransformS:
+	// - 同次座標を含む変換を行い、w で正規化して結果を返す。
+	// - 注意: 現在の実装は w が 0 のときのガードが空になっているため、呼び出し元は
+	//         行列が w=0 を作らないことを保証するか、ここでのエラーハンドリングを追加すること。
 	Vector3 TransformS(const Vector3& vector, const Matrix4x4& matrix)
 	{
 		Vector3 result = { 0 };
@@ -106,14 +120,17 @@ namespace MyMath {
 		result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
 		float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
 		if (w != 0) {
-
+			// 本来ならここで早期 return か何らかの処理を行うが、現在は空ブロックになっている。
 		}
+		// w が 0 の場合は除算で NaN/Inf を生じる可能性があるため注意。
 		result.x /= w;
 		result.y /= w;
 		result.z /= w;
 		return result;
 	}
 
+	// MakeAffineMatrix:
+	// - scale -> rotateX -> rotateY -> rotateZ -> translate の順で合成したアフィン行列を返す。
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate)
 	{
 		Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
@@ -123,6 +140,8 @@ namespace MyMath {
 		return Multiply(Multiply(MakeScaleMatrix(scale), rotateXYZMatrix), MakeTranslateMatrix(translate));
 	}
 
+	// MakePerspectiveFovMatrix:
+	// - 透視投影行列を作成する。fovY はラジアン単位、near/far の扱いは呼び出し側と整合させること。
 	Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip, float farClip)
 	{
 		Matrix4x4 result{ 0 };
@@ -136,6 +155,8 @@ namespace MyMath {
 		return result;
 	}
 
+	// MakeViewportmatrix:
+	// - ビューポート変換行列（スクリーン座標変換）を作成する。
 	Matrix4x4 MakeViewportmatrix(float left, float top, float width, float height, float minDepth, float maxDepth)
 	{
 		Matrix4x4 result{ 0 };
@@ -150,6 +171,10 @@ namespace MyMath {
 		return result;
 	}
 
+	// Inverse:
+	// - 4x4 行列の逆行列を計算して返す。
+	// - 行列が特異（determinant == 0）の場合は NaN/Inf を返す可能性があるため、
+	//   呼び出し側で事前に行列の可逆性を確認するか、ここでの防御処理を追加すること。
 	Matrix4x4 Inverse(const Matrix4x4& m)
 	{
 		float determinant =
@@ -244,6 +269,8 @@ namespace MyMath {
 		return result;
 	}
 
+	// MakeOrthographicMatrix:
+	// - 直行投影行列を作成する（UI / スプライト用途で使用）。
 	Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
 	{
 		Matrix4x4 result{ 0 };
@@ -257,6 +284,8 @@ namespace MyMath {
 		return result;
 	}
 
+	// TransformNormal:
+	// - 法線ベクトルを行列で変換するユーティリティ。
 	Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix)
 	{
 		Vector3 result;
@@ -267,6 +296,9 @@ namespace MyMath {
 		return result;
 	}
 
+	// Length / Normalize:
+	// - ベクトル長や正規化を行う。Normalize は length が 0 の場合に分母ゼロになるため、
+	//   呼び出し側で零ベクトルを渡さないこと、またはここでのガードを追加することを推奨する。
 	float Length(const Vector3& v) {
 		float result;
 		result = sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));

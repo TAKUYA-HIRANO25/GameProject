@@ -6,41 +6,42 @@
 #include "SpriteCommon.h"
 #include "Object3dCommon.h"
 
-// Initialize: main.cpp の初期化処理を移植（詳細を可能な限り再現）
+// MyGame:
+// - アプリケーション固有の初期化 / 更新 / 描画 / 解放処理を実装する。
+// - main.cpp のループを Framework::Run から移植した形。
+// - 本ファイルではシーン作成、入力反応、ゲーム状態の遷移、フェード制御などを扱う。
+
 void MyGame::Initialize()
 {
-	// WinAPI
+	// WinAPI 初期化（ウィンドウ生成とメッセージループ準備）
 	winApp_ = new WinApp();
 	winApp_->Initialize();
 
-	// DirectX
+	// DirectX 初期化（レンダラのセットアップ）
 	dxCommon_ = new DirectXCommon();
 	dxCommon_->Initialize(winApp_);
 
-	// Input シングルトン取得（既存実装に合わせる）
+	// 入力システムの取得・初期化（シングルトン想定）
 	input_ = Input::GetInstance();
 	input_->Initialize(winApp_);
 
-	// TextureManager 初期化
+	// テクスチャ管理・スプライト共通設定の初期化
 	TextureManager::GetInstance()->Initialize(dxCommon_);
-
-	// SpriteCommon（シングルトン）
 	spriteCommon_ = SpriteCommon::GetInstance();
 	spriteCommon_->Initialize(dxCommon_);
 
-	// ModelCommon（ローダ等）
+	// モデル周りの初期化
 	modelCommon_ = new ModelCommon();
 	modelCommon_->Initialize(dxCommon_);
 
-	// Object3dCommon（シングルトン）
+	// 3D 共通設定（カメラなど）初期化
 	object3dCommon_ = ObJect3dCommon::GetInstance();
 	object3dCommon_->Initialize(dxCommon_);
 
-
-	// ModelManager 初期化
+	// モデルマネージャ初期化（必要なモデルをロードする準備）
 	ModelManager::GetInstance()->Initialize(dxCommon_);
 
-	// 主要テクスチャ・モデルを読み込み（main.cpp と同様）
+	// 主要テクスチャ・モデルを読み込み（リソースを事前ロードしておく）
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/title.png");
 	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
@@ -54,7 +55,7 @@ void MyGame::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/Particle.png");
 	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
 
-	// モデル読み込み
+	// 必要なモデルをロード
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
@@ -66,10 +67,9 @@ void MyGame::Initialize()
 	CreateScene();
 }
 
-// シーン作成（main.cpp の処理を移植）
 void MyGame::CreateScene()
 {
-	// カメラ / レールカメラ
+	// カメラ / レールカメラの作成と初期配置
 	Camera* camera = new Camera;
 	camera->SetRotate({ 0.0f, 6.28f, 0.0f });
 	camera->SetTranslate({ 0.0f, 0.0f, -20.0f });
@@ -78,39 +78,48 @@ void MyGame::CreateScene()
 	railCamera_->Initialize(camera);
 	if (object3dCommon_) object3dCommon_->SetDefaultCamera(railCamera_->GetCamera());
 
-	// パーティクル
+	// パーティクルマネージャ生成（3D 共通設定を渡す）
 	particleManager_ = new ParticleManager(object3dCommon_);
 
-	// プレイヤー
+	// プレイヤー生成・初期化
 	player_ = new Player();
 	player_->Initialize(object3dCommon_, input_);
 	player_->SetRailCameraVelocity(railCamera_->GetVelocity());
 	player_->SetParticleManager(particleManager_);
 
-	// 敵
+	// 敵生成・初期化
 	enemy_ = new Enemy();
 	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -4.0f, 40.0f });
 	enemy_->setPlayer(player_);
 	enemy_->SetParticleManager(particleManager_);
 
-	// 天球（sky dome）
+	// 天球 (sky dome) の初期化
 	skyDome_ = new Object3d();
 	skyDome_->Initialize(object3dCommon_);
 	skyDome_->SetModel("sphere.obj");
 
-	// スプライト群（タイトル / UI / フェード etc.）
+	// スプライト群（タイトル / UI / フェード etc.）の生成と初期化
 	spriteCommon_ = SpriteCommon::GetInstance();
-	title_ = new Sprite(); title_->Initialize(spriteCommon_, "resources/title.png");
-	titleUI_ = new Sprite(); titleUI_->Initialize(spriteCommon_, "resources/titleUI.png");
-	backGround_ = new Sprite(); backGround_->Initialize(spriteCommon_, "resources/backGround.png"); backGround_->SetSize(Vector2(1280, 720));
-	fadeSprite_ = new Sprite(); fadeSprite_->Initialize(spriteCommon_, "resources/Fade.png"); fadeSprite_->SetSize(Vector2(0, 0)); fadeSprite_->SetPosition(Vector2(630, 360));
-	Ready_ = new Sprite(); Ready_->Initialize(spriteCommon_, "resources/Ready.png");
-	Go_ = new Sprite(); Go_->Initialize(spriteCommon_, "resources/GO.png");
-	gameOver_ = new Sprite(); gameOver_->Initialize(spriteCommon_, "resources/GameOver.png");
-	clear_ = new Sprite(); clear_->Initialize(spriteCommon_, "resources/Clear.png");
-	Black_ = new Sprite(); Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
+	title_ = new Sprite(); 
+	title_->Initialize(spriteCommon_, "resources/title.png");
+	titleUI_ = new Sprite(); 
+	titleUI_->Initialize(spriteCommon_, "resources/titleUI.png");
+	backGround_ = new Sprite(); 
+	backGround_->Initialize(spriteCommon_, "resources/backGround.png"); backGround_->SetSize(Vector2(1280, 720));
+	fadeSprite_ = new Sprite(); 
+	fadeSprite_->Initialize(spriteCommon_, "resources/Fade.png"); fadeSprite_->SetSize(Vector2(0, 0)); fadeSprite_->SetPosition(Vector2(630, 360));
+	Ready_ = new Sprite();
+	Ready_->Initialize(spriteCommon_, "resources/Ready.png");
+	Go_ = new Sprite(); 
+	Go_->Initialize(spriteCommon_, "resources/GO.png");
+	gameOver_ = new Sprite(); 
+	gameOver_->Initialize(spriteCommon_, "resources/GameOver.png");
+	clear_ = new Sprite(); 
+	clear_->Initialize(spriteCommon_, "resources/Clear.png");
+	Black_ = new Sprite(); 
+	Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
 
-	// 初期状態
+	// ゲーム初期フラグを明確に初期化
 	isTitle_ = true;
 	isFade_ = false;
 	endFade_ = false;
@@ -124,13 +133,13 @@ void MyGame::CreateScene()
 	startTime_ = 0;
 	goTime_ = 0;
 
+	// フェード処理オブジェクトの生成（Sprite と連動）
 	fadeEffect_ = new Fade(spriteCommon_, "resources/Fade.png");
 }
 
-// 毎フレーム更新: main.cpp のループを移植
 void MyGame::Update()
 {
-	// ウィンドウメッセージ処理（最初に行う
+	// ウィンドウメッセージ処理（最初に行う）
 	if (winApp_->ProcessMessage()) {
 		roopOut_ = true;
 		return;
@@ -139,24 +148,20 @@ void MyGame::Update()
 	// 入力更新はメッセージ処理の直後に行う
 	input_->Update();
 
-	// imgui フレームは入力更新の後に作る
+	// imgui フレームは入力更新の後に作る（デバッグ UI）
 #ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
-	// UI を構築
 	ImGui::ShowDemoWindow();
-	// ... 他の ImGui コントロール ...
 	// 描画用に Render を呼ぶ（描画直前に呼んでも OK）
 	ImGui::Render();
 #endif
 
-	// 以下、既存の更新処理（ゲームロジック等）を続ける
-	// 3D 共通設定
+	// 3D 共通描画用設定（シェーダ / PSO 設定など）
 	object3dCommon_->SettingCommonDraw();
 
-	// マウスボタンの簡易取得（必要なら Input の API を使う）
+	// 簡易マウス入力のフラグ管理
 	if (input_->PushMouse(0)) 
 	{ 
 		mouseLeft_ = true; 
@@ -166,25 +171,28 @@ void MyGame::Update()
 		mouseRight_ = true;
 	}
 
-	// 状態遷移と更新
+	// シーンの状態に応じた更新
 	if (isTitle_) {
+		// タイトル画面専用の UI 更新
 		title_->Update();
 		titleUI_->Update();
 		backGround_->Update();
+
+		// 再初期化要求があればオブジェクトの初期化を行う
 		if (reup_) {
-			// 再初期化（main.cpp と同様の動作）
 			player_->Initialize(object3dCommon_, input_);
 			enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -4.0f, 40.0f });
 			reup_ = false;
 		}
-		// 入力でフェード開始
+
+		// Enter キーでフェード開始フラグを立てる
 		if (input_->TriggerKey(DIK_RETURN)) {
 			isFade_ = true;
 			isOver_ = false;
 		}
 	}
 	else {
-		// スタート / Go フラグ処理
+		// スタート / Go フラグ処理（カウントでフラグを切り替える）
 		if (isStart_) {
 			++startTime_;
 			if (startTime_ >= 120) {
@@ -200,7 +208,7 @@ void MyGame::Update()
 			}
 		}
 
-		// ゲーム本体更新
+		// ゲーム本体の更新（カメラ / プレイヤー / 敵 / 当たり判定）
 		if (isGame_) {
 			railCamera_->Update();
 			if (!isOver_ && !isClear_) {
@@ -208,8 +216,7 @@ void MyGame::Update()
 				enemy_->Update();
 			}
 
-
-			// 当たり判定（main.cpp の判定を移植）
+			// 当たり判定（プレイヤー・敵・弾の座標比較）
 			if (player_ && enemy_) {
 				Vector3 posA = player_->GetWorldPosition();
 				const std::list<PlayerBullet*>& playerBullets = player_->GetBullets();
@@ -234,7 +241,7 @@ void MyGame::Update()
 					}
 				}
 
-				// 弾同士の衝突
+				// 弾同士の衝突判定
 				for (PlayerBullet* pb : playerBullets) {
 					Vector3 a = pb->GetWorldPosition();
 					for (EnemyBullet* eb : enemyBullets) {
@@ -248,11 +255,11 @@ void MyGame::Update()
 				}
 			}
 
-			// パーティクル更新
+			// パーティクル更新（描画用のエミッタ更新など）
 			particleManager_->Update();
 		}
 
-		// UI スプライト更新
+		// UI スプライト更新（タイトル外で常に更新）
 		Ready_->Update();
 		Go_->Update();
 		gameOver_->Update();
@@ -265,21 +272,26 @@ void MyGame::Update()
 #endif 
 
 	// フェード処理
+	// - isFade_ が true のときに Fade オブジェクトを開始/更新し、縮小開始時にタイトルを解除する
 	if (isFade_) {
+		// フェード開始条件：fadeEffect_ が存在し、実行中でなく、かつ未完了の場合
 		if (fadeEffect_ && !fadeEffect_->IsRunning() && !fadeEffect_->IsFinished()) {
 			fadeEffect_->Start();
 		}
+		// フェードの毎フレーム更新
 		if (fadeEffect_ && (fadeEffect_->IsRunning() || isFade_)) {
 			fadeEffect_->Update();
 		}
+		// フェードが縮小フェーズに入ったらタイトルを非表示にする（1回だけ実行）
 		if (fadeEffect_ && fadeEffect_->IsShrinking() && !endFade_) {
 			isTitle_ = false;
 			endFade_ = true;
 		}
+		// フェード完了時の遷移処理
 		if (fadeEffect_ && fadeEffect_->IsFinished()) {
 			endFade_ = false;
 			isFade_ = false;
-			isStart_ = true; // スタート演出へ移行する例
+			isStart_ = true; // スタート演出へ移行	
 			startTime_ = 0;
 			goTime_ = 0;
 			fadeEffect_->Reset();
@@ -287,22 +299,22 @@ void MyGame::Update()
 	}
 }
 
-// 描画（main.cpp の描画処理を移植）
 void MyGame::Draw()
 {
-	// 描画開始
+	// 描画開始（コマンドリスト等の初期化）
 	dxCommon_->PreDraw();
 
-	// スプライト用 PSO 設定（背景/UI）
+	// スプライト用 PSO 設定（背景/UI 用）
 	spriteCommon_->SettingCommonDraw();
 
 	if (isTitle_) {
+		// タイトル画面描画（背景・タイトル・UI）
 		backGround_->Draw();
 		title_->Draw();
 		titleUI_->Draw();
 	}
 	else {
-		// 3D 描画: Object3dCommon の PSO を設定してから描画
+		// 3D 描画: Object3dCommon の PSO を設定してから 3D オブジェクトを描画する
 		object3dCommon_->SettingCommonDraw();
 
 		// skyDome
@@ -328,9 +340,8 @@ void MyGame::Draw()
 			Go_->Draw();
 		}
 
-		// ゲームオーバー / クリア UI
+		// ゲームオーバー / クリア UI（スプライト PSO に戻して描画）
 		if (isOver_) {
-			// スプライト用 PSO に戻して描画
 			spriteCommon_->SettingCommonDraw();
 			Black_->Draw();
 			gameOver_->Draw();
@@ -341,15 +352,16 @@ void MyGame::Draw()
 			clear_->Draw();
 		}
 
-		// パーティクル
+		// パーティクル描画（3D）
 		particleManager_->Draw();
 
-		// フェードや UI はスプライトPSOに戻して描画
+		// フェードや UI はスプライト PSO に戻して描画する
 		spriteCommon_->SettingCommonDraw();
 
 	}
 
 	// フェードはスプライトとして描画（spriteCommon_ が設定された状態で呼ぶ）
+	// - フェードが存在しており、何らかの表示条件が満たされている場合に描画
 	if (fadeEffect_ && (isFade_ || endFade_ || fadeEffect_->IsRunning())) {
 		// spriteCommon_->SettingCommonDraw() が既に呼ばれていることを前提
 		fadeEffect_->Draw();
@@ -359,10 +371,10 @@ void MyGame::Draw()
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());
 #endif
 
+	// 描画終了（Present 等）
 	dxCommon_->PostDrow();
 }
 
-// Finalize: main.cpp の解放処理を移植
 void MyGame::Finalize()
 {
 	ReleaseResources();
@@ -383,7 +395,6 @@ void MyGame::Finalize()
 
 }
 
-// リソース解放
 void MyGame::ReleaseResources()
 {
 	delete title_; title_ = nullptr;
@@ -402,5 +413,6 @@ void MyGame::ReleaseResources()
 	delete railCamera_; railCamera_ = nullptr;
 	delete skyDome_; skyDome_ = nullptr;
 
+	// modelCommon_ は Initialize で new しているため解放
 	delete modelCommon_; modelCommon_ = nullptr;
 }
