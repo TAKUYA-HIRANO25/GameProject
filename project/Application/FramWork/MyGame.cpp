@@ -64,6 +64,7 @@ void MyGame::Initialize()
 	ModelManager::GetInstance()->LoadModel("Particle.obj");
 	ModelManager::GetInstance()->LoadModel("sphere.obj");
 	ModelManager::GetInstance()->LoadModel("Player/Player.obj");
+	ModelManager::GetInstance()->LoadModel("Enemy/Enemy.obj");
 	// シーン構築（カメラ、プレイヤー、敵、パーティクル、スプライト）
 	CreateScene();
 }
@@ -255,6 +256,23 @@ void MyGame::Update()
 					}
 				}
 			}
+
+			// ゲームオーバー / クリア判定
+			if (player_->IsDead()) {
+				isOver_ = true;
+				isGame_ = false;
+				isFade_ = false;
+				endFade_ = false;
+				Black_->SetColor(Vector4(1, 1, 1, 0));
+			}
+			if (enemy_->IsDead()) {
+				isClear_ = true;
+				isGame_ = false;
+				isFade_ = false;
+				endFade_ = false;
+				Black_->SetColor(Vector4(1, 1, 1, 0));
+			}
+
 
 			// パーティクル更新（描画用のエミッタ更新など）
 			particleManager_->Update();

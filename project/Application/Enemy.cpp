@@ -32,7 +32,8 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	// モデル生成・初期化
 	Model_ = new Object3d();
 	Model_->Initialize(object3dCommon);
-	Model_->SetModel("box.obj");
+	Model_->SetModel("Enemy/Enemy.obj");
+	Model_->SetRotate({ 0.0f,3.14f,0.0f });
 	Model_->SetTranslate(position);
 	// 初期色を保存（被弾後の復帰用）
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
