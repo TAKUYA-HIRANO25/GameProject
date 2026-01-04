@@ -109,37 +109,49 @@ void SpriteCommon::GeneratePipelineInitialize()
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
 	// BlendStateの設定
-	D3D12_BLEND_DESC blendDesc{};
+	D3D12_BLEND_DESC blendDesc = {};
 	blendDesc.AlphaToCoverageEnable = FALSE;
 	blendDesc.IndependentBlendEnable = FALSE;
+	for (int i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+		blendDesc.RenderTarget[i].BlendEnable = TRUE;
+		blendDesc.RenderTarget[i].LogicOpEnable = FALSE;
+		blendDesc.RenderTarget[i].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[i].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		blendDesc.RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;
+		blendDesc.RenderTarget[i].SrcBlendAlpha = D3D12_BLEND_ONE;
+		blendDesc.RenderTarget[i].DestBlendAlpha = D3D12_BLEND_ZERO;
+		blendDesc.RenderTarget[i].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		blendDesc.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
+		blendDesc.RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	}
 
-	// レンダーターゲットのブレンド設定
-	D3D12_RENDER_TARGET_BLEND_DESC rtBlendDesc{};
-	rtBlendDesc.BlendEnable = TRUE; // ブレンドを有効化
-	rtBlendDesc.LogicOpEnable = FALSE;
-	rtBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA; // ソースのアルファ値
-	rtBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // デスティネーションの1-アルファ値
-	rtBlendDesc.BlendOp = D3D12_BLEND_OP_ADD; // 加算
-	rtBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	rtBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	rtBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	rtBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	// 深度ステンシルは無効（スプライトは常に前面描画）
+	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = FALSE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	depthDesc.StencilEnable = FALSE;
 
-	// レンダーターゲットに適用
-	blendDesc.RenderTarget[0] = rtBlendDesc;
-
-	// RasiterzerStateの設定
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	// 裏面（時計回り）を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-	// 三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// shaderをコンパイルする
 	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Object3D.VS.hlsl",L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
 
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Object3D.ps.hlsl",L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
+
+	// RasterizerStateの設定
+	D3D12_RASTERIZER_DESC rasterizerDesc = {};
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	rasterizerDesc.FrontCounterClockwise = FALSE;
+	rasterizerDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+	rasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+	rasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+	rasterizerDesc.DepthClipEnable = TRUE;
+	rasterizerDesc.MultisampleEnable = FALSE;
+	rasterizerDesc.AntialiasedLineEnable = FALSE;
+	rasterizerDesc.ForcedSampleCount = 0;
+	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();

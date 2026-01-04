@@ -140,13 +140,13 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 					VertexData vd{};
 					// position
 					if (vi >= 0 && vi < (int)positions.size()) vd.position = positions[vi];
-					else vd.position = {0,0,0,1.0f};
+					else vd.position = { 0,0,0,1.0f };
 					// texcoord
 					if (vti >= 0 && vti < (int)texcoords.size()) vd.texcoord = texcoords[vti];
-					else vd.texcoord = {0.0f, 0.0f};
+					else vd.texcoord = { 0.0f, 0.0f };
 					// normal
 					if (vni >= 0 && vni < (int)normals.size()) vd.normal = normals[vni];
-					else vd.normal = {0.0f, 0.0f, 0.0f};
+					else vd.normal = { 0.0f, 0.0f, 0.0f };
 
 					out.vertices.push_back(vd);
 				}
@@ -165,7 +165,18 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 
 	// mtl が見つかっていれば読み込む
 	if (!lastMtllib.empty()) {
-		out.material = LoadMaterialTemplateFile(directoryPath, lastMtllib);
+		// 重要: filename がサブディレクトリを含む場合、mtl の相対参照は
+		// OBJ ファイルが置かれているディレクトリからの相対になる。
+		// そのため OBJ の所在ディレクトリを組み立てて渡す。
+		std::string objContainingDir = directoryPath;
+		// filename にサブパスが含まれていればそれを追加 ("Player/Player.obj" -> "resources/Player")
+		const size_t posSlash = filename.find_last_of("/\\");
+		if (posSlash != std::string::npos) {
+			std::string subdir = filename.substr(0, posSlash);
+			objContainingDir += "/" + subdir;
+		}
+		// LoadMaterialTemplateFile は第一引数に「mtl が存在するディレクトリ」を期待するように変更せず使う
+		out.material = LoadMaterialTemplateFile(objContainingDir, lastMtllib);
 	}
 
 	return out;
@@ -180,6 +191,20 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 		return out;
 	}
 
+	// mtl ファイルが存在するディレクトリを取得（"resources/Player/Player.mtl" -> "resources/Player"）
+	std::string mtlDirectory;
+	{
+		// fullpath の最後の '/' または '\\' の位置を探す
+		const size_t posSlash = fullpath.find_last_of("/\\");
+		if (posSlash != std::string::npos) {
+			mtlDirectory = fullpath.substr(0, posSlash);
+		}
+		else {
+			// 予備: directoryPath を使う（フォールバック）
+			mtlDirectory = directoryPath;
+		}
+	}
+
 	std::string line;
 	while (std::getline(ifs, line)) {
 		if (line.empty()) continue;
@@ -190,8 +215,23 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 		if (prefix == "map_Kd") {
 			std::string texpath;
 			iss >> texpath;
-			// mtl 内で相対パスならディレクトリを付与して返す
-			out.textureFilePath = directoryPath + "/" + texpath;
+
+			// テクスチャパスが絶対パスやドライブ指定を含む場合、そのまま使う
+			bool isAbsolute = false;
+#if defined(_WIN32)
+			if (texpath.size() >= 2 && texpath[1] == ':') isAbsolute = true; // C:\...
+#endif
+			if (!texpath.empty() && (texpath.front() == '/' || texpath.front() == '\\')) isAbsolute = true;
+
+			if (isAbsolute) {
+				out.textureFilePath = texpath;
+			}
+			else {
+				// mtl が置かれているディレクトリを基準に相対パスを解決
+				out.textureFilePath = mtlDirectory + "/" + texpath;
+			}
+
+			// 正常に見つけたのでループ終了
 			break;
 		}
 	}

@@ -24,15 +24,18 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	// プレイヤーモデル生成・初期化
 	Model_ = new Object3d();
 	Model_->Initialize(object3dCommon);
-	Model_->SetModel("box.obj");
+	Model_->SetModel("Player/Player.obj");
 	Model_->SetTranslate(position_);
 
-	// レティクルモデル（小さく表示する）を作成
-	reticleModel_ = new Object3d();
-	reticleModel_->Initialize(object3dCommon);
-	reticleModel_->SetModel("axis.obj"); // axis.obj を小さく表示してレティクルにする
-	reticleModel_->SetScale({ 0.1f, 0.1f, 0.1f });
-	reticleModel_->SetTranslate(position_);
+	spriteCommon_ = SpriteCommon::GetInstance();
+	if (spriteCommon_) {
+		reticleSprite_ = new Sprite();
+		reticleSprite_->Initialize(spriteCommon_, "resources/Reticle.png");
+		reticleSprite_->SetAnchorPoint({ 0.5f,0.5f });
+		reticleSprite_->SetSize(Vector2(64,64));
+		// 初期位置は画面中央
+		reticleSprite_->SetPosition(Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f));
+	}
 
 	// 初期色・ステータスを保存
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -86,11 +89,6 @@ void Player::Update()
 	Model_->SetTranslate(position_);
 	Model_->Updata();
 
-	// reticle の更新（視認性のため常に行列更新しておく）
-	if (reticleModel_) {
-		reticleModel_->SetTranslate(reticleWorldPos_);
-		reticleModel_->Updata();
-	}
 }
 
 void Player::Draw()
@@ -98,13 +96,15 @@ void Player::Draw()
 	if (isDead_ == false) {
 		Model_->Draw();
 	}
-	// レティクルはプレイヤーより先に描画しても問題ない（Depth テスト等の扱いに依存）
-	if (reticleModel_) {
-		reticleModel_->Draw();
-	}
 
 	for (PlayerBullet* bullet : bulletList_) {
 		bullet->Draw();
+	}
+}
+
+void Player::SpriteDraw() {
+	if (isDead_ == false) {
+		reticleSprite_->Draw();
 	}
 }
 
@@ -180,7 +180,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	PlayerHP -= 1;
+	//PlayerHP -= 1;
 
 	// パーティクルの生成（被弾エフェクト）
 	if (particleManager_) {
@@ -206,7 +206,6 @@ void Player::OnCollision()
 	}
 }
 
-
 void Player::Reticle()
 {
 	// 必要な参照が無ければ早期リターン
@@ -218,7 +217,9 @@ void Player::Reticle()
 	Vector2 cursor = input_->GetCursorClientPos2();
 	const float width = static_cast<float>(WinApp::kClientWidth);
 	const float height = static_cast<float>(WinApp::kClientHeight);
-
+	// スプライト版レティクルのスクリーン座標更新
+	reticleSprite_->SetPosition(cursor);
+	reticleSprite_->Update();
 	// NDC に変換
 	float nx = (cursor.x / width) * 2.0f - 1.0f;
 	float ny = -((cursor.y / height) * 2.0f - 1.0f); // 上下反転
@@ -286,4 +287,4 @@ void Player::ChangeColor()
 		}
 	}
 }
-
+	

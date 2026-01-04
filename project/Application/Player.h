@@ -4,6 +4,8 @@
 #include "Object3dCommon.h"
 #include "Input.h"
 #include "WinApp.h"
+#include "Sprite.h"
+#include "SpriteCommon.h"
 #include "ModelManager.h"
 #include "Model.h"
 #include "ModelCommon.h"
@@ -41,6 +43,8 @@ public:
 	void Update();
 	// 描画
 	void Draw();
+	//スプライト描画
+	void SpriteDraw();
 	//移動
 	void Move();
 	//弾発射
@@ -69,6 +73,8 @@ public:
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
+	SpriteCommon* spriteCommon_ = nullptr;
+
 	//プレイヤー
 	Object3d* Model_ = nullptr; // 3Dオブジェクト
 	Vector3 position_ = { 0.0f, -4.0f, 10.0f }; // 位置
@@ -88,6 +94,7 @@ private:
 	Object3d* reticleModel_ = nullptr;    // 画面上の3Dレティクル表示用
 	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f }; // レティクルのワールド位置
 	float reticleDistance_ = 100.0f; // レティクルまでの距離（代替ターゲット距離）
+	Sprite* reticleSprite_ = nullptr;
 
 	float PlayerHP = 5.0f;
 	bool isDead_ = false;

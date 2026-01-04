@@ -54,7 +54,8 @@ void MyGame::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/Clear.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Particle.png");
 	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
-
+	TextureManager::GetInstance()->LoadTexture("resources/Player/Player.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Reticle.png");
 	// 必要なモデルをロード
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
@@ -62,7 +63,7 @@ void MyGame::Initialize()
 	ModelManager::GetInstance()->LoadModel("Bullet.obj");
 	ModelManager::GetInstance()->LoadModel("Particle.obj");
 	ModelManager::GetInstance()->LoadModel("sphere.obj");
-
+	ModelManager::GetInstance()->LoadModel("Player/Player.obj");
 	// シーン構築（カメラ、プレイヤー、敵、パーティクル、スプライト）
 	CreateScene();
 }
@@ -321,22 +322,14 @@ void MyGame::Draw()
 		skyDome_->Draw();
 
 		// ゲームオブジェクト
-		if (!isOver_)
-		{
-			player_->Draw();
-		}
-		if (!isClear_)
-		{
-			enemy_->Draw();
-		}
+		if (!isOver_) { player_->Draw(); }
+		if (!isClear_) { enemy_->Draw(); }
 
 		// スタート / GO 表示
-		if (isStart_)
-		{
+		if (isStart_) {
 			Ready_->Draw();
 		}
-		else if (isGo_)
-		{
+		else if (isGo_) {
 			Go_->Draw();
 		}
 
@@ -358,6 +351,10 @@ void MyGame::Draw()
 		// フェードや UI はスプライト PSO に戻して描画する
 		spriteCommon_->SettingCommonDraw();
 
+		// ここでスプライト系（レティクル等）を描画する（3D の上に乗るように）
+		if (player_) {
+			player_->SpriteDraw();
+		}
 	}
 
 	// フェードはスプライトとして描画（spriteCommon_ が設定された状態で呼ぶ）
