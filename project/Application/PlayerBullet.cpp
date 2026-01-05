@@ -23,7 +23,9 @@ void PlayerBullet::Initialize(ObJect3dCommon* object3dCommon, const Vector3& pos
     Model_->Initialize(object3dCommon);
     Model_->SetModel("Bullet.obj");
     Model_->SetTranslate(position);
-    velocity_ = velocity;
+    velocity_.x = velocity.x * speed_;
+	velocity_.y = velocity.y * speed_;
+	velocity_.z = velocity.z * speed_;
     position_ = position;
 }
 

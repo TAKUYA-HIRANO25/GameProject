@@ -49,7 +49,8 @@ private:
 	Vector3 position_; // 位置
 	Vector3 rotation_; // 回転
 	Vector3 scale_; // 拡大縮小
-	Vector3 velocity_; // 移動速度
+	Vector3 velocity_; // 移動方向
+	float speed_ = 2.0f; // 移動速度
 	//タイマー
 	static const int32_t kLifeTime = 60 * 5;
 	int32_t deathTimer_ = kLifeTime;
