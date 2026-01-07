@@ -40,7 +40,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	// 初期色・ステータスを保存
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 	isDead_ = false;
-	PlayerHP = 5.0f;
+	PlayerHP = 10.0f;
 
 	// 入力はシングルトンから取得（引数 input が nullptr の場合でも安全に扱うため）
 	input_ = Input::GetInstance();
@@ -180,7 +180,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	//PlayerHP -= 1;
+	PlayerHP -= 1;
 
 	// パーティクルの生成（被弾エフェクト）
 	if (particleManager_) {

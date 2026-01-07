@@ -266,6 +266,8 @@ void MyGame::Update()
 				Black_->SetColor(Vector4(1, 1, 1, 0));
 				if (input_->TriggerKey(DIK_T)) {
 					isTitle_ = true;
+					isGame_ = false;
+					isOver_ = false;
 					reup_ = true;
 				}
 			}
@@ -277,10 +279,11 @@ void MyGame::Update()
 				Black_->SetColor(Vector4(1, 1, 1, 0));
 				if (input_->TriggerKey(DIK_T)) {
 					isTitle_ = true;
+					isGame_ = false;
+					isOver_ = false;
 					reup_ = true;
 				}
 			}
-
 
 			// パーティクル更新（描画用のエミッタ更新など）
 			particleManager_->Update();
@@ -292,6 +295,19 @@ void MyGame::Update()
 		gameOver_->Update();
 		clear_->Update();
 		Black_->Update();
+
+		// クリア／ゲームオーバー時に T キーでタイトルへ戻る処理を常時受け付ける
+		if ((isOver_ || isClear_) && input_->TriggerKey(DIK_T)) {
+			// タイトルへ戻す（再初期化要求を出す）
+			isTitle_ = true;
+			isGame_ = false;
+			isOver_ = false;
+			isClear_ = false;
+			isFade_ = false;
+			endFade_ = false;
+			Black_->SetColor(Vector4(1, 1, 1, 0));
+			reup_ = true;
+		}
 	}
 
 #ifdef USE_IMGUI
