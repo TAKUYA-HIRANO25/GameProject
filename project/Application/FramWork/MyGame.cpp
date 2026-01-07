@@ -91,7 +91,7 @@ void MyGame::CreateScene()
 
 	// 敵生成・初期化
 	enemy_ = new Enemy();
-	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -4.0f, 40.0f });
+	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -1.0f, 60.0f });
 	enemy_->setPlayer(player_);
 	enemy_->SetParticleManager(particleManager_);
 
@@ -264,6 +264,10 @@ void MyGame::Update()
 				isFade_ = false;
 				endFade_ = false;
 				Black_->SetColor(Vector4(1, 1, 1, 0));
+				if (input_->TriggerKey(DIK_T)) {
+					isTitle_ = true;
+					reup_ = true;
+				}
 			}
 			if (enemy_->IsDead()) {
 				isClear_ = true;
@@ -271,6 +275,10 @@ void MyGame::Update()
 				isFade_ = false;
 				endFade_ = false;
 				Black_->SetColor(Vector4(1, 1, 1, 0));
+				if (input_->TriggerKey(DIK_T)) {
+					isTitle_ = true;
+					reup_ = true;
+				}
 			}
 
 

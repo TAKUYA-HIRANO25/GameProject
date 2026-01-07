@@ -180,7 +180,7 @@ Vector3 Player::GetWorldPosition()
 
 void Player::OnCollision()
 {
-	PlayerHP -= 1;
+	//PlayerHP -= 1;
 
 	// パーティクルの生成（被弾エフェクト）
 	if (particleManager_) {

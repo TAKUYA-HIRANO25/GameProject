@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "Player.h"
+#include <cmath>
 
 // Enemy:
 // - 敵の生成・更新・描画・弾発射・被弾エフェクト等を担当するクラス実装。
@@ -45,6 +46,10 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	FireTime();
 	MoveTime();
 
+	// 行動初期化
+	behavior_ = BehaviorType::Patrol;
+	behaviorTimer_ = kMoveInterval;
+
 	// bullets_ を念のためクリア（初期化時の安全策）
 	bullets_.remove_if([](EnemyBullet* bullet) {
 		delete bullet;
@@ -68,14 +73,109 @@ void Enemy::Update()
 	// 被弾点滅（ChangeColor 内で Model_->SetDiffuseColor を切り替える）
 	ChangeColor();
 
-	// 移動カウントダウン処理。moveTime が 0 で方向反転
-	moveTime--;
-	if (moveTime == 0) {
-		move.x *= -1;
-		moveTime = kMoveInterval;
+	// 行動タイマー減算・切り替え
+	behaviorTimer_--;
+	if (behaviorTimer_ <= 0) {
+		MoveTime(); // 行動を切り替える
 	}
-	// 速度を位置に適用
-	position_ += move;
+
+	// 行動ごとの移動処理
+	switch (behavior_) {
+	case BehaviorType::Patrol:
+		// 元のランダム左右移動
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		break;
+
+	case BehaviorType::Chase:
+		if (player_) {
+			/*
+			Vector3 dir = player_->GetWorldPosition() - position_;
+			dir = MyMath::Normalize(dir);
+			position_ += dir * speed;
+			*/
+			moveTime--;
+			if (moveTime == 0) {
+				move.x *= -1;
+				moveTime = kMoveInterval;
+			}
+			position_ += move;
+		}
+		break;
+
+	case BehaviorType::SineWave:
+		// 前に進みつつ X 軸にサイン波オフセット
+		/*
+		sinePhase_ += kSineFrequency;
+		position_.z += -speed; // 前に進む（z方向）
+		position_.x += std::sin(sinePhase_) * kSineAmplitude;
+		*/
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		break;
+
+	case BehaviorType::Dash:
+		if (dashTimer_ > 0) {
+			/*
+			// ダッシュ中はプレイヤー方向へ素早く接近
+			if (player_) {
+				Vector3 dir = player_->GetWorldPosition() - position_;
+				dir = MyMath::Normalize(dir);
+				position_ += dir * kDashSpeed;
+			}
+			*/
+			moveTime--;
+			if (moveTime == 0) {
+				move.x *= -1;
+				moveTime = kMoveInterval;
+			}
+			position_ += move;
+			dashTimer_--;
+		}
+		else {
+			// ノーマルに戻る
+			moveTime--;
+			if (moveTime == 0) {
+				move.x *= -1;
+				moveTime = kMoveInterval;
+			}
+			position_ += move;
+		}
+		break;
+
+	case BehaviorType::Idle:
+		// ほとんど動かない
+		// small idle wiggle
+		/*
+		position_.x += std::sin(sinePhase_) * 0.02f;
+		sinePhase_ += 0.05f;
+		*/
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		break;
+
+	default:
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		//position_ += move;
+		break;
+	}
 
 	// 発射カウントダウン
 	Time--;
@@ -95,15 +195,17 @@ void Enemy::Update()
 	}
 
 	// モデルに位置を反映して更新
-	Model_->SetTranslate(position_);
-	Model_->Updata();
+	if (Model_) {
+		Model_->SetTranslate(position_);
+		Model_->Updata();
+	}
 }
 
 // 描画:
 // - 死んでいない場合はモデルを描画、所有弾も描画
 void Enemy::Draw()
 {
-	if (isDead_ == false) 
+	if (isDead_ == false && Model_) 
 	{
 		Model_->Draw();
 	}
@@ -113,9 +215,20 @@ void Enemy::Draw()
 }
 
 // 弾を発射する処理:
-// - プレイヤー方向へ向かう弾を生成して bullets_ に push_back する
+// - 行動に応じて通常弾/拡散/バーストを切り替える
 void Enemy::Fire() {
 
+	// デフォルトの単発追尾
+	if (behavior_ == BehaviorType::SpreadAttack || behavior_ == BehaviorType::Chase) {
+		FireSpread(kSpreadCount, kSpreadAngleDeg);
+		return;
+	}
+	if (behavior_ == BehaviorType::BurstAttack || behavior_ == BehaviorType::Idle) {
+		FireBurst(kBurstCount);
+		return;
+	}
+
+	// 通常弾（プレイヤー方向）
 	bulletActive = true;
 	const float kBulletSpeed = -0.5f;
 	bulletVel = { 0, 0, 0 };
@@ -137,15 +250,106 @@ void Enemy::Fire() {
 
 }
 
+// 拡散弾（XZ 平面で回転させる簡易実装）
+void Enemy::FireSpread(int count, float totalAngleDeg)
+{
+	if (count <= 0) return;
+	const float kBulletSpeed = -0.45f;
+
+	// 基準方向（プレイヤー方向）
+	Vector3 baseDir = MyMath::Normalize(GetWorldPosition() - player_->GetWorldPosition());
+
+	// 中心から等間隔で角度を振る
+	float half = totalAngleDeg * 0.5f;
+	for (int i = 0; i < count; ++i) {
+		float t = (count == 1) ? 0.0f : (float(i) / float(count - 1));
+		float angleDeg = -half + t * totalAngleDeg;
+		float angleRad = angleDeg * 3.14159265f / 180.0f;
+
+		// XZ 平面で回転
+		float cx = std::cos(angleRad);
+		float sx = std::sin(angleRad);
+		Vector3 dir;
+		dir.x = baseDir.x * cx - baseDir.z * sx;
+		dir.y = baseDir.y; // 高さ成分はそのまま
+		dir.z = baseDir.x * sx + baseDir.z * cx;
+
+		dir = MyMath::Normalize(dir);
+		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
+
+		EnemyBullet* newBullet = new EnemyBullet();
+		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), vel);
+		bullets_.push_back(newBullet);
+	}
+	bulletActive = true;
+}
+
+// バースト（複数弾を同時に飛ばす簡易版）
+void Enemy::FireBurst(int count)
+{
+	if (count <= 0) return;
+	const float kBulletSpeed = -0.55f;
+
+	Vector3 baseDir = MyMath::Normalize(GetWorldPosition() - player_->GetWorldPosition());
+	for (int i = 0; i < count; ++i) {
+		// 少しランダムに拡散
+		float rx = (std::rand() % 100 - 50) / 500.0f;
+		float rz = (std::rand() % 100 - 50) / 500.0f;
+		Vector3 dir = baseDir;
+		dir.x += rx;
+		dir.z += rz;
+		dir = MyMath::Normalize(dir);
+		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
+
+		EnemyBullet* newBullet = new EnemyBullet();
+		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), vel);
+		bullets_.push_back(newBullet);
+	}
+	bulletActive = true;
+}
+
 // 発射タイマー初期化
 void Enemy::FireTime()
 {
 	Time = kFireInterval;
 }
 
-// 移動タイマー初期化
+// 移動タイマー初期化（行動切り替え）
 void Enemy::MoveTime()
 {
+	// 行動をランダムに選択（簡易）
+	int r = std::rand() % 6;
+	switch (r) {
+	case 0:
+		behavior_ = BehaviorType::Patrol;
+		behaviorTimer_ = kMoveInterval;
+		break;
+	case 1:
+		behavior_ = BehaviorType::Chase;
+		behaviorTimer_ = kMoveInterval;
+		break;
+	case 2:
+		behavior_ = BehaviorType::SineWave;
+		behaviorTimer_ = kMoveInterval;
+		sinePhase_ = 0.0f;
+		break;
+	case 3:
+		behavior_ = BehaviorType::Dash;
+		behaviorTimer_ = kMoveInterval;
+		dashTimer_ = kDashDuration;
+		break;
+	case 4:
+		behavior_ = BehaviorType::SpreadAttack;
+		behaviorTimer_ = kMoveInterval;
+		break;
+	case 5:
+	default:
+		behavior_ = BehaviorType::BurstAttack;
+		behaviorTimer_ = kMoveInterval;
+		break;
+	}
+
+	// 既存の moveTime もリセット（パトロールが選ばれたときに有効）
 	moveTime = 180;
 }
 

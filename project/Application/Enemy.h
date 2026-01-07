@@ -1,42 +1,16 @@
 #pragma once
+#include <list>
 #include "Object3d.h"
-#include "MyMath.h"
-#include "Object3dCommon.h"
-#include "Input.h"
-#include "WinApp.h"
-#include "ModelManager.h"
-#include "Model.h"
-#include "ModelCommon.h"
-#include "Camera.h"
-#include "MatuilityForText.h"
 #include "EnemyBullet.h"
+#include "Player.h"
 #include "ParticleManager.h"
+#include "MyMath.h"
 
-class Player;
-/// <summary>
-/// 敵キャラクターを表すクラス。
-/// 
-/// 概要:
-/// - 3Dモデルを保持し、単純な移動・射撃・当たり判定を行うエンティティ。
-/// - 自身で弾 (`EnemyBullet`) を生成して管理し、プレイヤーへの追尾射撃などの簡易的な攻撃を行う。
-/// 
-/// 主な責務:
-/// - `Initialize` でモデルと初期位置を設定する。
-/// - `Update` で移動・射撃タイマー・弾の更新・死亡判定を行う。
-/// - `Draw` で自身と弾を描画する。
-/// - `Fire` で弾を生成してリストへ追加する（発射間隔は `kFireInterval`）。
-/// - `OnCollision` で被弾処理（HP 減少）を行う。
-/// - `setPlayer` によりプレイヤー参照を受け取り、発射時にプレイヤー位置を参照して狙うことができる。
-/// 
-/// 注意事項:
-/// - 本クラスはレンダリング / 更新をメインスレッドで行う前提でスレッドセーフではない。
-/// - 弾はポインタで管理され、デストラクタ / 更新時に削除されるため、外部からの参照は破棄に注意すること。
-/// </summary>
+// 敵キャラクターを表すクラス
 class Enemy
 {
 public:
 	Enemy();
-	
 	~Enemy();
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, Vector3 position);
@@ -44,11 +18,11 @@ public:
 	void Update();
 	// 描画
 	void Draw();
-	//移動
+	//弾発射（行動に応じて振る舞う）
 	void Fire();
-	//弾発射
+	//発射タイマー初期化
 	void FireTime();
-	//移動切り替え
+	//移動切り替え（行動をランダムに切り替える）
 	void MoveTime();
 	// プレイヤーのワールド位置取得
 	Vector3 GetWorldPosition();
@@ -68,15 +42,24 @@ public:
 	bool bulletActive = false; //弾発射フラグ
 
 	static const int kFireInterval = 60; //弾の間隔
-
 	static const int kMoveInterval = 360; //移動切り替え
 
 	static const int kFlashDuration = 10; // 点滅時間（フレーム）
-
 	// 点滅を何回繰り返すか
 	static const int kFlashRepeat = 4;
 
 private:
+	// 行動状態
+	enum class BehaviorType {
+		Patrol,
+		Chase,
+		SineWave,
+		Dash,
+		SpreadAttack,
+		BurstAttack,
+		Idle
+	};
+
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	//敵の3Dモデル
@@ -85,13 +68,13 @@ private:
 	Vector3 position_; // 位置
 	Vector3 rotation_; // 回転
 	Vector3 scale_; // 拡大縮小
-	float speed; // 移動速度
+	float speed = 0.1f; // 移動速度（基本）
 	//弾
 	std::list<EnemyBullet*> bullets_;
 	int Time = 0; //弾発射間隔用タイマー
 	Vector3 bulletVel = { 0.0f,0.0f,0.0f };
 	// 敵のHP
-	float EnemyHp = 5.0f;
+	float EnemyHp = 1.0f;
 	//死亡フラグ
 	bool isDead_ = false;
 	//プレイヤー情報
@@ -99,6 +82,21 @@ private:
 	//移動
 	Vector3 move = { 0.1f,0.0f,0.0f };
 	int32_t moveTime = 0;
+
+	// 行動関連
+	BehaviorType behavior_ = BehaviorType::Patrol;
+	int behaviorTimer_ = 0;
+	int dashTimer_ = 0;
+	float sinePhase_ = 0.0f;
+	
+	// 行動パラメータ（定数）
+	static constexpr float kDashSpeed = 2.5f;
+	static constexpr int kDashDuration = 30;
+	static constexpr float kSineAmplitude = 0.6f;
+	static constexpr float kSineFrequency = 0.15f;
+	static constexpr int kBurstCount = 3;
+	static constexpr int kSpreadCount = 5;
+	static constexpr float kSpreadAngleDeg = 60.0f;
 
 	//パーティクル
 	ParticleManager* particleManager_ = nullptr;
@@ -113,5 +111,10 @@ private:
 
 	// 元の色を保持して復帰するための値（初期は白）
 	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	// 行動別の射撃サポート
+	void FireSpread(int count, float totalAngleDeg);
+	void FireBurst(int count);
+
 };
 

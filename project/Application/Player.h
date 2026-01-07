@@ -96,7 +96,7 @@ private:
 	float reticleDistance_ = 100.0f; // レティクルまでの距離（代替ターゲット距離）
 	Sprite* reticleSprite_ = nullptr;
 
-	float PlayerHP = 5.0f;
+	float PlayerHP = 10.0f;
 	bool isDead_ = false;
 
 	//パーティクル
