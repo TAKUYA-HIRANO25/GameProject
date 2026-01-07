@@ -72,6 +72,8 @@ private:
 	int startTime_ = 0;
 	int goTime_ = 0;
 
+	//色
+	float blackAlpha = 0.0f;
 	// 一時 / デバッグ
 	bool mouseLeft_ = false;
 	bool mouseRight_ = false;

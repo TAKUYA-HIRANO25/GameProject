@@ -263,26 +263,22 @@ void MyGame::Update()
 				isGame_ = false;
 				isFade_ = false;
 				endFade_ = false;
-				Black_->SetColor(Vector4(1, 1, 1, 0));
-				if (input_->TriggerKey(DIK_T)) {
-					isTitle_ = true;
-					isGame_ = false;
-					isOver_ = false;
-					reup_ = true;
+				blackAlpha += 0.01f;
+				if (blackAlpha > 1.0f) {
+					blackAlpha = 1.0f; // 最大値を超えないように制限
 				}
+				Black_->SetColor(Vector4(1, 1, 1, 0));
 			}
 			if (enemy_->IsDead()) {
 				isClear_ = true;
 				isGame_ = false;
 				isFade_ = false;
 				endFade_ = false;
-				Black_->SetColor(Vector4(1, 1, 1, 0));
-				if (input_->TriggerKey(DIK_T)) {
-					isTitle_ = true;
-					isGame_ = false;
-					isOver_ = false;
-					reup_ = true;
+				blackAlpha += 0.01f;
+				if (blackAlpha > 1.0f) {
+					blackAlpha = 1.0f; // 最大値を超えないように制限
 				}
+				Black_->SetColor(Vector4(1, 1, 1, 0));
 			}
 
 			// パーティクル更新（描画用のエミッタ更新など）
@@ -305,8 +301,8 @@ void MyGame::Update()
 			isClear_ = false;
 			isFade_ = false;
 			endFade_ = false;
-			Black_->SetColor(Vector4(1, 1, 1, 0));
 			reup_ = true;
+			blackAlpha = 0.0f;
 		}
 	}
 
