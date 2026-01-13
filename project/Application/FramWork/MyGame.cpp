@@ -56,6 +56,7 @@ void MyGame::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Player/Player.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Reticle.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Explanation.png");
 	// 必要なモデルをロード
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
@@ -120,7 +121,8 @@ void MyGame::CreateScene()
 	clear_->Initialize(spriteCommon_, "resources/Clear.png");
 	Black_ = new Sprite(); 
 	Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
-
+	explanation_ = new Sprite();
+	explanation_->Initialize(spriteCommon_, "resources/Explanation.png");
 	// ゲーム初期フラグを明確に初期化
 	isTitle_ = true;
 	isFade_ = false;
@@ -291,7 +293,7 @@ void MyGame::Update()
 		gameOver_->Update();
 		clear_->Update();
 		Black_->Update();
-
+		explanation_->Update();
 		// クリア／ゲームオーバー時に T キーでタイトルへ戻る処理を常時受け付ける
 		if ((isOver_ || isClear_) && input_->TriggerKey(DIK_T)) {
 			// タイトルへ戻す（再初期化要求を出す）
@@ -382,7 +384,9 @@ void MyGame::Draw()
 			Black_->Draw();
 			clear_->Draw();
 		}
-
+		if (isGame_) {
+			explanation_->Draw();
+		}
 		// パーティクル描画（3D）
 		particleManager_->Draw();
 
@@ -441,7 +445,7 @@ void MyGame::ReleaseResources()
 	delete Black_; Black_ = nullptr;
 	delete gameOver_; gameOver_ = nullptr;
 	delete clear_; clear_ = nullptr;
-
+	delete explanation_; explanation_ = nullptr;
 	delete player_; player_ = nullptr;
 	delete enemy_; enemy_ = nullptr;
 	delete particleManager_; particleManager_ = nullptr;

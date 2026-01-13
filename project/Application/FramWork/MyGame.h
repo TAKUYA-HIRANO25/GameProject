@@ -52,6 +52,7 @@ private:
 	Sprite* Black_ = nullptr;
 	Sprite* gameOver_ = nullptr;
 	Sprite* clear_ = nullptr;
+	Sprite* explanation_ = nullptr;
 
 	// UI / フェード等
 	bool isTitle_ = true;
