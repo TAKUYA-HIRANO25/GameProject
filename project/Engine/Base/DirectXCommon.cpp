@@ -95,7 +95,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_
 
 Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResourece(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata)
 {
-	//リソース設定
+	// リソース設定
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = UINT(metadata.width);
 	resourceDesc.Height = UINT(metadata.height);
@@ -104,16 +104,21 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResourece(Mic
 	resourceDesc.Format = metadata.format;
 	resourceDesc.SampleDesc.Count = 1;
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);
-	//利用するHeap
+
+	// WRITE_BACK / CUSTOM はテクスチャ用には不適切なことがあるため DEFAULT にする
 	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_CUSTOM;
-	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-	//リソース生成
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+	// 初期状態は COPY_DEST（Upload -> COPY -> GENERIC_READ へ遷移する）
+	D3D12_RESOURCE_STATES initialState = D3D12_RESOURCE_STATE_COPY_DEST;
+
+	// Resource の生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProperties, D3D12_HEAP_FLAG_NONE,
-		&resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST,
+		&resourceDesc, initialState,
 		nullptr, IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
 	return resource;
@@ -128,8 +133,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::UploadTextureData(Microsof
 	intermediateResources_.push_back(intermediateResource);
 
 	UpdateSubresources(commandList.Get(), texture.Get(), intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
-	//Tetureへの転送後利用できるように変更する
-	D3D12_RESOURCE_BARRIER barrier{};
+
+	// テクスチャをGPUで読める状態へ遷移
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	barrier.Transition.pResource = texture.Get();
@@ -139,16 +144,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::UploadTextureData(Microsof
 	commandList->ResourceBarrier(1, &barrier);
 	return intermediateResource;
 
-	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-	for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel) {
-		const DirectX::Image* img = mipImages.GetImage(mipLevel, 0, 0);
-		HRESULT hr = texture->WriteToSubresource(
-			UINT(mipLevel), nullptr,
-			img->pixels, UINT(img->rowPitch),
-			UINT(img->slicePitch)
-		);
-		assert(SUCCEEDED(hr));
-	}
+	// 関数としては転送先テクスチャ（GPUリソース）を返すのが自然
+	return texture;
 }
 
 DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath)
