@@ -1,5 +1,6 @@
 #include "Input.h"
 #include <cassert>
+#include <algorithm>
 
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -94,6 +95,10 @@ void Input::Update()
 		mouseMoveY = mouseState.lY;
 		mouseWheel = mouseState.lZ;
 	}
+
+	// ゲームパッドの状態を更新（Input クラスに実装した UpdateGamepads() を呼び出す）
+	// ※ UpdateGamepads() はヘッダに宣言し、別実装ファイルで定義している前提
+	UpdateGamepads();
 }
 
 

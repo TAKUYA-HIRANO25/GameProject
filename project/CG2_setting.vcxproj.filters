@@ -40,6 +40,7 @@
     <ClCompile Include="Application\FramWork\MyGame.cpp" />
     <ClCompile Include="Application\FramWork\Framework.cpp" />
     <ClCompile Include="Application\Fade.cpp" />
+    <ClCompile Include="Engine\Base\InputGamepad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />

@@ -134,6 +134,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\Logger.cpp" />
     <ClCompile Include="Application\FramWork\Framework.cpp" />
     <ClCompile Include="Application\Fade.cpp" />
+    <ClCompile Include="Engine\Base\InputGamepad.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\3D\Model.cpp" />
     <ClCompile Include="Engine\3D\ModelCommon.cpp" />

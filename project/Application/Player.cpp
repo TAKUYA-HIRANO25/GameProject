@@ -1,5 +1,8 @@
 #include "Player.h"
 #include "MatuilityForText.h"
+#include <Xinput.h>
+#include <algorithm>
+#include <cmath>
 
 Player::Player()
 {
@@ -19,7 +22,7 @@ Player::~Player()
 
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	// 3D 共通参照を保持
-	object3dCommon_ = object3dCommon;
+	object3dCommon_ = object3dCommon;	
 
 	// プレイヤーモデル生成・初期化
 	Model_ = new Object3d();
@@ -69,10 +72,10 @@ void Player::Update()
 	// 入力に基づく移動処理
 	Move();
 
-	// マウス位置からレティクル位置を決定して更新
+	// マウス/パッド位置からレティクル位置を決定して更新
 	Reticle();
 
-	// 発射処理（スペースキー）
+	// 発射処理（スペースキーまたはコントローラ A）
 	Fire();
 
 	// 所有弾の更新
@@ -113,7 +116,7 @@ void Player::Move()
 	Vector3 move = { 0,0,0 }; // 移動量
 	const float kCharacterSpeed = 0.2f; // キャラクターの移動速度
 
-	// 左右上下・前後移動（Q/E で Z 軸）
+	// キーボード移動（既存）
 	if (input_->PushKey(DIK_A)) {
 		move.x -= kCharacterSpeed;
 	}
@@ -134,6 +137,23 @@ void Player::Move()
 		move.z -= kCharacterSpeed;
 	}
 
+	// ----- パッド入力（左スティック・トリガで移動） -----
+	// パッド 0 を使用（必要ならインデックスを外部で指定する拡張も可）
+	if (input_->IsGamepadConnected(0)) {
+		// 左スティック: X -> 左右, Y -> 上下（Y は上下反転しない想定）
+		const float padSpeedFactor = 0.18f; // パッド感度（チューニング可）
+		float lx = input_->GetLeftThumbX(0); // -1..1
+		float ly = input_->GetLeftThumbY(0); // -1..1
+		move.x += lx * padSpeedFactor;
+		move.y += ly * padSpeedFactor;
+
+		// トリガで Z 軸（左トリガで下、右トリガで上へ移動など）
+		float lt = input_->GetLeftTrigger(0);  // 0..1
+		float rt = input_->GetRightTrigger(0); // 0..1
+		// ここでは右トリガで +Z、左トリガで -Z（既存 Q/E と逆が好みなら入れ替え可）
+		move.z += (rt - lt) * kCharacterSpeed * 1.5f;
+	}
+
 	// カメラの移動量を加算してワールド位置へ適用
 	position_ += move + railCameraVelocity_;
 }
@@ -141,7 +161,16 @@ void Player::Move()
 void Player::Fire()
 {
 
-	if (input_->TriggerKey(DIK_SPACE) && bulletTime <= 0) {
+	// スペース or コントローラ A 押下で発射（トリガ判定）
+	bool fireTriggered = false;
+	if (input_->TriggerKey(DIK_SPACE)) {
+		fireTriggered = true;
+	}
+	else if (input_->IsGamepadConnected(0) && input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		fireTriggered = true;
+	}
+
+	if (fireTriggered && bulletTime <= 0) {
 
 		bulletActive = true;
 		bulletTime = 10;
@@ -199,7 +228,7 @@ void Player::OnCollision()
 	}
 
 	// 被弾点滅を開始（flashTimer_ / flashToggleCounter_ を用いる）
-	if (Model_) {
+	if (Model_ && flashFlag == false) {
 		flashTimer_ = flashDuration_ * flashRepeat_ * 2;
 		flashToggleCounter_ = flashDuration_;
 		Model_->SetDiffuseColor(flashColor_);
@@ -213,11 +242,81 @@ void Player::Reticle()
 	Camera* camera = object3dCommon_->GetDefaultCamera();
 	if (!camera) return;
 
+	// 振る舞い:
+	// - コントローラを「使用している」状態のときはマウス位置を無視する（マウスが反応しない）。
+	// - 判定条件: コントローラ接続かつスティック/トリガ/主要ボタンに入力がある場合を「使用中」とみなす。
+
+	// 永続的に保持するスクリーン位置（マウス使用時は更新、コントローラ使用時は右スティックで移動）
+	static Vector2 lastCursor = { float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f };
+	static bool initialized = false;
+	if (!initialized) {
+		// 初回はスプライト位置を優先して初期化（安全策）
+		lastCursor = Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f);
+		initialized = true;
+	}
+
+	// コントローラ使用判定
+	bool controllerActive = false;
+	const float padDead = 0.15f;
+
+	if (input_->IsGamepadConnected(0)) {
+		float lx = input_->GetLeftThumbX(0);
+		float ly = input_->GetLeftThumbY(0);
+		float rx = input_->GetRightThumbX(0);
+		float ry = input_->GetRightThumbY(0);
+		float lt = input_->GetLeftTrigger(0);
+		float rt = input_->GetRightTrigger(0);
+
+		if (std::abs(lx) > padDead || std::abs(ly) > padDead ||
+			std::abs(rx) > padDead || std::abs(ry) > padDead ||
+			lt > 0.05f || rt > 0.05f) {
+			controllerActive = true;
+		}
+		// ボタン入力があればコントローラ使用中とみなす
+		if (!controllerActive) {
+			if (input_->GamepadButtonPush(0, XINPUT_GAMEPAD_A) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_B) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_X) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_Y) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_DPAD_UP) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_DPAD_DOWN) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_DPAD_LEFT) ||
+				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_DPAD_RIGHT)) {
+				controllerActive = true;
+			}
+		}
+	}
+
 	// クライアント座標（ピクセル）
-	Vector2 cursor = input_->GetCursorClientPos2();
+	Vector2 cursor;
+
+	if (controllerActive) {
+		// コントローラ優先: マウスは無視。lastCursor に右スティックの移動を適用する。
+		const float padReticleSpeed = 8.0f; // スティック 1.0 当たりのピクセル移動量（調整可）
+		float rx = input_->GetRightThumbX(0); // -1..1
+		float ry = input_->GetRightThumbY(0); // -1..1
+
+		// 少しの入力で動かないようにする（簡易デッドゾーン）
+		if (std::abs(rx) > padDead || std::abs(ry) > padDead) {
+			lastCursor.x += rx * padReticleSpeed;
+			lastCursor.y -= ry * padReticleSpeed; // 上下反転を補正
+		}
+		// 現在のカーソルとして lastCursor を使う（マウス無視）
+		cursor = lastCursor;
+	} else {
+		// マウス優先: 実際のマウス位置で lastCursor を更新する
+		Vector2 mousePos = input_->GetCursorClientPos2();
+		lastCursor = mousePos;
+		cursor = lastCursor;
+	}
+
 	const float width = static_cast<float>(WinApp::kClientWidth);
 	const float height = static_cast<float>(WinApp::kClientHeight);
 	// スプライト版レティクルのスクリーン座標更新
+	// クランプ
+	cursor.x = std::clamp(cursor.x, 0.0f, width - 1.0f);
+	cursor.y = std::clamp(cursor.y, 0.0f, height - 1.0f);
+
 	reticleSprite_->SetPosition(cursor);
 	reticleSprite_->Update();
 	// NDC に変換
@@ -264,6 +363,7 @@ void Player::SetRailCameraVelocity(Vector3 velocity)
 void Player::ChangeColor()
 {
 	if (flashTimer_ > 0 && Model_) {
+		flashFlag = true;
 		--flashTimer_;
 		--flashToggleCounter_;
 
@@ -284,7 +384,7 @@ void Player::ChangeColor()
 		// 点滅終了時に確実に元色へ戻す
 		if (flashTimer_ == 0) {
 			Model_->SetDiffuseColor(originalColor_);
+			flashFlag = false;
 		}
 	}
 }
-	

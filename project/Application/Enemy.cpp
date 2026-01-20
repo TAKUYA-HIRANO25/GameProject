@@ -383,7 +383,7 @@ void Enemy::OnCollision() {
 			vel *= -1.0f; // 敵なので下向きに飛ばす
 
 			// 点滅（赤）を開始：複数回トグルする実装
-			if (Model_) {
+			if (Model_ && flashFlag_ == false) {
 				// 元色は Initialize 時に originalColor_ に保持しているので利用
 				flashTimer_ = kFlashDuration * kFlashRepeat * 2;
 				flashToggleCounter_ = kFlashDuration;
@@ -402,6 +402,7 @@ void Enemy::OnCollision() {
 // - flashTimer_ と flashToggleCounter_ を用いて赤/元色を切り替える
 void Enemy::ChangeColor()
 {
+
 	// --- 点滅処理 ---
 	if (flashTimer_ > 0 && Model_) {
 		// フレームを消費

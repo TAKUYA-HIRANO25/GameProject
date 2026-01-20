@@ -116,6 +116,7 @@ private:
 	Vector4 flashColor_ = { 1.0f, 0.25f, 0.25f, 1.0f }; // デフォルト赤
 	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // 元の色保持
 
+	bool flashFlag = false;
 	// 点滅処理ヘルパ
 	void ChangeColor();
 };

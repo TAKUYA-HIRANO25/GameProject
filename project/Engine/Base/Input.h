@@ -1,13 +1,3 @@
-#pragma once
-#include "Windows.h"
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#include <wrl.h>
-#include <algorithm> // for std::clamp
-#include "WinApp.h"
-#include "Vector2.h"
-#include "Vector3.h"
-
 /// <summary>
 /// 入力管理クラス
 /// 
@@ -29,6 +19,17 @@
 /// - マウスの相対移動はフレームごとの差分を返すため、描画ループ内で毎フレーム `Update` を呼び出すこと。
 /// </summary>
 
+#pragma once
+
+#include <Windows.h>
+#include <Xinput.h>
+#pragma comment(lib, "xinput.lib")
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#include "WinApp.h"
+#include "Vector2.h"
+#include "Vector3.h"
+
 class Input {
 
 public:
@@ -41,6 +42,7 @@ public:
 	void Initialize(WinApp* winApp);
 	// 更新
 	void Update();
+
 	// --- キーボード関連 ---
 	bool PushKey(BYTE keyNumber);
 	// 押した瞬間
@@ -62,6 +64,26 @@ public:
 	Vector2 GetCursorClientPos2();
 
 	Vector3 GetCursorClientPos3();
+
+	// --- ゲームパッド関連（追加API） ---
+	// フレームごとにポーリングする（Input::Update 内で呼ぶか、外部から毎フレーム呼ぶ）
+	void UpdateGamepads();
+
+	// コントローラ接続確認（index: 0..3）
+	bool IsGamepadConnected(uint32_t index) const noexcept;
+
+	// ボタン押下 / トリガー（index: 0..3, button: XINPUT_GAMEPAD_...）
+	bool GamepadButtonPush(uint32_t index, WORD button) const noexcept;
+	bool GamepadButtonTrigger(uint32_t index, WORD button) const noexcept;
+
+	// 軸値（-1.0 .. 1.0） / トリガー（0.0 .. 1.0）
+	float GetLeftThumbX(uint32_t index) const noexcept;
+	float GetLeftThumbY(uint32_t index) const noexcept;
+	float GetRightThumbX(uint32_t index) const noexcept;
+	float GetRightThumbY(uint32_t index) const noexcept;
+	float GetLeftTrigger(uint32_t index) const noexcept;
+	float GetRightTrigger(uint32_t index) const noexcept;
+
 private:
 	// プライベート化（シングルトン）
 	Input() = default;
@@ -92,6 +114,11 @@ private:
 	int mouseMoveX = 0;
 	int mouseMoveY = 0;
 	int mouseWheel = 0;
+
+	// ゲームパッド状態（最大4台）
+	XINPUT_STATE gamepadState[4]{};
+	XINPUT_STATE gamepadStatePrev[4]{};
+	bool gamepadConnected[4]{};
 
 	static Input* instance;
 };

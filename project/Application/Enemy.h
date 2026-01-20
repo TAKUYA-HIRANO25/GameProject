@@ -105,7 +105,7 @@ private:
 
 	// 被弾点滅用タイマー（フレーム） : 残りトグル用総フレーム数
 	int flashTimer_ = 0;
-
+	bool flashFlag_ = false; // 点滅中フラグ
 	// 点滅で色を切り替える間隔カウンタ
 	int flashToggleCounter_ = 0;
 
