@@ -84,6 +84,12 @@ public:
 	float GetLeftTrigger(uint32_t index) const noexcept;
 	float GetRightTrigger(uint32_t index) const noexcept;
 
+	// 追加: 指定のゲームパッドが「アクティブ（使用中）」かを判定する（スティック/トリガ/ボタン）
+	bool IsGamepadActive(uint32_t index) const noexcept;
+
+	// 追加: 接続中のいずれかのゲームパッドがアクティブかを判定する
+	bool IsAnyGamepadActive() const noexcept;
+
 private:
 	// プライベート化（シングルトン）
 	Input() = default;

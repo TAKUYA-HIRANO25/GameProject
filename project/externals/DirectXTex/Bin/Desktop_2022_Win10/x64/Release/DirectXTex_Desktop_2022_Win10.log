@@ -1,9 +1,9 @@
 ﻿  BC.cpp
-C:\GameProject\project\externals\DirectXTex\BC.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
   BC4BC5.cpp
-C:\GameProject\project\externals\DirectXTex\BC4BC5.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
   BC6HBC7.cpp
-C:\GameProject\project\externals\DirectXTex\BC6HBC7.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
   BCDirectCompute.cpp
-C:\GameProject\project\externals\DirectXTex\BCDirectCompute.cpp(10,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
   コードを生成中...
+C:\GameProject\project\externals\DirectXTex\BC.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
+C:\GameProject\project\externals\DirectXTex\BC4BC5.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
+C:\GameProject\project\externals\DirectXTex\BC6HBC7.cpp(12,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)
+C:\GameProject\project\externals\DirectXTex\BCDirectCompute.cpp(10,10): error C1853: 'Bin\Desktop_2022_Win10\x64\Release\DirectXTex.pch' プリコンパイル済みヘッダー ファイルは別のバージョンのコンパイラからのものです。または、C++ のプリコンパイル済みヘッダーを C で使用しています (その逆も考えられます)

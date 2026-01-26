@@ -17,7 +17,7 @@ Player::~Player()
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
-		});
+	});
 }
 
 void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
@@ -29,6 +29,12 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("Player/Player.obj");
 	Model_->SetTranslate(position_);
+
+	// デバッグログ: 初期位置と Model ポインタの確認
+	char buf[256];
+	sprintf_s(buf, "Player::Initialize: position=(%f,%f,%f) Model ptr=%p\n",
+		position_.x, position_.y, position_.z, static_cast<void*>(Model_));
+	OutputDebugStringA(buf);
 
 	spriteCommon_ = SpriteCommon::GetInstance();
 	if (spriteCommon_) {
@@ -52,7 +58,9 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
-		});
+	});
+
+	isGame = false;
 }
 
 void Player::Update()
@@ -64,30 +72,30 @@ void Player::Update()
 			return true;
 		}
 		return false;
-		});
+	});
+	if (isGame) {
+		// 被弾時の点滅処理（色の切替）
+		ChangeColor();
 
-	// 被弾時の点滅処理（色の切替）
-	ChangeColor();
+		// 入力に基づく移動処理
+		Move();
 
-	// 入力に基づく移動処理
-	Move();
+		// マウス/パッド位置からレティクル位置を決定して更新
+		Reticle();
 
-	// マウス/パッド位置からレティクル位置を決定して更新
-	Reticle();
+		// 発射処理（スペースキーまたはコントローラ A）
+		Fire();
 
-	// 発射処理（スペースキーまたはコントローラ A）
-	Fire();
+		// 所有弾の更新
+		for (PlayerBullet* bullet : bulletList_) {
+			bullet->Update();
+		}
 
-	// 所有弾の更新
-	for (PlayerBullet* bullet : bulletList_) {
-		bullet->Update();
+		// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
+		if (PlayerHP == 0) {
+			isDead_ = true;
+		}
 	}
-
-	// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
-	if (PlayerHP == 0) {
-		isDead_ = true;
-	}
-
 	// モデルに位置を反映して行列更新（Object3d 側で World 行列等を作る想定）
 	Model_->SetTranslate(position_);
 	Model_->Updata();
@@ -116,25 +124,30 @@ void Player::Move()
 	Vector3 move = { 0,0,0 }; // 移動量
 	const float kCharacterSpeed = 0.2f; // キャラクターの移動速度
 
-	// キーボード移動（既存）
-	if (input_->PushKey(DIK_A)) {
-		move.x -= kCharacterSpeed;
-	}
-	else if (input_->PushKey(DIK_D)) {
-		move.x += kCharacterSpeed;
-	}
-	if (input_->PushKey(DIK_W)) {
-		move.y += kCharacterSpeed;
-	}
-	else if (input_->PushKey(DIK_S)) {
-		move.y -= kCharacterSpeed;
-	}
+	// コントローラ使用判定: 使用中ならキーボード入力を無視する
+	bool controllerActive = input_->IsAnyGamepadActive();
 
-	if (input_->PushKey(DIK_Q)) {
-		move.z += kCharacterSpeed;
-	}
-	else if (input_->PushKey(DIK_E)) {
-		move.z -= kCharacterSpeed;
+	// キーボード移動（コントローラ使用時は無視）
+	if (!controllerActive) {
+		if (input_->PushKey(DIK_A)) {
+			move.x -= kCharacterSpeed;
+		}
+		else if (input_->PushKey(DIK_D)) {
+			move.x += kCharacterSpeed;
+		}
+		if (input_->PushKey(DIK_W)) {
+			move.y += kCharacterSpeed;
+		}
+		else if (input_->PushKey(DIK_S)) {
+			move.y -= kCharacterSpeed;
+		}
+
+		if (input_->PushKey(DIK_Q)) {
+			move.z += kCharacterSpeed;
+		}
+		else if (input_->PushKey(DIK_E)) {
+			move.z -= kCharacterSpeed;
+		}
 	}
 
 	// ----- パッド入力（左スティック・トリガで移動） -----
@@ -163,9 +176,15 @@ void Player::Fire()
 
 	// スペース or コントローラ A 押下で発射（トリガ判定）
 	bool fireTriggered = false;
-	if (input_->TriggerKey(DIK_SPACE)) {
+
+	// コントローラ使用判定: 使用中ならキーボード入力を無視する
+	bool controllerActive = input_->IsAnyGamepadActive();
+
+	// キーボードからの発射（コントローラ使用中は無効）
+	if (!controllerActive && input_->TriggerKey(DIK_SPACE)) {
 		fireTriggered = true;
 	}
+	// コントローラからの発射は常に許可（接続確認されれば）
 	else if (input_->IsGamepadConnected(0) && input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 		fireTriggered = true;
 	}

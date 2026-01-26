@@ -68,6 +68,9 @@ private:
 	// フェード用
 	Fade* fadeEffect_ = nullptr;
 
+	// フェード完了後のプリスタート演出待機フラグ
+	bool waitingPreStartCinematic_ = false;
+
 	// スタートタイマー等
 	int titleTime_ = 0;
 	int startTime_ = 0;

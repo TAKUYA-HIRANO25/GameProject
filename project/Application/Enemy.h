@@ -48,6 +48,7 @@ public:
 	// 点滅を何回繰り返すか
 	static const int kFlashRepeat = 4;
 
+	bool SetIsGame(bool isGame_) { return isGame = isGame_; }
 private:
 	// 行動状態
 	enum class BehaviorType {
@@ -116,5 +117,6 @@ private:
 	void FireSpread(int count, float totalAngleDeg);
 	void FireBurst(int count);
 
+	bool isGame = false;
 };
 

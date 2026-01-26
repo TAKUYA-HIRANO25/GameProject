@@ -81,6 +81,16 @@ void MyGame::CreateScene()
 	railCamera_->Initialize(camera);
 	if (object3dCommon_) object3dCommon_->SetDefaultCamera(railCamera_->GetCamera());
 
+	// 少し前進して視点を強調する (例: z を -14 へ 2 秒で移動) と軽い揺れ
+	{
+		Transform target = railCamera_->GetTransform();
+		target.translate.z = -14.0f; // カメラを手前に（-20 -> -14）
+		// 少し上に上げたい場合: target.translate.y += 1.5f;
+		railCamera_->StartCinematicMove(target, 2.0f); // 2 秒で移動
+		// 起動時の振動（small）
+		railCamera_->StartShake(0.08f, 1.0f); // 強さ 0.08、1 秒
+	}
+
 	// パーティクルマネージャ生成（3D 共通設定を渡す）
 	particleManager_ = new ParticleManager(object3dCommon_);
 
@@ -139,6 +149,34 @@ void MyGame::CreateScene()
 
 	// フェード処理オブジェクトの生成（Sprite と連動）
 	fadeEffect_ = new Fade(spriteCommon_, "resources/Fade.png");
+
+	{
+		// 初期カメラ行列とオブジェクト行列を即時更新しておく（最初のフレームで視界外になるのを防ぐ）
+		if (railCamera_) {
+			// RailCamera::Update() は camera->Update() を呼ぶので初期同期用に一度実行
+			railCamera_->Update();
+		}
+
+		// デバッグ出力（カメラ・プレイヤー位置）
+		Camera* cam = object3dCommon_->GetDefaultCamera();
+		if (cam) {
+			Vector3 cpos = cam->GetTranslate();
+			char buf[256];
+			sprintf_s(buf, "DEBUG CreateScene end: Camera pos=(%f,%f,%f)\n", cpos.x, cpos.y, cpos.z);
+			OutputDebugStringA(buf);
+		}
+		if (player_) {
+			Vector3 p = player_->GetWorldPosition();
+			char buf[256];
+			sprintf_s(buf, "DEBUG Player pos=(%f,%f,%f)\n", p.x, p.y, p.z);
+			OutputDebugStringA(buf);
+		}
+	}
+
+	waitingPreStartCinematic_ = false;
+
+	player_->Update(); // 最初の Update で位置をセットしておく
+	enemy_->Update();
 }
 
 void MyGame::Update()
@@ -193,9 +231,22 @@ void MyGame::Update()
 		if (input_->TriggerKey(DIK_RETURN)) {
 			isFade_ = true;
 			isOver_ = false;
+			// デバッグ：Enter 押下を明示
+			{
+				char buf[256];
+				sprintf_s(buf, "MyGame: Enter pressed -> isFade_=%d railCamera=%p fadeEffect=%p\n",
+					(int)isFade_, (void*)railCamera_, (void*)fadeEffect_);
+				OutputDebugStringA(buf);
+			}
+			// フェードオブジェクトが既に終了フラグの場合の保険（スタートできない場合をリセットして再スタート）
+			if (fadeEffect_ && fadeEffect_->IsFinished()) {
+				fadeEffect_->Reset();
+				OutputDebugStringA("MyGame: fadeEffect_ was finished -> Reset() called on Enter\n");
+			}
 		}
 	}
 	else {
+
 		// スタート / Go フラグ処理（カウントでフラグを切り替える）
 		if (isStart_) {
 			++startTime_;
@@ -212,9 +263,26 @@ void MyGame::Update()
 			}
 		}
 
+		
+		railCamera_->Update();
+
+		// プリスタート演出が終わったら自動で isStart_ を有効にする
+		if (waitingPreStartCinematic_) {
+			if (!railCamera_->IsBusy()) {
+				// 演出終了 → スタート演出へ移行
+				isStart_ = true;
+				startTime_ = 0;
+				goTime_ = 0;
+				waitingPreStartCinematic_ = false;
+				// reset any flags if needed
+			}
+		}
+
+		player_->SetIsGame(isGame_);
+		enemy_->SetIsGame(isGame_);
+
 		// ゲーム本体の更新（カメラ / プレイヤー / 敵 / 当たり判定）
 		if (isGame_) {
-			railCamera_->Update();
 			if (!isOver_ && !isClear_) {
 				player_->Update();
 				enemy_->Update();
@@ -230,8 +298,15 @@ void MyGame::Update()
 					Vector3 posB = bullet->GetWorldPosition();
 					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
 					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+						// プレイヤーにヒット
 						player_->OnCollision();
 						bullet->OnCollision();
+
+						// カメラ揺れを発生（存在チェック）
+						if (railCamera_) {
+							// 強めの揺れを与える（調整可）
+							railCamera_->StartShake(0.12f, 0.5f);
+						}
 					}
 				}
 
@@ -240,6 +315,7 @@ void MyGame::Update()
 					Vector3 posB = bullet->GetWorldPosition();
 					float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
 					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+						// 敵にヒット
 						enemy_->OnCollision();
 						bullet->OnCollision();
 					}
@@ -315,30 +391,87 @@ void MyGame::Update()
 	// フェード処理
 	// - isFade_ が true のときに Fade オブジェクトを開始/更新し、縮小開始時にタイトルを解除する
 	if (isFade_) {
+		// 毎フレーム、フェード状態をログに出す（簡潔に）
+		if (fadeEffect_) {
+			char buf[256];
+			sprintf_s(buf, "MyGame: FadeState eachFrame: isFade_=%d IsRunning=%d IsFinished=%d\n",
+				(int)isFade_, (int)fadeEffect_->IsRunning(), (int)fadeEffect_->IsFinished());
+			OutputDebugStringA(buf);
+		}
+
 		// フェード開始条件：fadeEffect_ が存在し、実行中でなく、かつ未完了の場合
 		if (fadeEffect_ && !fadeEffect_->IsRunning() && !fadeEffect_->IsFinished()) {
 			fadeEffect_->Start();
+			OutputDebugStringA("MyGame: fadeEffect_->Start() called (normal path)\n");
 		}
+		else if (fadeEffect_ && !fadeEffect_->IsRunning() && fadeEffect_->IsFinished() && isFade_) {
+			// もし既に IsFinished()==true で Start() が呼べない状態なら Reset して再開する
+			fadeEffect_->Reset();
+			fadeEffect_->Start();
+			OutputDebugStringA("MyGame: fadeEffect was finished -> Reset() then Start() called (fallback)\n");
+		}
+
 		// フェードの毎フレーム更新
 		if (fadeEffect_ && (fadeEffect_->IsRunning() || isFade_)) {
 			fadeEffect_->Update();
 		}
+
 		// フェードが縮小フェーズに入ったらタイトルを非表示にする（1回だけ実行）
 		if (fadeEffect_ && fadeEffect_->IsShrinking() && !endFade_) {
 			isTitle_ = false;
 			endFade_ = true;
+			OutputDebugStringA("MyGame: fadeEffect entered shrinking phase -> isTitle_ = false\n");
 		}
-		// フェード完了時の遷移処理
+
+		// フェード完了時の遷移処理（ログを残す）
 		if (fadeEffect_ && fadeEffect_->IsFinished()) {
+			{
+				char buf[256];
+				sprintf_s(buf, "MyGame::FadeFinished: railCamera=%p player=%p fadeEffect=%p\n",
+					(void*)railCamera_, (void*)player_, (void*)fadeEffect_);
+				OutputDebugStringA(buf);
+			}
+			// 以降の既存処理はそのまま継続...
 			endFade_ = false;
 			isFade_ = false;
-			isStart_ = true; // スタート演出へ移行	
 			startTime_ = 0;
 			goTime_ = 0;
 			fadeEffect_->Reset();
+
+			// RailCamera とプレイヤーが有効な場合にプリスタート演出をセット
+			if (railCamera_ && player_) {
+				Vector3 center = player_->GetWorldPosition();
+				{
+					Transform camT = railCamera_->GetTransform();
+					char buf[256];
+					sprintf_s(buf, "MyGame: Starting PreStartCinematic center=(%f,%f,%f) camPos=(%f,%f,%f)\n",
+						center.x, center.y, center.z,
+						camT.translate.x, camT.translate.y, camT.translate.z);
+					OutputDebugStringA(buf);
+				}
+
+				float startRadius = 25.0f;
+				Transform endT = railCamera_->GetTransform();
+				endT.translate = { 0.0f, 0.0f, -20.0f };
+				endT.rotate = { 0.0f, 6.28f, 0.0f };
+				float revolutions = 1.5f;
+				float duration = 3.0f;
+
+				railCamera_->StartPreStartCinematic(center, startRadius, endT, revolutions, duration);
+				railCamera_->StartShake(0.06f, duration * 0.6f);
+
+				waitingPreStartCinematic_ = true;
+
+				OutputDebugStringA("MyGame: Called RailCamera::StartPreStartCinematic and StartShake; waitingPreStartCinematic_=true\n");
+			}
+			else {
+				OutputDebugStringA("MyGame: railCamera_ or player_ is NULL -> set isStart_ = true\n");
+				isStart_ = true;
+			}
 		}
 	}
 }
+
 
 void MyGame::Draw()
 {
@@ -407,7 +540,7 @@ void MyGame::Draw()
 	}
 
 #ifdef USE_IMGUI
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());	
 #endif
 
 	// 描画終了（Present 等）

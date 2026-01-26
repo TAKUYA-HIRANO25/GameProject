@@ -93,3 +93,39 @@ float Input::GetRightTrigger(uint32_t index) const noexcept {
 	if (!IsValidIndex(index) || !gamepadConnected[index]) return 0.0f;
 	return NormalizeTrigger(gamepadState[index].Gamepad.bRightTrigger, XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 }
+
+// 追加: ゲームパッドが「使用中（アクティブ）」かどうかの判定
+bool Input::IsGamepadActive(uint32_t index) const noexcept {
+	if (!IsValidIndex(index)) return false;
+	if (!gamepadConnected[index]) return false;
+
+	const SHORT lx = gamepadState[index].Gamepad.sThumbLX;
+	const SHORT ly = gamepadState[index].Gamepad.sThumbLY;
+	const SHORT rx = gamepadState[index].Gamepad.sThumbRX;
+	const SHORT ry = gamepadState[index].Gamepad.sThumbRY;
+	const BYTE lt = gamepadState[index].Gamepad.bLeftTrigger;
+	const BYTE rt = gamepadState[index].Gamepad.bRightTrigger;
+	const WORD buttons = gamepadState[index].Gamepad.wButtons;
+
+	// スティックがデッドゾーンを超えている
+	if (std::abs(lx) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) return true;
+	if (std::abs(ly) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) return true;
+	if (std::abs(rx) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) return true;
+	if (std::abs(ry) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) return true;
+
+	// トリガが閾値を超えている
+	if (lt > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) return true;
+	if (rt > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) return true;
+
+	// いずれかのボタンが押されている
+	if (buttons != 0) return true;
+
+	return false;
+}
+
+bool Input::IsAnyGamepadActive() const noexcept {
+	for (uint32_t i = 0; i < 4; ++i) {
+		if (IsGamepadActive(i)) return true;
+	}
+	return false;
+}

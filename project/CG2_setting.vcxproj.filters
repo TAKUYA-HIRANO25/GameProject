@@ -41,6 +41,7 @@
     <ClCompile Include="Application\FramWork\Framework.cpp" />
     <ClCompile Include="Application\Fade.cpp" />
     <ClCompile Include="Engine\Base\InputGamepad.cpp" />
+    <ClCompile Include="Application\Poose.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -83,11 +84,16 @@
     <ClInclude Include="Application\FramWork\MyGame.h" />
     <ClInclude Include="Application\FramWork\Framework.h" />
     <ClInclude Include="Application\Fade.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Application\Poose.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CG2_setting.rc" />
   </ItemGroup>
 </Project>

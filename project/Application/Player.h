@@ -70,6 +70,8 @@ public:
 	void SetFlashDuration(int frames) { flashDuration_ = frames; }
 	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
 
+	bool SetIsGame(bool isGame_) { return isGame = isGame_; }
+
 private:
 	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
@@ -119,4 +121,6 @@ private:
 	bool flashFlag = false;
 	// 点滅処理ヘルパ
 	void ChangeColor();
+
+	bool isGame = false;
 };
