@@ -16,6 +16,7 @@
 #include "ParticleManager.h"
 #include "RailCamera.h"
 #include "Fade.h"
+#include "Poose.h" 
 
 class MyGame : public Framework {
 public:
@@ -53,6 +54,9 @@ private:
 	Sprite* gameOver_ = nullptr;
 	Sprite* clear_ = nullptr;
 	Sprite* explanation_ = nullptr;
+
+	// Poose（ポーズ画面）
+	Poose* poose_ = nullptr;
 
 	// UI / フェード等
 	bool isTitle_ = true;

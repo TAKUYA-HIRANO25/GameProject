@@ -57,6 +57,7 @@ void MyGame::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/Player/Player.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Reticle.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Explanation.png");
+	TextureManager::GetInstance()->LoadTexture("resources/GameBack.png");
 	// 必要なモデルをロード
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
@@ -113,23 +114,23 @@ void MyGame::CreateScene()
 
 	// スプライト群（タイトル / UI / フェード etc.）の生成と初期化
 	spriteCommon_ = SpriteCommon::GetInstance();
-	title_ = new Sprite(); 
+	title_ = new Sprite();
 	title_->Initialize(spriteCommon_, "resources/title.png");
-	titleUI_ = new Sprite(); 
+	titleUI_ = new Sprite();
 	titleUI_->Initialize(spriteCommon_, "resources/titleUI.png");
-	backGround_ = new Sprite(); 
+	backGround_ = new Sprite();
 	backGround_->Initialize(spriteCommon_, "resources/backGround.png"); backGround_->SetSize(Vector2(1280, 720));
-	fadeSprite_ = new Sprite(); 
+	fadeSprite_ = new Sprite();
 	fadeSprite_->Initialize(spriteCommon_, "resources/Fade.png"); fadeSprite_->SetSize(Vector2(0, 0)); fadeSprite_->SetPosition(Vector2(630, 360));
 	Ready_ = new Sprite();
 	Ready_->Initialize(spriteCommon_, "resources/Ready.png");
-	Go_ = new Sprite(); 
+	Go_ = new Sprite();
 	Go_->Initialize(spriteCommon_, "resources/GO.png");
-	gameOver_ = new Sprite(); 
+	gameOver_ = new Sprite();
 	gameOver_->Initialize(spriteCommon_, "resources/GameOver.png");
-	clear_ = new Sprite(); 
+	clear_ = new Sprite();
 	clear_->Initialize(spriteCommon_, "resources/Clear.png");
-	Black_ = new Sprite(); 
+	Black_ = new Sprite();
 	Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
 	explanation_ = new Sprite();
 	explanation_->Initialize(spriteCommon_, "resources/Explanation.png");
@@ -173,6 +174,10 @@ void MyGame::CreateScene()
 		}
 	}
 
+	// Poose の生成・初期化
+	poose_ = new Poose();
+	poose_->Initialize(spriteCommon_, input_);
+
 	waitingPreStartCinematic_ = false;
 
 	player_->Update(); // 最初の Update で位置をセットしておく
@@ -190,6 +195,44 @@ void MyGame::Update()
 	// 入力更新はメッセージ処理の直後に行う
 	input_->Update();
 
+	// ポーズトグル（ゲーム中のみ）
+	if (isGame_ && !isOver_ && !isClear_ && poose_ && input_->TriggerKey(DIK_F)) {
+		if (!poose_->IsActive()) {
+			poose_->Activate();
+		}
+		else {
+			poose_->Deactivate();
+		}
+	}
+
+	// ポーズが有効なら Poose を先に更新し、結果が出たら処理する（ゲーム本体の更新はスキップ）
+	if (poose_ && poose_->IsActive()) {
+		poose_->Update();
+
+		auto r = poose_->GetResult();
+		if (r != Poose::Result::None) {
+			if (r == Poose::Result::Resume) {
+				poose_->Deactivate();
+			}
+			else if (r == Poose::Result::ToTitle) {
+				// タイトルへ戻す（再初期化要求を出す）
+				isTitle_ = true;
+				isGame_ = false;
+				isOver_ = false;
+				isClear_ = false;
+				isFade_ = false;
+				endFade_ = false;
+				reup_ = true;
+				blackAlpha = 0.0f;
+				poose_->Deactivate();
+			}
+			poose_->ClearResult();
+		}
+
+		// ポーズ中はゲームロジック更新をスキップしてフェード処理へ
+		goto SKIP_GAME_UPDATE;
+	}
+
 	// imgui フレームは入力更新の後に作る（デバッグ UI）
 #ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
@@ -204,9 +247,9 @@ void MyGame::Update()
 	object3dCommon_->SettingCommonDraw();
 
 	// 簡易マウス入力のフラグ管理
-	if (input_->PushMouse(0)) 
-	{ 
-		mouseLeft_ = true; 
+	if (input_->PushMouse(0))
+	{
+		mouseLeft_ = true;
 	}
 	else if (input_->PushMouse(1))
 	{
@@ -231,17 +274,9 @@ void MyGame::Update()
 		if (input_->TriggerKey(DIK_RETURN)) {
 			isFade_ = true;
 			isOver_ = false;
-			// デバッグ：Enter 押下を明示
-			{
-				char buf[256];
-				sprintf_s(buf, "MyGame: Enter pressed -> isFade_=%d railCamera=%p fadeEffect=%p\n",
-					(int)isFade_, (void*)railCamera_, (void*)fadeEffect_);
-				OutputDebugStringA(buf);
-			}
 			// フェードオブジェクトが既に終了フラグの場合の保険（スタートできない場合をリセットして再スタート）
 			if (fadeEffect_ && fadeEffect_->IsFinished()) {
 				fadeEffect_->Reset();
-				OutputDebugStringA("MyGame: fadeEffect_ was finished -> Reset() called on Enter\n");
 			}
 		}
 	}
@@ -263,7 +298,7 @@ void MyGame::Update()
 			}
 		}
 
-		
+
 		railCamera_->Update();
 
 		// プリスタート演出が終わったら自動で isStart_ を有効にする
@@ -274,7 +309,6 @@ void MyGame::Update()
 				startTime_ = 0;
 				goTime_ = 0;
 				waitingPreStartCinematic_ = false;
-				// reset any flags if needed
 			}
 		}
 
@@ -304,7 +338,6 @@ void MyGame::Update()
 
 						// カメラ揺れを発生（存在チェック）
 						if (railCamera_) {
-							// 強めの揺れを与える（調整可）
 							railCamera_->StartShake(0.12f, 0.5f);
 						}
 					}
@@ -343,7 +376,7 @@ void MyGame::Update()
 				endFade_ = false;
 				blackAlpha += 0.01f;
 				if (blackAlpha > 1.0f) {
-					blackAlpha = 1.0f; // 最大値を超えないように制限
+					blackAlpha = 1.0f;
 				}
 				Black_->SetColor(Vector4(1, 1, 1, 0));
 			}
@@ -354,7 +387,7 @@ void MyGame::Update()
 				endFade_ = false;
 				blackAlpha += 0.01f;
 				if (blackAlpha > 1.0f) {
-					blackAlpha = 1.0f; // 最大値を超えないように制限
+					blackAlpha = 1.0f;
 				}
 				Black_->SetColor(Vector4(1, 1, 1, 0));
 			}
@@ -386,12 +419,12 @@ void MyGame::Update()
 
 #ifdef USE_IMGUI
 	ImGui::Render();
-#endif 
+#endif
+
+SKIP_GAME_UPDATE:
 
 	// フェード処理
-	// - isFade_ が true のときに Fade オブジェクトを開始/更新し、縮小開始時にタイトルを解除する
 	if (isFade_) {
-		// 毎フレーム、フェード状態をログに出す（簡潔に）
 		if (fadeEffect_) {
 			char buf[256];
 			sprintf_s(buf, "MyGame: FadeState eachFrame: isFade_=%d IsRunning=%d IsFinished=%d\n",
@@ -399,75 +432,31 @@ void MyGame::Update()
 			OutputDebugStringA(buf);
 		}
 
-		// フェード開始条件：fadeEffect_ が存在し、実行中でなく、かつ未完了の場合
 		if (fadeEffect_ && !fadeEffect_->IsRunning() && !fadeEffect_->IsFinished()) {
 			fadeEffect_->Start();
-			OutputDebugStringA("MyGame: fadeEffect_->Start() called (normal path)\n");
 		}
 		else if (fadeEffect_ && !fadeEffect_->IsRunning() && fadeEffect_->IsFinished() && isFade_) {
-			// もし既に IsFinished()==true で Start() が呼べない状態なら Reset して再開する
 			fadeEffect_->Reset();
 			fadeEffect_->Start();
-			OutputDebugStringA("MyGame: fadeEffect was finished -> Reset() then Start() called (fallback)\n");
 		}
 
-		// フェードの毎フレーム更新
 		if (fadeEffect_ && (fadeEffect_->IsRunning() || isFade_)) {
 			fadeEffect_->Update();
 		}
 
-		// フェードが縮小フェーズに入ったらタイトルを非表示にする（1回だけ実行）
 		if (fadeEffect_ && fadeEffect_->IsShrinking() && !endFade_) {
 			isTitle_ = false;
 			endFade_ = true;
-			OutputDebugStringA("MyGame: fadeEffect entered shrinking phase -> isTitle_ = false\n");
 		}
 
-		// フェード完了時の遷移処理（ログを残す）
 		if (fadeEffect_ && fadeEffect_->IsFinished()) {
-			{
-				char buf[256];
-				sprintf_s(buf, "MyGame::FadeFinished: railCamera=%p player=%p fadeEffect=%p\n",
-					(void*)railCamera_, (void*)player_, (void*)fadeEffect_);
-				OutputDebugStringA(buf);
-			}
-			// 以降の既存処理はそのまま継続...
 			endFade_ = false;
 			isFade_ = false;
 			startTime_ = 0;
 			goTime_ = 0;
 			fadeEffect_->Reset();
-
-			// RailCamera とプレイヤーが有効な場合にプリスタート演出をセット
-			if (railCamera_ && player_) {
-				Vector3 center = player_->GetWorldPosition();
-				{
-					Transform camT = railCamera_->GetTransform();
-					char buf[256];
-					sprintf_s(buf, "MyGame: Starting PreStartCinematic center=(%f,%f,%f) camPos=(%f,%f,%f)\n",
-						center.x, center.y, center.z,
-						camT.translate.x, camT.translate.y, camT.translate.z);
-					OutputDebugStringA(buf);
-				}
-
-				float startRadius = 25.0f;
-				Transform endT = railCamera_->GetTransform();
-				endT.translate = { 0.0f, 0.0f, -20.0f };
-				endT.rotate = { 0.0f, 6.28f, 0.0f };
-				float revolutions = 1.5f;
-				float duration = 3.0f;
-
-				railCamera_->StartPreStartCinematic(center, startRadius, endT, revolutions, duration);
-				railCamera_->StartShake(0.06f, duration * 0.6f);
-
-				waitingPreStartCinematic_ = true;
-
-				OutputDebugStringA("MyGame: Called RailCamera::StartPreStartCinematic and StartShake; waitingPreStartCinematic_=true\n");
-			}
-			else {
-				OutputDebugStringA("MyGame: railCamera_ or player_ is NULL -> set isStart_ = true\n");
-				isStart_ = true;
-			}
+			isStart_ = true;
+			
 		}
 	}
 }
@@ -532,15 +521,19 @@ void MyGame::Draw()
 		}
 	}
 
+	// Poose が有効なら最前面に描画
+	if (poose_ && poose_->IsActive()) {
+		spriteCommon_->SettingCommonDraw();
+		poose_->Draw();
+	}
+
 	// フェードはスプライトとして描画（spriteCommon_ が設定された状態で呼ぶ）
-	// - フェードが存在しており、何らかの表示条件が満たされている場合に描画
 	if (fadeEffect_ && (isFade_ || endFade_ || fadeEffect_->IsRunning())) {
-		// spriteCommon_->SettingCommonDraw() が既に呼ばれていることを前提
 		fadeEffect_->Draw();
 	}
 
 #ifdef USE_IMGUI
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());	
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());
 #endif
 
 	// 描画終了（Present 等）
@@ -563,7 +556,7 @@ void MyGame::Finalize()
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-#endif 
+#endif
 
 }
 
@@ -584,6 +577,9 @@ void MyGame::ReleaseResources()
 	delete particleManager_; particleManager_ = nullptr;
 	delete railCamera_; railCamera_ = nullptr;
 	delete skyDome_; skyDome_ = nullptr;
+
+	// Poose の解放を追加
+	delete poose_; poose_ = nullptr;
 
 	// modelCommon_ は Initialize で new しているため解放
 	delete modelCommon_; modelCommon_ = nullptr;
