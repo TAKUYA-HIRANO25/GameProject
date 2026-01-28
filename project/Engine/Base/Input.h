@@ -62,33 +62,33 @@ public:
 
 	// クライアント座標でのカーソル位置（必要なら使用）
 	Vector2 GetCursorClientPos2();
-
 	Vector3 GetCursorClientPos3();
 
 	// --- ゲームパッド関連（追加API） ---
-	// フレームごとにポーリングする（Input::Update 内で呼ぶか、外部から毎フレーム呼ぶ）
 	void UpdateGamepads();
-
-	// コントローラ接続確認（index: 0..3）
 	bool IsGamepadConnected(uint32_t index) const noexcept;
-
-	// ボタン押下 / トリガー（index: 0..3, button: XINPUT_GAMEPAD_...）
 	bool GamepadButtonPush(uint32_t index, WORD button) const noexcept;
 	bool GamepadButtonTrigger(uint32_t index, WORD button) const noexcept;
-
-	// 軸値（-1.0 .. 1.0） / トリガー（0.0 .. 1.0）
 	float GetLeftThumbX(uint32_t index) const noexcept;
 	float GetLeftThumbY(uint32_t index) const noexcept;
 	float GetRightThumbX(uint32_t index) const noexcept;
 	float GetRightThumbY(uint32_t index) const noexcept;
 	float GetLeftTrigger(uint32_t index) const noexcept;
 	float GetRightTrigger(uint32_t index) const noexcept;
-
-	// 追加: 指定のゲームパッドが「アクティブ（使用中）」かを判定する（スティック/トリガ/ボタン）
 	bool IsGamepadActive(uint32_t index) const noexcept;
-
-	// 追加: 接続中のいずれかのゲームパッドがアクティブかを判定する
 	bool IsAnyGamepadActive() const noexcept;
+
+	// Poose 等から入力ロックを要求するための API
+	void SetKeyboardLockedByPoose(bool locked) noexcept;
+	bool IsKeyboardLockedByPoose() const noexcept;
+	void SetMouseLockedByPoose(bool locked) noexcept;
+	bool IsMouseLockedByPoose() const noexcept;
+
+	// プレイヤー等が検出したコントローラによる入力ロック API
+	void SetKeyboardLockedByController(bool locked) noexcept;
+	bool IsKeyboardLockedByController() const noexcept;
+	void SetMouseLockedByController(bool locked) noexcept;
+	bool IsMouseLockedByController() const noexcept;
 
 private:
 	// プライベート化（シングルトン）
@@ -125,6 +125,14 @@ private:
 	XINPUT_STATE gamepadState[4]{};
 	XINPUT_STATE gamepadStatePrev[4]{};
 	bool gamepadConnected[4]{};
+
+	// Poose による入力ロックフラグ
+	bool keyboardLockedByPoose_ = false;
+	bool mouseLockedByPoose_ = false;
+
+	// コントローラ検出による入力ロックフラグ（プレイヤー側で使用）
+	bool keyboardLockedByController_ = false;
+	bool mouseLockedByController_ = false;
 
 	static Input* instance;
 };

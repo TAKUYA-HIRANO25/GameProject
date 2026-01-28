@@ -127,6 +127,19 @@ void Player::Move()
 	// コントローラ使用判定: 使用中ならキーボード入力を無視する
 	bool controllerActive = input_->IsAnyGamepadActive();
 
+	// --- ここでコントローラ検出に基づき入力ロックをセット ---
+	if (input_) {
+		if (controllerActive) {
+			input_->SetKeyboardLockedByController(true);
+			input_->SetMouseLockedByController(true);
+		}
+		else {
+			// コントローラ非使用時はコントローラ由来のロックを解除する（Poose ロックは別扱い）
+			input_->SetKeyboardLockedByController(false);
+			input_->SetMouseLockedByController(false);
+		}
+	}
+
 	// キーボード移動（コントローラ使用時は無視）
 	if (!controllerActive) {
 		if (input_->PushKey(DIK_A)) {
@@ -151,19 +164,15 @@ void Player::Move()
 	}
 
 	// ----- パッド入力（左スティック・トリガで移動） -----
-	// パッド 0 を使用（必要ならインデックスを外部で指定する拡張も可）
 	if (input_->IsGamepadConnected(0)) {
-		// 左スティック: X -> 左右, Y -> 上下（Y は上下反転しない想定）
 		const float padSpeedFactor = 0.18f; // パッド感度（チューニング可）
 		float lx = input_->GetLeftThumbX(0); // -1..1
 		float ly = input_->GetLeftThumbY(0); // -1..1
 		move.x += lx * padSpeedFactor;
 		move.y += ly * padSpeedFactor;
 
-		// トリガで Z 軸（左トリガで下、右トリガで上へ移動など）
 		float lt = input_->GetLeftTrigger(0);  // 0..1
 		float rt = input_->GetRightTrigger(0); // 0..1
-		// ここでは右トリガで +Z、左トリガで -Z（既存 Q/E と逆が好みなら入れ替え可）
 		move.z += (rt - lt) * kCharacterSpeed * 1.5f;
 	}
 
@@ -261,19 +270,6 @@ void Player::Reticle()
 	Camera* camera = object3dCommon_->GetDefaultCamera();
 	if (!camera) return;
 
-	// 振る舞い:
-	// - コントローラを「使用している」状態のときはマウス位置を無視する（マウスが反応しない）。
-	// - 判定条件: コントローラ接続かつスティック/トリガ/主要ボタンに入力がある場合を「使用中」とみなす。
-
-	// 永続的に保持するスクリーン位置（マウス使用時は更新、コントローラ使用時は右スティックで移動）
-	static Vector2 lastCursor = { float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f };
-	static bool initialized = false;
-	if (!initialized) {
-		// 初回はスプライト位置を優先して初期化（安全策）
-		lastCursor = Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f);
-		initialized = true;
-	}
-
 	// コントローラ使用判定
 	bool controllerActive = false;
 	const float padDead = 0.15f;
@@ -291,7 +287,6 @@ void Player::Reticle()
 			lt > 0.05f || rt > 0.05f) {
 			controllerActive = true;
 		}
-		// ボタン入力があればコントローラ使用中とみなす
 		if (!controllerActive) {
 			if (input_->GamepadButtonPush(0, XINPUT_GAMEPAD_A) ||
 				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_B) ||
@@ -303,6 +298,18 @@ void Player::Reticle()
 				input_->GamepadButtonPush(0, XINPUT_GAMEPAD_DPAD_RIGHT)) {
 				controllerActive = true;
 			}
+		}
+	}
+
+	// --- Reticle 側でもロック状態を設定（Move と整合） ---
+	if (input_) {
+		if (controllerActive) {
+			input_->SetKeyboardLockedByController(true);
+			input_->SetMouseLockedByController(true);
+		}
+		else {
+			input_->SetKeyboardLockedByController(false);
+			input_->SetMouseLockedByController(false);
 		}
 	}
 

@@ -9,7 +9,6 @@ Input* Input::instance = nullptr;
 
 Input* Input::GetInstance()
 {
-
 	if (instance == nullptr) {
 		instance = new Input;
 	}
@@ -57,8 +56,6 @@ void Input::Update()
 	{
 		HRESULT hr = keyboard->Acquire();
 		if (FAILED(hr)) {
-			// 失敗時にログ出力（デバッガ出力 or ログファイル）
-			// OutputDebugString などでエラーコードを確認する
 			char buf[128];
 			sprintf_s(buf, "Keyboard Acquire failed: 0x%08X\n", static_cast<unsigned>(hr));
 			OutputDebugStringA(buf);
@@ -96,13 +93,46 @@ void Input::Update()
 		mouseWheel = mouseState.lZ;
 	}
 
-	// ゲームパッドの状態を更新（Input クラスに実装した UpdateGamepads() を呼び出す）
-	// ※ UpdateGamepads() はヘッダに宣言し、別実装ファイルで定義している前提
+	// ゲームパッドの状態を更新
 	UpdateGamepads();
 }
 
+// キーボードロック用 API (Poose)
+void Input::SetKeyboardLockedByPoose(bool locked) noexcept {
+	keyboardLockedByPoose_ = locked;
+}
+bool Input::IsKeyboardLockedByPoose() const noexcept {
+	return keyboardLockedByPoose_;
+}
+
+// マウスロック用 API (Poose)
+void Input::SetMouseLockedByPoose(bool locked) noexcept {
+	mouseLockedByPoose_ = locked;
+}
+bool Input::IsMouseLockedByPoose() const noexcept {
+	return mouseLockedByPoose_;
+}
+
+// キーボードロック用 API (Controller)
+void Input::SetKeyboardLockedByController(bool locked) noexcept {
+	keyboardLockedByController_ = locked;
+}
+bool Input::IsKeyboardLockedByController() const noexcept {
+	return keyboardLockedByController_;
+}
+
+// マウスロック用 API (Controller)
+void Input::SetMouseLockedByController(bool locked) noexcept {
+	mouseLockedByController_ = locked;
+}
+bool Input::IsMouseLockedByController() const noexcept {
+	return mouseLockedByController_;
+}
 
 bool Input::PushKey(BYTE keyNumber) {
+	// Poose または Controller によるロック中は常に false を返す（キーボード無効化）
+	if (keyboardLockedByPoose_ || keyboardLockedByController_) return false;
+
 	//指定キーを押していればtrueを返す
 	if (key[keyNumber]) {
 		return true;
@@ -111,29 +141,42 @@ bool Input::PushKey(BYTE keyNumber) {
 }
 
 bool Input::TriggerKey(BYTE keyNumber) {
+	// Poose または Controller によるロック中は常に false を返す（キーボード無効化）
+	if (keyboardLockedByPoose_ || keyboardLockedByController_) return false;
+
 	if (keyPre[keyNumber] == 0 && key[keyNumber] != 0) {
 		return true;
 	}
 	return false;
 }
 
-
 // --- マウス用の実装 ---
 // ボタン: 0 = 左, 1 = 右, 2 = 中
 bool Input::PushMouse(uint8_t button) const noexcept
 {
+	// Poose または Controller によるロック中は常に false を返す（マウス無効化）
+	if (mouseLockedByPoose_ || mouseLockedByController_) return false;
+
 	if (button >= 8) return false;
 	return (mouseState.rgbButtons[button] & 0x80) != 0;
 }
 
 bool Input::TriggerMouse(uint8_t button) const noexcept
 {
+	// Poose または Controller によるロック中は常に false を返す（マウス無効化）
+	if (mouseLockedByPoose_ || mouseLockedByController_) return false;
+
 	if (button >= 8) return false;
 	return ((mouseStatePrev.rgbButtons[button] & 0x80) == 0) && ((mouseState.rgbButtons[button] & 0x80) != 0);
 }
 
 Vector2 Input::GetCursorClientPos2()
 {
+	// Poose または Controller によるマウスロック中は中央位置を返す（ポーズ中にマウスで操作されないようにする）
+	if (mouseLockedByPoose_ || mouseLockedByController_) {
+		return Vector2{ static_cast<float>(WinApp::kClientWidth) * 0.5f, static_cast<float>(WinApp::kClientHeight) * 0.5f };
+	}
+
 	// WinApp がセットされていない場合は (0,0) を返す
 	if (!winApp) {
 		return Vector2{ 0.0f, 0.0f };

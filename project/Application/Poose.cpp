@@ -47,10 +47,22 @@ void Poose::Activate() noexcept
 	result_ = Result::None;
 	selectedIndex_ = 0;
 	EnsureSpritesInitialized();
+
+	// 既にコントローラが使用されている場合はキーボードとマウスをロックしておく
+	if (input_ && input_->IsAnyGamepadActive()) {
+		input_->SetKeyboardLockedByPoose(true);
+		input_->SetMouseLockedByPoose(true);
+	}
 }
 
 void Poose::Deactivate() noexcept
 {
+	// Poose を閉じるときはキーボードとマウスロックを解除
+	if (input_) {
+		input_->SetKeyboardLockedByPoose(false);
+		input_->SetMouseLockedByPoose(false);
+	}
+
 	active_ = false;
 	result_ = Result::None;
 }
@@ -62,7 +74,6 @@ bool Poose::IsActive() const noexcept
 
 void Poose::Update()
 {
-
 	UpdateInput();
 	UpdateSprites();
 }
@@ -70,6 +81,12 @@ void Poose::Update()
 void Poose::UpdateInput()
 {
 	if (!input_) return;
+
+	// コントローラ使用をここで検出したらキーボードとマウスをロック（閉じるまで解除しない）
+	if (input_->IsAnyGamepadActive()) {
+		input_->SetKeyboardLockedByPoose(true);
+		input_->SetMouseLockedByPoose(true);
+	}
 
 	// P で復帰（トグル用ショートカット）
 	if (input_->TriggerKey(DIK_R)) {
