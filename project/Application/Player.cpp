@@ -271,7 +271,6 @@ void Player::Reticle()
 	if (!camera) return;
 
 	// コントローラ使用判定
-	bool controllerActive = false;
 	const float padDead = 0.15f;
 
 	if (input_->IsGamepadConnected(0)) {
@@ -338,6 +337,7 @@ void Player::Reticle()
 
 	const float width = static_cast<float>(WinApp::kClientWidth);
 	const float height = static_cast<float>(WinApp::kClientHeight);
+
 	// スプライト版レティクルのスクリーン座標更新
 	// クランプ
 	cursor.x = std::clamp(cursor.x, 0.0f, width - 1.0f);

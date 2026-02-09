@@ -93,10 +93,12 @@ private:
 	Vector3 dir = { 0.0f, 0.0f, 1.0f };
 
 	// --- レティクル関連 ---
-	Object3d* reticleModel_ = nullptr;    // 画面上の3Dレティクル表示用
+	Object3d* reticleModel_;    // 画面上の3Dレティクル表示用
 	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f }; // レティクルのワールド位置
 	float reticleDistance_ = 100.0f; // レティクルまでの距離（代替ターゲット距離）
 	Sprite* reticleSprite_ = nullptr;
+	Vector2 lastCursor; // 前フレームのカーソル位置保持用
+	bool controllerActive = false; // コントローラ使用中フラグ
 
 	float PlayerHP = 10.0f;
 	bool isDead_ = false;
