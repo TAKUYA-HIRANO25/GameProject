@@ -142,8 +142,14 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 					if (vi >= 0 && vi < (int)positions.size()) vd.position = positions[vi];
 					else vd.position = { 0,0,0,1.0f };
 					// texcoord
-					if (vti >= 0 && vti < (int)texcoords.size()) vd.texcoord = texcoords[vti];
-					else vd.texcoord = { 0.0f, 0.0f };
+					if (vti >= 0 && vti < (int)texcoords.size()) {
+                        // OBJ の V は下原点の場合が多い -> DirectX のテクスチャ座標と合わせるため反転
+                        vd.texcoord = texcoords[vti];
+                        vd.texcoord.y = 1.0f - vd.texcoord.y;
+                    }
+                    else {
+                        vd.texcoord = { 0.0f, 0.0f };
+                    }
 					// normal
 					if (vni >= 0 && vni < (int)normals.size()) vd.normal = normals[vni];
 					else vd.normal = { 0.0f, 0.0f, 0.0f };
