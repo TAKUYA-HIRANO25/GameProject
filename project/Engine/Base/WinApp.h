@@ -29,6 +29,9 @@
 /// </summary>
 class WinApp {
 public:
+	// シングルトン取得（Meyers）
+	static WinApp* GetInstance();
+
 	// 初期化
 	void Initialize();
 
@@ -59,4 +62,13 @@ private:
 
 	WNDCLASS wc{};
 
+	// プライベート化（シングルトン）
+	WinApp() = default;
+	~WinApp() = default;
+	WinApp(const WinApp&) = delete;
+	WinApp& operator=(const WinApp&) = delete;
+	WinApp(WinApp&&) = delete;
+	WinApp& operator=(WinApp&&) = delete;
+
+	static WinApp* instance;
 };

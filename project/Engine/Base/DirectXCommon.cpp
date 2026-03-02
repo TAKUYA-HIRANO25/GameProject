@@ -7,6 +7,17 @@ using namespace Microsoft::WRL;
 
 const uint32_t DirectXCommon::kMaxSRVCount = 512;
 
+// シングルトン実体の定義
+DirectXCommon* DirectXCommon::instance = nullptr;
+
+DirectXCommon* DirectXCommon::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = new DirectXCommon;
+	}
+	return instance;
+}
+
 void DirectXCommon::Initialize(WinApp* winApp)
 {
 	assert(winApp);

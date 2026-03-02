@@ -20,7 +20,7 @@ Player::~Player()
 	});
 }
 
-void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
+void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	// 3D 共通参照を保持
 	object3dCommon_ = object3dCommon;	
 
@@ -29,12 +29,6 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("Player/Player.obj");
 	Model_->SetTranslate(position_);
-
-	// デバッグログ: 初期位置と Model ポインタの確認
-	char buf[256];
-	sprintf_s(buf, "Player::Initialize: position=(%f,%f,%f) Model ptr=%p\n",
-		position_.x, position_.y, position_.z, static_cast<void*>(Model_));
-	OutputDebugStringA(buf);
 
 	spriteCommon_ = SpriteCommon::GetInstance();
 	if (spriteCommon_) {
@@ -60,7 +54,6 @@ void Player::Initialize(ObJect3dCommon* object3dCommon, Input* input) {
 		return true;
 	});
 
-	isGame = false;
 }
 
 void Player::Update()
@@ -73,49 +66,53 @@ void Player::Update()
 		}
 		return false;
 	});
-	if (isGame) {
-		// 被弾時の点滅処理（色の切替）
-		ChangeColor();
+	// 被弾時の点滅処理（色の切替）
+	ChangeColor();
 
-		// 入力に基づく移動処理
-		Move();
+	// 入力に基づく移動処理
+	Move();
 
-		// マウス/パッド位置からレティクル位置を決定して更新
-		Reticle();
+	// マウス/パッド位置からレティクル位置を決定して更新
+	Reticle();
 
-		// 発射処理（スペースキーまたはコントローラ A）
-		Fire();
+	// 発射処理（スペースキーまたはコントローラ A）
+	Fire();
 
-		// 所有弾の更新
-		for (PlayerBullet* bullet : bulletList_) {
-			bullet->Update();
-		}
-
-		// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
-		if (PlayerHP == 0) {
-			isDead_ = true;
-		}
+	// 所有弾の更新
+	for (PlayerBullet* bullet : bulletList_) {
+		bullet->Update();
 	}
+
+	// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
+	if (PlayerHP == 0) {
+		isDead_ = true;
+	}
+
 	// モデルに位置を反映して行列更新（Object3d 側で World 行列等を作る想定）
 	Model_->SetTranslate(position_);
 	Model_->Updata();
 
 }
 
+void Player::SpriteDraw()
+{
+	// スプライト用 PSO 設定（背景/UI 用）
+	spriteCommon_->SettingCommonDraw();
+	if (isDead_ == false) {
+		reticleSprite_->Draw();
+	}
+}
+
 void Player::Draw()
 {
+
+	object3dCommon_->SettingCommonDraw(); // 3D描画共通設定
 	if (isDead_ == false) {
 		Model_->Draw();
 	}
 
 	for (PlayerBullet* bullet : bulletList_) {
 		bullet->Draw();
-	}
-}
-
-void Player::SpriteDraw() {
-	if (isDead_ == false) {
-		reticleSprite_->Draw();
 	}
 }
 
@@ -170,10 +167,11 @@ void Player::Move()
 		float ly = input_->GetLeftThumbY(0); // -1..1
 		move.x += lx * padSpeedFactor;
 		move.y += ly * padSpeedFactor;
-
+		/*
 		float lt = input_->GetLeftTrigger(0);  // 0..1
 		float rt = input_->GetRightTrigger(0); // 0..1
 		move.z += (rt - lt) * kCharacterSpeed * 1.5f;
+		*/
 	}
 
 	// カメラの移動量を加算してワールド位置へ適用
@@ -182,22 +180,25 @@ void Player::Move()
 
 void Player::Fire()
 {
-
-	// スペース or コントローラ A 押下で発射（トリガ判定）
+	// 長押し（ホールド）で発射。キーボードはスペース、コントローラはR2（右トリガ）を使用する。
 	bool fireTriggered = false;
 
-	// コントローラ使用判定: 使用中ならキーボード入力を無視する
-	bool controllerActive = input_->IsAnyGamepadActive();
-
-	// キーボードからの発射（コントローラ使用中は無効）
-	if (!controllerActive && input_->TriggerKey(DIK_SPACE)) {
-		fireTriggered = true;
-	}
-	// コントローラからの発射は常に許可（接続確認されれば）
-	else if (input_->IsGamepadConnected(0) && input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+	// キーボードからの発射（長押しで連射）
+	if (input_ && input_->PushKey(DIK_SPACE)) {
 		fireTriggered = true;
 	}
 
+	// コントローラからの発射: 右トリガ（R2）を長押しで発射
+	// 閾値を超えている間はホールド扱いになる
+	const float kTriggerThreshold = 0.35f; // 調整可：0.0-1.0
+	if (!fireTriggered && input_ && input_->IsGamepadConnected(0)) {
+		float rt = input_->GetRightTrigger(0); // 0..1
+		if (rt > kTriggerThreshold) {
+			fireTriggered = true;
+		}
+	}
+
+	// 発射処理（インターバル制御は既存ロジックを維持）
 	if (fireTriggered && bulletTime <= 0) {
 
 		bulletActive = true;
@@ -207,7 +208,6 @@ void Player::Fire()
 
 		// 発射元の位置と方向を決定（reticleWorldPos_ を目標にする）
 		Vector3 startPos = Model_->GetTranslate();
-		dir = { 0.0f, 0.0f, 1.0f };
 		dir = { reticleWorldPos_.x - startPos.x, reticleWorldPos_.y - startPos.y, reticleWorldPos_.z - startPos.z };
 		dir = Normalize(dir);
 		Vector3 velocity = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
@@ -220,9 +220,9 @@ void Player::Fire()
 	}
 	else {
 		// 発射インターバルのカウントダウン（下限 0）
-		bulletTime--;
-		if (bulletTime <= 0) {
-			bulletTime = 0;
+		if (bulletTime > 0) {
+			--bulletTime;
+			if (bulletTime < 0) bulletTime = 0;
 		}
 	}
 }
@@ -383,9 +383,7 @@ void Player::SetRailCameraVelocity(Vector3 velocity)
 	railCameraVelocity_ = velocity;
 }
 
-// ChangeColor:
 // 被弾点滅ロジック。flashTimer_ と flashToggleCounter_ で赤/元色を切り替える。
-// Model_->SetDiffuseColor() を使って表示色を変更する。
 void Player::ChangeColor()
 {
 	if (flashTimer_ > 0 && Model_) {
@@ -413,4 +411,48 @@ void Player::ChangeColor()
 			flashFlag = false;
 		}
 	}
+}
+
+// 追加実装: Position / Scale / Rotate のセッター / ゲッター
+void Player::SetPosition(const Vector3& pos)
+{
+	position_ = pos;
+	if (Model_) {
+		Model_->SetTranslate(position_);
+		Model_->Updata();
+	}
+}
+
+void Player::SetScale(const Vector3& s)
+{
+	scale = s;
+	if (Model_) {
+		Model_->SetScale(scale);
+		Model_->Updata();
+	}
+}
+
+void Player::SetRotate(const Vector3& r)
+{
+	rotation = r;
+	if (Model_) {
+		Model_->SetRotate(rotation);
+		Model_->Updata();
+	}
+}
+
+Vector3 Player::GetScale() const
+{
+	if (Model_) {
+		return Model_->GetScale();
+	}
+	return scale;
+}
+
+Vector3 Player::GetRotate() const
+{
+	if (Model_) {
+		return Model_->GetRotate();
+	}
+	return rotation;
 }

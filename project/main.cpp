@@ -1,4 +1,4 @@
-#include "Application/FramWork/MyGame.h"
+#include "MyGame.h"
 #pragma comment(lib,"dxcompiler.lib")
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {

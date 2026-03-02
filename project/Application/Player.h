@@ -15,18 +15,18 @@
 #include "ParticleManager.h"
 /// <summary>
 /// プレイヤーを表すクラス
-/// 
+///
 /// 概要:
 /// - 3Dモデルを保持し、移動・射撃・被弾処理・レティクル（マウス方向を向く3Dターゲット）を管理するエンティティ。
 /// - 自身で `PlayerBullet` を生成してリストで管理し、弾のライフサイクルを制御する。
-/// 
+///
 /// 主な責務:
 /// - `Initialize` : モデルや入力参照の初期設定を行う。
 /// - `Update`     : 移動・レティクル更新・射撃処理・弾の更新・死亡判定を行う。
 /// - `Draw`       : プレイヤー本体と弾、レティクルの描画を行う。
 /// - `Move` / `Fire` : ユーザー入力に基づく移動と弾発射処理を提供する。
 /// - `Reticle`    : マウス位置からワールド空間の照準位置を算出してレティクルを更新する（逆射影を用いる想定）。
-/// 
+///
 /// 注意事項:
 /// - 弾やレティクルは生ポインタで管理されるため、外部参照がある場合は破棄タイミングに注意すること。
 /// - レンダリングと更新はメインスレッドで行う前提でスレッドセーフではない。
@@ -38,13 +38,13 @@ public:
 	Player();
 	~Player();
 	// 初期化
-	void Initialize(ObJect3dCommon* object3dCommon, Input* input);
+	void Initialize(ObJect3dCommon* object3dCommon);
 	// 更新
 	void Update();
-	// 描画
-	void Draw();
 	//スプライト描画
 	void SpriteDraw();
+	// 描画
+	void Draw();
 	//移動
 	void Move();
 	//弾発射
@@ -70,7 +70,12 @@ public:
 	void SetFlashDuration(int frames) { flashDuration_ = frames; }
 	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
 
-	bool SetIsGame(bool isGame_) { return isGame = isGame_; }
+	// 追加 API: Position / Scale / Rotate の外部操作と取得
+	void SetPosition(const Vector3& pos);
+	void SetScale(const Vector3& s);
+	void SetRotate(const Vector3& r);
+	Vector3 GetScale() const;
+	Vector3 GetRotate() const;
 
 private:
 	// 基盤
@@ -124,5 +129,4 @@ private:
 	// 点滅処理ヘルパ
 	void ChangeColor();
 
-	bool isGame = false;
 };

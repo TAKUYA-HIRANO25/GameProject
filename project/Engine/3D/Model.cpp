@@ -49,19 +49,9 @@ void Model::Draw()
 	// VertexBufferViewを設定
 	modelCommon->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-	// --- デバッグ: textureIndex を確認 ---
-	{
-		uint32_t texIdx = modelData.material.textureIndex;
-		// textureIndex がロード済みテクスチャの範囲内か確認（GetSrvHandleGPU は範囲外で assert する）
-		// 簡易ログ
-		char buf[128];
-		sprintf_s(buf, "Model::Draw(): textureIndex=%u\n", texIdx);
-		OutputDebugStringA(buf);
-	}
-
 	// SRVのDescriptorTarbleの先頭を設定
-	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(
-		2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
+	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->
+		GetSrvHandleGPU(modelData.material.textureIndex));
 
 	// 描画！（DrawCall/ドローコール)
 	modelCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);

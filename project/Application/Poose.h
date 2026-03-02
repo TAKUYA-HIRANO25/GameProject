@@ -17,7 +17,7 @@ public:
 	~Poose();
 
 	// 初期化（SpriteCommon と Input を受け取る）
-	void Initialize(SpriteCommon* spriteCommon, Input* input);
+	void Initialize();
 
 	// ポーズの有効化 / 無効化
 	void Activate() noexcept;

@@ -37,11 +37,13 @@
     <ClCompile Include="Engine\3D\Particle.cpp" />
     <ClCompile Include="Engine\3D\ParticleManager.cpp" />
     <ClCompile Include="Application\RailCamera.cpp" />
-    <ClCompile Include="Application\FramWork\MyGame.cpp" />
+    <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Application\FramWork\Framework.cpp" />
     <ClCompile Include="Application\Fade.cpp" />
     <ClCompile Include="Engine\Base\InputGamepad.cpp" />
     <ClCompile Include="Application\Poose.cpp" />
+    <ClCompile Include="Application\Scene\TitleScene.cpp" />
+    <ClCompile Include="Application\Scene\GameScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -81,14 +83,17 @@
     <ClInclude Include="Engine\3D\Particle.h" />
     <ClInclude Include="Engine\3D\ParticleManager.h" />
     <ClInclude Include="Application\RailCamera.h" />
-    <ClInclude Include="Application\FramWork\MyGame.h" />
+    <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Application\FramWork\Framework.h" />
     <ClInclude Include="Application\Fade.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Application\Poose.h" />
+    <ClInclude Include="Application\Scene\TitleScene.h" />
+    <ClInclude Include="Application\Scene\GameScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />
+    <None Include="Engine\Base\Direct" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

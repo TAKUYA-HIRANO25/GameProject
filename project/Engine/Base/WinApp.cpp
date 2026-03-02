@@ -10,6 +10,17 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif 
 
+// シングルトン実体の定義
+WinApp* WinApp::instance = nullptr;
+
+WinApp* WinApp::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = new WinApp;
+	}
+	return instance;
+}
+
 // WindowProc:
 // - アプリケーションのウィンドウプロシージャ。
 // - ImGui を使用している場合は最初に ImGui のハンドラにメッセージを渡し、

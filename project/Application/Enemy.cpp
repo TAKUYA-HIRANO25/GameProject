@@ -61,59 +61,76 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 // - 弾の寿命チェック、色点滅処理、移動・発射処理、モデル更新を行う
 void Enemy::Update()
 {
-	if (isGame) {
-		// 死亡した弾を削除
-		bullets_.remove_if([](EnemyBullet* bullet) {
-			if (bullet->IsDead()) {
-				delete bullet;
-				return true;
-			}
-			return false;
-			});
-
-		// 被弾点滅（ChangeColor 内で Model_->SetDiffuseColor を切り替える）
-		ChangeColor();
-
-		// 行動タイマー減算・切り替え
-		behaviorTimer_--;
-		if (behaviorTimer_ <= 0) {
-			MoveTime(); // 行動を切り替える
+	// 死亡した弾を削除
+	bullets_.remove_if([](EnemyBullet* bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
 		}
+		return false;
+	});
 
-		// 行動ごとの移動処理
-		switch (behavior_) {
-		case BehaviorType::Patrol:
-			// 元のランダム左右移動
+	// 被弾点滅（ChangeColor 内で Model_->SetDiffuseColor を切り替える）
+	ChangeColor();
+
+	// 行動タイマー減算・切り替え
+	behaviorTimer_--;
+	if (behaviorTimer_ <= 0) {
+		MoveTime(); // 行動を切り替える
+	}
+
+	// 行動ごとの移動処理
+	switch (behavior_) {
+	case BehaviorType::Patrol:
+		// 元のランダム左右移動
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		break;
+
+	case BehaviorType::Chase:
+		if (player_) {
+			/*
+			Vector3 dir = player_->GetWorldPosition() - position_;
+			dir = MyMath::Normalize(dir);
+			position_ += dir * speed;
+			*/
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-			break;
+		}
+		break;
 
-		case BehaviorType::Chase:
+	case BehaviorType::SineWave:
+		// 前に進みつつ X 軸にサイン波オフセット
+		/*
+		sinePhase_ += kSineFrequency;
+		position_.z += -speed; // 前に進む（z方向）
+		position_.x += std::sin(sinePhase_) * kSineAmplitude;
+		*/
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
+		}
+		position_ += move;
+		break;
+
+	case BehaviorType::Dash:
+		if (dashTimer_ > 0) {
+			/*
+			// ダッシュ中はプレイヤー方向へ素早く接近
 			if (player_) {
-				/*
 				Vector3 dir = player_->GetWorldPosition() - position_;
 				dir = MyMath::Normalize(dir);
-				position_ += dir * speed;
-				*/
-				moveTime--;
-				if (moveTime == 0) {
-					move.x *= -1;
-					moveTime = kMoveInterval;
-				}
-				position_ += move;
+				position_ += dir * kDashSpeed;
 			}
-			break;
-
-		case BehaviorType::SineWave:
-			// 前に進みつつ X 軸にサイン波オフセット
-			/*
-			sinePhase_ += kSineFrequency;
-			position_.z += -speed; // 前に進む（z方向）
-			position_.x += std::sin(sinePhase_) * kSineAmplitude;
 			*/
 			moveTime--;
 			if (moveTime == 0) {
@@ -121,79 +138,60 @@ void Enemy::Update()
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-			break;
-
-		case BehaviorType::Dash:
-			if (dashTimer_ > 0) {
-				/*
-				// ダッシュ中はプレイヤー方向へ素早く接近
-				if (player_) {
-					Vector3 dir = player_->GetWorldPosition() - position_;
-					dir = MyMath::Normalize(dir);
-					position_ += dir * kDashSpeed;
-				}
-				*/
-				moveTime--;
-				if (moveTime == 0) {
-					move.x *= -1;
-					moveTime = kMoveInterval;
-				}
-				position_ += move;
-				dashTimer_--;
-			}
-			else {
-				// ノーマルに戻る
-				moveTime--;
-				if (moveTime == 0) {
-					move.x *= -1;
-					moveTime = kMoveInterval;
-				}
-				position_ += move;
-			}
-			break;
-
-		case BehaviorType::Idle:
-			// ほとんど動かない
-			// small idle wiggle
-			/*
-			position_.x += std::sin(sinePhase_) * 0.02f;
-			sinePhase_ += 0.05f;
-			*/
+			dashTimer_--;
+		}
+		else {
+			// ノーマルに戻る
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-			break;
-
-		default:
-			moveTime--;
-			if (moveTime == 0) {
-				move.x *= -1;
-				moveTime = kMoveInterval;
-			}
-			position_ += move;
-			//position_ += move;
-			break;
 		}
+		break;
 
-		// 発射カウントダウン
-		Time--;
-		if (Time == 0) {
-			Time = kFireInterval;
-			Fire();
+	case BehaviorType::Idle:
+		// ほとんど動かない
+		// small idle wiggle
+		/*
+		position_.x += std::sin(sinePhase_) * 0.02f;
+		sinePhase_ += 0.05f;
+		*/
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
 		}
+		position_ += move;
+		break;
 
-		// 所持弾の Update を呼び出す
-		for (EnemyBullet* bullet : bullets_) {
-			bullet->Update();
+	default:
+		moveTime--;
+		if (moveTime == 0) {
+			move.x *= -1;
+			moveTime = kMoveInterval;
 		}
+		position_ += move;
+		//position_ += move;
+		break;
+	}
 
-		// HP が尽きたら死亡フラグを立てる
-		if (EnemyHp <= 0) {
-			isDead_ = true;
-		}
+	// 発射カウントダウン
+	Time--;
+	if (Time == 0) {
+		Time = kFireInterval;
+		Fire();
+	}
+
+	// 所持弾の Update を呼び出す
+	for (EnemyBullet* bullet : bullets_) {
+		bullet->Update();
+	}
+
+	// HP が尽きたら死亡フラグを立てる
+	if (EnemyHp <= 0) {
+		isDead_ = true;
 	}
 	// モデルに位置を反映して更新
 	if (Model_) {

@@ -14,10 +14,10 @@ Poose::~Poose()
 	delete resumeSprite_; resumeSprite_ = nullptr;
 }
 
-void Poose::Initialize(SpriteCommon* spriteCommon, Input* input)
+void Poose::Initialize()
 {
-	spriteCommon_ = spriteCommon;
-	input_ = input;
+	spriteCommon_ = spriteCommon_->GetInstance();
+	input_ = Input::GetInstance();
 	EnsureSpritesInitialized();
 }
 

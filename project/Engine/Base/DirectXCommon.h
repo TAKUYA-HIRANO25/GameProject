@@ -35,6 +35,9 @@
 class DirectXCommon
 {
 public:
+	/// シングルトン取得（Meyers）
+	static DirectXCommon* GetInstance();
+
 	/// コンストラクタ
 	void Initialize(WinApp* winApp);
 	/// DepthStencilTextureの生成
@@ -191,4 +194,14 @@ private:
 
 	//中間
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> intermediateResources_;
+
+	// プライベート化（シングルトン）
+	DirectXCommon() = default;
+	~DirectXCommon() = default;
+	DirectXCommon(const DirectXCommon&) = delete;
+	DirectXCommon& operator=(const DirectXCommon&) = delete;
+	DirectXCommon(DirectXCommon&&) = delete;
+	DirectXCommon& operator=(DirectXCommon&&) = delete;
+
+	static DirectXCommon* instance;
 };

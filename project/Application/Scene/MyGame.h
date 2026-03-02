@@ -17,6 +17,8 @@
 #include "RailCamera.h"
 #include "Fade.h"
 #include "Poose.h" 
+#include "TitleScene.h"
+#include "GameScene.h"
 
 class MyGame : public Framework {
 public:
@@ -32,34 +34,19 @@ private:
 	DirectXCommon* dxCommon_ = nullptr;
 	ModelCommon* modelCommon_ = nullptr;
 
-	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
-	ParticleManager* particleManager_ = nullptr;
+	//シーン
+	TitleScene* titleScene_ = nullptr;
+	GameScene* gameScene_ = nullptr;
+
+	//オブジェクト
 	RailCamera* railCamera_ = nullptr;
-	Object3d* skyDome_ = nullptr;
 
 	// シングルトン参照（プロジェクト側 GetInstance() がポインタを返す想定）
 	Input* input_ = nullptr;
 	SpriteCommon* spriteCommon_ = nullptr;
 	ObJect3dCommon* object3dCommon_ = nullptr;
 
-	// スプライト群（所有）
-	Sprite* title_ = nullptr;
-	Sprite* titleUI_ = nullptr;
-	Sprite* backGround_ = nullptr;
-	Sprite* fadeSprite_ = nullptr;
-	Sprite* Ready_ = nullptr;
-	Sprite* Go_ = nullptr;
-	Sprite* Black_ = nullptr;
-	Sprite* gameOver_ = nullptr;
-	Sprite* clear_ = nullptr;
-	Sprite* explanation_ = nullptr;
-
-	// Poose（ポーズ画面）
-	Poose* poose_ = nullptr;
-
 	// UI / フェード等
-	bool isTitle_ = true;
 	bool isFade_ = false;
 	bool endFade_ = false;
 	bool isStart_ = false;
@@ -68,29 +55,26 @@ private:
 	bool isOver_ = false;
 	bool isClear_ = false;
 	bool reup_ = false;
-
+	bool isScene_ = false;
 	// フェード用
 	Fade* fadeEffect_ = nullptr;
 
 	// フェード完了後のプリスタート演出待機フラグ
 	bool waitingPreStartCinematic_ = false;
 
-	// スタートタイマー等
-	int titleTime_ = 0;
-	int startTime_ = 0;
-	int goTime_ = 0;
-
-	//色
-	float blackAlpha = 0.0f;
-	// 一時 / デバッグ
-	bool mouseLeft_ = false;
-	bool mouseRight_ = false;
-
 	// UV transform 用（main.cpp の変数を保持）
 	Sprite::Transform uvTransformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
+	enum class Scene {
+		Title,
+		Rule,
+		Poose,
+		Select,
+		Game,
+	};
+	Scene currentScene = Scene::Title; // 初期シーンはTitle
+
 	// helper
-	void LoadCommonResources();
 	void CreateScene();
 	void ReleaseResources();
 };

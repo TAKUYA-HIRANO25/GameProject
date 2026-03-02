@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;$(ProjectDir)Application/FramWork;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary />
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +135,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\FramWork\Framework.cpp" />
     <ClCompile Include="Application\Fade.cpp" />
     <ClCompile Include="Engine\Base\InputGamepad.cpp" />
+    <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\3D\Model.cpp" />
     <ClCompile Include="Engine\3D\ModelCommon.cpp" />
@@ -153,8 +154,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3D\Particle.cpp" />
     <ClCompile Include="Engine\3D\ParticleManager.cpp" />
     <ClCompile Include="Application\RailCamera.cpp" />
-    <ClCompile Include="Application\FramWork\MyGame.cpp" />
+    <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Application\Poose.cpp" />
+    <ClCompile Include="Application\Scene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -194,11 +196,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3D\Particle.h" />
     <ClInclude Include="Engine\3D\ParticleManager.h" />
     <ClInclude Include="Application\RailCamera.h" />
-    <ClInclude Include="Application\FramWork\MyGame.h" />
+    <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Application\FramWork\Framework.h" />
     <ClInclude Include="Application\Fade.h" />
     <ClInclude Include="Application\Poose.h" />
+    <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Application\Scene\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -209,6 +213,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Engine\Base\Direct" />
     <None Include="resources\shaders\Object3d.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
