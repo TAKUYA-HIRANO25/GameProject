@@ -44,6 +44,7 @@
     <ClCompile Include="Application\Poose.cpp" />
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
+    <ClCompile Include="Engine\Audio\Audio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -90,6 +91,7 @@
     <ClInclude Include="Application\Poose.h" />
     <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\Scene\GameScene.h" />
+    <ClInclude Include="Engine\Audio\Audio.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />

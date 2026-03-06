@@ -119,7 +119,6 @@ void MyGame::CreateScene()
 	{
 		// 初期カメラ行列とオブジェクト行列を即時更新しておく（最初のフレームで視界外になるのを防ぐ）
 		if (railCamera_) {
-			// RailCamera::Update() は camera->Update() を呼ぶので初期同期用に一度実行
 			railCamera_->Update();
 		}
 	}
