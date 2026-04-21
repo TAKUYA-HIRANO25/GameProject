@@ -1,10 +1,12 @@
-
-
 #include "Player.h"
 #include "MatuilityForText.h"
 #include <Xinput.h>
 #include <algorithm>
 #include <cmath>
+Player::Player()
+{
+	//Initializerで初期化
+}
 
 Player::~Player()
 {

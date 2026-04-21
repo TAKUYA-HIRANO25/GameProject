@@ -1,5 +1,9 @@
 #include "PlayerBullet.h"
 
+PlayerBullet::PlayerBullet() {
+    // Initializerで初期化
+}
+
 PlayerBullet::~PlayerBullet() {
     // デストラクタ: 所有するObject3dを解放
     delete Model_;

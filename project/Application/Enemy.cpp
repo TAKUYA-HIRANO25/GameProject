@@ -2,6 +2,11 @@
 #include "Player.h"
 #include <cmath>
 
+Enemy::Enemy()
+{
+	// Initializerで初期化
+}
+
 Enemy::~Enemy()
 {
 	// デストラクタ:保持しているモデルと弾を解放
