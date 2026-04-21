@@ -94,7 +94,7 @@ float Input::GetRightTrigger(uint32_t index) const noexcept {
 	return NormalizeTrigger(gamepadState[index].Gamepad.bRightTrigger, XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 }
 
-// 追加: ゲームパッドが「使用中（アクティブ）」かどうかの判定
+// ゲームパッドが「使用中」かどうかの判定
 bool Input::IsGamepadActive(uint32_t index) const noexcept {
 	if (!IsValidIndex(index)) return false;
 	if (!gamepadConnected[index]) return false;

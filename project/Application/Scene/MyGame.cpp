@@ -6,22 +6,17 @@
 #include "SpriteCommon.h"
 #include "Object3dCommon.h"
 
-// MyGame:
-// - アプリケーション固有の初期化 / 更新 / 描画 / 解放処理を実装する。
-// - main.cpp のループを Framework::Run から移植した形。
-// - 本ファイルではシーン作成、入力反応、ゲーム状態の遷移、フェード制御などを扱う。
-
 void MyGame::Initialize()
 {
-	// WinAPI 初期化（ウィンドウ生成とメッセージループ準備）
+	// WinAPI初期化
 	winApp_ = WinApp::GetInstance();
 	winApp_->Initialize();
 
-	// DirectX 初期化（レンダラのセットアップ）
+	// DirectX初期化
 	dxCommon_ = DirectXCommon::GetInstance();
 	dxCommon_->Initialize(winApp_);
 
-	// 入力システムの取得・初期化（シングルトン想定）
+	// 入力システムの取得・初期化
 	input_ = Input::GetInstance();
 	input_->Initialize(winApp_);
 
@@ -34,14 +29,14 @@ void MyGame::Initialize()
 	modelCommon_ = new ModelCommon();
 	modelCommon_->Initialize(dxCommon_);
 
-	// 3D 共通設定（カメラなど）初期化
+	// 3D 共通設定の初期化
 	object3dCommon_ = ObJect3dCommon::GetInstance();
 	object3dCommon_->Initialize(dxCommon_);
 
-	// モデルマネージャ初期化（必要なモデルをロードする準備）
+	// モデルマネージャ初期化
 	ModelManager::GetInstance()->Initialize(dxCommon_);
 
-	// 主要テクスチャ・モデルを読み込み（リソースを事前ロードしておく）
+	// 主要テクスチャ・モデルを読み込み
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/title.png");
 	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
@@ -67,13 +62,13 @@ void MyGame::Initialize()
 	ModelManager::GetInstance()->LoadModel("sphere.obj");
 	ModelManager::GetInstance()->LoadModel("Player/Player.obj");
 	ModelManager::GetInstance()->LoadModel("Enemy/Enemy.obj");
-	// シーン構築（カメラ、プレイヤー、敵、パーティクル、スプライト）
+	// シーン構築
 	CreateScene();
 }
 
 void MyGame::CreateScene()
 {
-	// カメラ / レールカメラの作成と初期配置
+	// カメラ/レールカメラの作成と初期配置
 	Camera* camera = new Camera;
 	camera->SetRotate({ 0.0f, 6.28f, 0.0f });
 	camera->SetTranslate({ 0.0f, 0.0f, -20.0f });
@@ -82,17 +77,17 @@ void MyGame::CreateScene()
 	railCamera_->Initialize(camera);
 	if (object3dCommon_) object3dCommon_->SetDefaultCamera(railCamera_->GetCamera());
 
-	// 少し前進して視点を強調する (例: z を -14 へ 2 秒で移動) と軽い揺れ
+	// 少し前進して視点を強調する(zを-14へ2秒で移動)と軽い揺れ
 	{
 		Transform target = railCamera_->GetTransform();
-		target.translate.z = -14.0f; // カメラを手前に（-20 -> -14）
-		// 少し上に上げたい場合: target.translate.y += 1.5f;
-		railCamera_->StartCinematicMove(target, 2.0f); // 2 秒で移動
-		// 起動時の振動（small）
-		railCamera_->StartShake(0.08f, 1.0f); // 強さ 0.08、1 秒
+		target.translate.z = -14.0f; // カメラを手前に(-20 -> -14)
+		// 少し上に上げたい場合:target.translate.y += 1.5f;
+		railCamera_->StartCinematicMove(target, 2.0f); // 2秒で移動
+		// 起動時の振動
+		railCamera_->StartShake(0.08f, 1.0f); // 強さ0.08、1秒
 	}
 
-	// スプライト群（タイトル / UI / フェード etc.）の生成と初期化
+	// スプライト群(タイトル/UI/フェードetc)の生成と初期化
 	spriteCommon_ = SpriteCommon::GetInstance();
 	
 	// ゲーム初期フラグを明確に初期化
@@ -113,11 +108,11 @@ void MyGame::CreateScene()
 	gameScene_ = new GameScene();
 	gameScene_->Initialize(railCamera_);
 
-	// フェード処理オブジェクトの生成（Sprite と連動）
+	// フェード処理オブジェクトの生成
 	fadeEffect_ = new Fade(spriteCommon_, "resources/Fade.png");
 
 	{
-		// 初期カメラ行列とオブジェクト行列を即時更新しておく（最初のフレームで視界外になるのを防ぐ）
+		// 初期カメラ行列とオブジェクト行列を即時更新しておく
 		if (railCamera_) {
 			railCamera_->Update();
 		}
@@ -128,7 +123,7 @@ void MyGame::CreateScene()
 
 void MyGame::Update()
 {
-	// ウィンドウメッセージ処理（最初に行う）
+	// ウィンドウメッセージ処理
 	if (winApp_->ProcessMessage()) {
 		roopOut_ = true;
 		return;
@@ -138,7 +133,7 @@ void MyGame::Update()
 	input_->Update();
 
 #ifdef USE_IMGUI
-	// ImGui フレーム開始はフレーム単位で一度だけ行う（全シーン共通）
+	// ImGui フレーム開始はフレーム単位で一度だけ行う
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -157,8 +152,8 @@ void MyGame::Update()
 		if (fadeEffect_->IsShrinking()) {
 			isScene_ = false;
 			currentScene = Scene::Game;
-			titleScene_->Finalize(); // タイトルシーンの終了処理をここで行う（タイトルからゲームへ遷移するタイミングで）
-			gameScene_->Initialize(railCamera_); // ゲームシーンの初期化をここで行う（タイトルからゲームへ遷移するタイミングで）
+			titleScene_->Finalize(); // タイトルシーンの終了処理をここで行う
+			gameScene_->Initialize(railCamera_); // ゲームシーンの初期化をここで行う
 		}
 		break;
 	case MyGame::Scene::Rule:
@@ -176,10 +171,10 @@ void MyGame::Update()
 		if (gameScene_->IsGameSet()) {
 			currentScene = MyGame::Scene::Title;
 			isScene_ = false;
-			gameScene_->Finalize(); // ゲームシーンの終了処理をここで行う（ゲームからタイトルへ遷移するタイミングで）
-			titleScene_->Initialize(railCamera_); // タイトルシーンの初期化をここで行う（ゲームからタイトルへ遷移するタイミングで）
+			gameScene_->Finalize(); // ゲームシーンの終了処理をここで行う
+			titleScene_->Initialize(railCamera_); // タイトルシーンの初期化をここで行う
 		}
-		// ゲームオーバー / クリアのフラグをゲームシーンから取得して反映
+		// ゲームオーバー/クリアのフラグをゲームシーンから取得して反映
 	default:
 
 		break;
@@ -218,7 +213,7 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	// 描画開始（コマンドリスト等の初期化）
+	// 描画開始
 	dxCommon_->PreDraw();
 
 	switch (currentScene)
@@ -247,7 +242,7 @@ void MyGame::Draw()
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList());
 #endif
 
-	// 描画終了（Present 等）
+	// 描画終了
 	dxCommon_->PostDrow();
 }
 
@@ -255,7 +250,7 @@ void MyGame::Finalize()
 {
 	ReleaseResources();
 
-	// singletons の Finalize 呼び出し
+	// singletonsのFinalize呼び出し
 	ModelManager::GetInstance()->Finalize();
 	TextureManager::GetInstance()->Finalize();
 
@@ -274,6 +269,6 @@ void MyGame::ReleaseResources()
 	delete titleScene_; titleScene_ = nullptr;
 	delete gameScene_; gameScene_ = nullptr;
 
-	// modelCommon_ は Initialize で new しているため解放
+	// modelCommonはInitializeでnewしているため解放
 	delete modelCommon_; modelCommon_ = nullptr;
 }

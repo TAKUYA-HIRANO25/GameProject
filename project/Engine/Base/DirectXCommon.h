@@ -22,20 +22,21 @@
 /// 
 /// 役割:
 /// - Direct3D12 デバイス、スワップチェーン、コマンド関連オブジェクトの初期化と管理を行う。
-/// - レンダーターゲット / デプスステンシルバッファ、デスクリプタヒープなど共通リソースを生成する。
-/// - シェーダーコンパイル（DXC）や ImGui の初期化、フレーム前後の処理ラッパー（__PreDraw__/__PostDrow__）を提供する。
-/// - テクスチャ用のアロケータや一時転送リソースを管理するヘルパーも兼ねる。
+/// - レンダーターゲット/デプスステンシルバッファ、デスクリプタヒープなど共通リソースを生成する。
+/// - シェーダーコンパイル(DXC)やImGui の初期化、フレーム前後の処理ラッパーを提供する。
+/// - テクスチャ用のアロケータや一時転送リソースを管理する。
 /// 
 /// 使用上の注意:
 /// - 初期化はアプリケーションの起動時に一度だけ行い、終了時に後片付けを行うこと。
-/// - スレッドセーフではなく、レンダリングスレッド（通常はメインスレッド）で操作する。
-/// - リソース作成系メソッド（CreateBufferResource, CreateTextureResourece 等）を通して
-///   GPU リソースを一元管理することでメモリ管理を簡素化する。
+/// - スレッドセーフではなく、レンダリングスレッド(通常はメインスレッド)で操作する。
+/// - リソース作成系メソッド(CreateBufferResource, CreateTextureResourece等)を通して
+///   GPUリソースを一元管理することでメモリ管理を簡素化する。
 /// </summary>
+
 class DirectXCommon
 {
 public:
-	/// シングルトン取得（Meyers）
+	/// シングルトン取得
 	static DirectXCommon* GetInstance();
 
 	/// コンストラクタ
@@ -195,7 +196,7 @@ private:
 	//中間
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> intermediateResources_;
 
-	// プライベート化（シングルトン）
+	// シングルトン
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
 	DirectXCommon(const DirectXCommon&) = delete;

@@ -116,13 +116,13 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResourece(Mic
 	resourceDesc.SampleDesc.Count = 1;
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);
 
-	// WRITE_BACK / CUSTOM はテクスチャ用には不適切なことがあるため DEFAULT にする
+	// WRITE_BACK/CUSTOM はテクスチャ用には不適切なことがあるためDEFAULTにする
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
-	// 初期状態は COPY_DEST（Upload -> COPY -> GENERIC_READ へ遷移する）
+	// 初期状態はCOPY_DEST(Upload -> COPY -> GENERIC_READ へ遷移する)
 	D3D12_RESOURCE_STATES initialState = D3D12_RESOURCE_STATE_COPY_DEST;
 
 	// Resource の生成
@@ -155,7 +155,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::UploadTextureData(Microsof
 	commandList->ResourceBarrier(1, &barrier);
 	return intermediateResource;
 
-	// 関数としては転送先テクスチャ（GPUリソース）を返すのが自然
+	// 関数としては転送先テクスチャ(GPUリソース)を返すのが自然
 	return texture;
 }
 
@@ -524,7 +524,7 @@ void DirectXCommon::UpdateFixFPS()
 	std::chrono::microseconds elapsep =
 		std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
 
-	// 1/60秒（よりわずかに短い時間）経っていない場合
+	// 1/60秒(よりわずかに短い時間)経っていない場合
 	if (elapsep < kMinCheckTime) {
 		// 1/60秒経過するまで微小なスリープを繰り返す
 		while (std::chrono::steady_clock::now() - reference_ < kMinTime) {

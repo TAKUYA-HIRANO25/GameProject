@@ -14,7 +14,7 @@
 /// - .obj ファイルなどから頂点／マテリアルを読み込み、GPU バッファを作成して描画を行うクラス。
 /// - ModelCommon 経由で DirectX の共通機能にアクセスする。
 ///
-/// 主なメソッド:
+/// 機能:
 /// - Initialize: ファイル読み込みとバッファ作成を行う。
 /// - Draw: 作成済みバッファを使って描画コマンドを発行する。
 /// - static LoadObjFile / LoadMaterialTemplateFile: ファイル読み込みユーティリティ（静的）。

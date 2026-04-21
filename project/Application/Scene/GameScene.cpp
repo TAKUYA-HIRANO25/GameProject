@@ -22,7 +22,7 @@ void GameScene::Initialize(RailCamera* railCamera)
 	spriteCommon_ = SpriteCommon::GetInstance();
 	object3dCommon_ = ObJect3dCommon::GetInstance();
 
-	// パーティクルマネージャ生成（3D 共通設定を渡す）
+	// パーティクルマネージャ生成
 	particleManager_ = new ParticleManager(object3dCommon_);
 
 	// カメラ
@@ -39,10 +39,12 @@ void GameScene::Initialize(RailCamera* railCamera)
 	enemy_->setPlayer(player_);
 	enemy_->SetParticleManager(particleManager_);
 
-	// 天球 (sky dome) の初期化
+	// 天球の初期化
 	skyDome_ = new Object3d();
 	skyDome_->Initialize(object3dCommon_);
 	skyDome_->SetModel("sphere.obj");
+	skyDome_->SetScale({ 50.0f, 50.0f, 50.0f });
+	skyDome_->SetTranslate({ 0.0f, -1.0f, 20.0f });
 
 	// スプライトの初期化
 	Ready_ = new Sprite();
@@ -92,7 +94,7 @@ void GameScene::Update()
 		}
 		break;
 	case GameScene::Scene::main:
-		if (input_->TriggerKey(DIK_F)) {
+		if (input_->TriggerKey(DIK_ESCAPE) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_START)) {
 			if (!poose_->IsActive()) {
 				poose_->Activate();
 			}
@@ -100,7 +102,7 @@ void GameScene::Update()
 				poose_->Deactivate();
 			}
 		}
-		// ポーズが有効なら Poose を先に更新し、結果が出たら処理する（ゲーム本体の更新はスキップ）
+		// ポーズが有効ならPooseを先に更新し
 		if (poose_->IsActive()) {
 			poose_->Update();
 
@@ -118,19 +120,19 @@ void GameScene::Update()
 			// ポーズ中はゲームロジック更新をスキップしてフェード処理へ
 			goto SKIP_GAME_UPDATE;
 		}
+		// パーティクル更新
+		particleManager_->Update();
 		// プレイヤー更新
 		player_->Update();
 		// 敵更新
 		enemy_->Update();
-		// パーティクル更新（描画用のエミッタ更新など）
-		particleManager_->Update();
-		// UI スプライト更新（タイトル外で常に更新）
+		// UI スプライト更新
 		gameOver_->Update();
 		clear_->Update();
 		Black_->Update();
 		explanation_->Update();
 
-		// 当たり判定（プレイヤー・敵・弾の座標比較）
+		// 当たり判定
 		if (player_ && enemy_) {
 			Vector3 posA = player_->GetWorldPosition();
 			const std::list<PlayerBullet*>& playerBullets = player_->GetBullets();
@@ -176,7 +178,7 @@ void GameScene::Update()
 			}
 		}
 
-		// ゲームオーバー / クリア判定
+		// ゲームオーバー/クリア判定
 		if (player_->IsDead()) {
 			currentScene_ = Scene::gameOver;
 		}
@@ -187,14 +189,14 @@ void GameScene::Update()
 
 		break;
 	case GameScene::Scene::gameOver:
-		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
-			isGame_ = false;
-			isSet_ = true;
+		 isGame_ = false;
+		 isSet_ = true;
 		}
 		break;
 	case GameScene::Scene::clear:
-		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
 		 isGame_ = false;
 		 isSet_ = true;
@@ -205,8 +207,7 @@ void GameScene::Update()
 	}
 
 	skyDome_->Updata();
-
-	// imgui フレームは MyGame::Update() で開始されるため、ここではウィジェット作成のみ行う
+	// imguiフレームはMyGame::Update()で開始されるため、ここではウィジェット作成のみ行う
 #ifdef USE_IMGUI
 	ImGui::ShowDemoWindow();
 
@@ -234,11 +235,77 @@ void GameScene::Update()
 		ImGui::Text("Tip: Rotation in radians.");
 		ImGui::End();
 	}
+
+	// SkyDomeサイズ編集ウィンドウ
+	if (skyDome_) {
+		const Vector3 curScale = skyDome_->GetScale();
+		float scaleArr[3] = { curScale.x, curScale.y, curScale.z };
+
+		ImGui::Begin("SkyDome Scale");
+		// 個別軸でいじれるようにDragFloat3を使う
+		if (ImGui::DragFloat3("Scale", scaleArr, 1.0f, 0.01f, 1000.0f)) {
+			skyDome_->SetScale({ scaleArr[0], scaleArr[1], scaleArr[2] });
+		}
+		// 一括スケールを用意
+		float uniform = (scaleArr[0] + scaleArr[1] + scaleArr[2]) / 3.0f;
+		if (ImGui::SliderFloat("Uniform Scale", &uniform, 0.01f, 1000.0f)) {
+			skyDome_->SetScale({ uniform, uniform, uniform });
+		}
+		if (ImGui::Button("Reset SkyDome Scale")) {
+			// デフォルトに戻す
+			skyDome_->SetScale({ 1.0f, 1.0f, 1.0f });
+		}
+		ImGui::End();
+	}
+
+	// カメラ変換編集ウィンドウ
+	if (railCamera_) {
+		// RailCameraのTransform参照を取得
+		Transform& t = railCamera_->GetTransform();
+
+		// 現在値をローカル配列へコピー(ImGui は生配列を要求)
+		float p[3] = { t.translate.x, t.translate.y, t.translate.z };
+		float s[3] = { t.scale.x, t.scale.y, t.scale.z };
+		float r[3] = { t.rotate.x, t.rotate.y, t.rotate.z };
+
+		ImGui::Begin("Camera Transform");
+		if (ImGui::DragFloat3("Position", p, 0.1f, -1000.0f, 1000.0f)) {
+			t.translate = { p[0], p[1], p[2] };
+		}
+		if (ImGui::DragFloat3("Scale", s, 0.01f, 0.001f, 100.0f)) {
+			t.scale = { s[0], s[1], s[2] };
+		}
+		if (ImGui::DragFloat3("Rotation", r, 0.01f, -6.28318f, 6.28318f)) {
+			t.rotate = { r[0], r[1], r[2] };
+		}
+		ImGui::Text("Tip: Rotation in radians.");
+
+		// 追加の便利ボタン
+		if (ImGui::Button("Stop Cinematic / Shake")) {
+			railCamera_->StopCinematicMove();
+			railCamera_->StopShake();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Transform")) {
+			t.translate = { 0.0f, 0.0f, 0.0f };
+			t.rotate = { 0.0f, 0.0f, 0.0f };
+			t.scale = { 1.0f, 1.0f, 1.0f };
+		}
+
+		ImGui::End();
+	}
 #endif
+
 }
 
 void GameScene::Draw()
 {
+	object3dCommon_->SettingCommonDraw();
+	// 天球描画
+	if (skyDome_) {
+		skyDome_->Draw();
+	}
+
 	switch (currentScene_) {
 		case GameScene::Scene::ready:
 			spriteCommon_->SettingCommonDraw();
@@ -286,11 +353,8 @@ void GameScene::Draw()
 			break;
 	}
 
-	object3dCommon_->SettingCommonDraw();
-	// 天球描画
-	if (skyDome_) {
-		skyDome_->Draw();
-	}
+	
+	
 }
 
 void GameScene::Finalize()
@@ -318,7 +382,7 @@ void GameScene::Finalize()
 	delete poose_;
 	poose_ = nullptr;
 	railCamera_ = nullptr;
-	// シングルトン参照は解放しない（グローバル管理）
+	// シングルトン参照は解放しない
 	spriteCommon_ = nullptr;
 	object3dCommon_ = nullptr;
 	input_ = nullptr;

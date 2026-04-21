@@ -1,13 +1,10 @@
+
+
 #include "Player.h"
 #include "MatuilityForText.h"
 #include <Xinput.h>
 #include <algorithm>
 #include <cmath>
-
-Player::Player()
-{
-	// コンストラクタ: メンバは Initialize() で初期化する想定
-}
 
 Player::~Player()
 {
@@ -45,10 +42,10 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	isDead_ = false;
 	PlayerHP = 10.0f;
 
-	// 入力はシングルトンから取得（引数 input が nullptr の場合でも安全に扱うため）
+	// 入力はシングルトンから取得
 	input_ = Input::GetInstance();
 
-	// bulletList_ を念のためクリア（初期化時の安全措置）
+	// bulletList_ を念のためクリア
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
@@ -66,7 +63,7 @@ void Player::Update()
 		}
 		return false;
 	});
-	// 被弾時の点滅処理（色の切替）
+	// 被弾時の点滅処理
 	ChangeColor();
 
 	// 入力に基づく移動処理
@@ -75,7 +72,7 @@ void Player::Update()
 	// マウス/パッド位置からレティクル位置を決定して更新
 	Reticle();
 
-	// 発射処理（スペースキーまたはコントローラ A）
+	// 発射処理
 	Fire();
 
 	// 所有弾の更新
@@ -83,7 +80,7 @@ void Player::Update()
 		bullet->Update();
 	}
 
-	// HP が 0 なら死亡フラグを立てる（必要なら <= 0 に変更）
+	// HP が 0 なら死亡フラグを立てる
 	if (PlayerHP == 0) {
 		isDead_ = true;
 	}
@@ -121,23 +118,23 @@ void Player::Move()
 	Vector3 move = { 0,0,0 }; // 移動量
 	const float kCharacterSpeed = 0.2f; // キャラクターの移動速度
 
-	// コントローラ使用判定: 使用中ならキーボード入力を無視する
+	// コントローラ使用判定:使用中ならキーボード入力を無視する
 	bool controllerActive = input_->IsAnyGamepadActive();
 
-	// --- ここでコントローラ検出に基づき入力ロックをセット ---
+	// ここでコントローラ検出に基づき入力ロックをセット
 	if (input_) {
 		if (controllerActive) {
 			input_->SetKeyboardLockedByController(true);
 			input_->SetMouseLockedByController(true);
 		}
 		else {
-			// コントローラ非使用時はコントローラ由来のロックを解除する（Poose ロックは別扱い）
+			// コントローラ非使用時はコントローラ由来のロックを解除する
 			input_->SetKeyboardLockedByController(false);
 			input_->SetMouseLockedByController(false);
 		}
 	}
 
-	// キーボード移動（コントローラ使用時は無視）
+	// キーボード移動
 	if (!controllerActive) {
 		if (input_->PushKey(DIK_A)) {
 			move.x -= kCharacterSpeed;
@@ -162,7 +159,7 @@ void Player::Move()
 
 	// ----- パッド入力（左スティック・トリガで移動） -----
 	if (input_->IsGamepadConnected(0)) {
-		const float padSpeedFactor = 0.18f; // パッド感度（チューニング可）
+		const float padSpeedFactor = 0.18f; // パッド感度
 		float lx = input_->GetLeftThumbX(0); // -1..1
 		float ly = input_->GetLeftThumbY(0); // -1..1
 		move.x += lx * padSpeedFactor;
@@ -180,15 +177,15 @@ void Player::Move()
 
 void Player::Fire()
 {
-	// 長押し（ホールド）で発射。キーボードはスペース、コントローラはR2（右トリガ）を使用する。
+	// 長押しで発射。キーボードはスペース、コントローラはR2を使用する。
 	bool fireTriggered = false;
 
-	// キーボードからの発射（長押しで連射）
+	// キーボードからの発射
 	if (input_ && input_->PushKey(DIK_SPACE)) {
 		fireTriggered = true;
 	}
 
-	// コントローラからの発射: 右トリガ（R2）を長押しで発射
+	// コントローラからの発射:R2を長押しで発射
 	// 閾値を超えている間はホールド扱いになる
 	const float kTriggerThreshold = 0.35f; // 調整可：0.0-1.0
 	if (!fireTriggered && input_ && input_->IsGamepadConnected(0)) {
@@ -198,7 +195,7 @@ void Player::Fire()
 		}
 	}
 
-	// 発射処理（インターバル制御は既存ロジックを維持）
+	// 発射処理
 	if (fireTriggered && bulletTime <= 0) {
 
 		bulletActive = true;
@@ -206,7 +203,7 @@ void Player::Fire()
 
 		const float kBulletSpeed = 1.0f;
 
-		// 発射元の位置と方向を決定（reticleWorldPos_ を目標にする）
+		// 発射元の位置と方向を決定
 		Vector3 startPos = Model_->GetTranslate();
 		dir = { reticleWorldPos_.x - startPos.x, reticleWorldPos_.y - startPos.y, reticleWorldPos_.z - startPos.z };
 		dir = Normalize(dir);
@@ -219,7 +216,7 @@ void Player::Fire()
 		bulletList_.push_back(newBullet);
 	}
 	else {
-		// 発射インターバルのカウントダウン（下限 0）
+		// 発射インターバルのカウントダウン
 		if (bulletTime > 0) {
 			--bulletTime;
 			if (bulletTime < 0) bulletTime = 0;
@@ -255,7 +252,7 @@ void Player::OnCollision()
 		}
 	}
 
-	// 被弾点滅を開始（flashTimer_ / flashToggleCounter_ を用いる）
+	// 被弾点滅を開始
 	if (Model_ && flashFlag == false) {
 		flashTimer_ = flashDuration_ * flashRepeat_ * 2;
 		flashToggleCounter_ = flashDuration_;
@@ -300,7 +297,7 @@ void Player::Reticle()
 		}
 	}
 
-	// --- Reticle 側でもロック状態を設定（Move と整合） ---
+	// Reticle 側でもロック状態を設定
 	if (input_) {
 		if (controllerActive) {
 			input_->SetKeyboardLockedByController(true);
@@ -312,12 +309,12 @@ void Player::Reticle()
 		}
 	}
 
-	// クライアント座標（ピクセル）
+	// クライアント座標
 	Vector2 cursor;
 
 	if (controllerActive) {
-		// コントローラ優先: マウスは無視。lastCursor に右スティックの移動を適用する。
-		const float padReticleSpeed = 8.0f; // スティック 1.0 当たりのピクセル移動量（調整可）
+		// コントローラ優先:マウスは無視lastCursor に右スティックの移動を適用する。
+		const float padReticleSpeed = 8.0f; // スティック1.0当たりのピクセル移動量
 		float rx = input_->GetRightThumbX(0); // -1..1
 		float ry = input_->GetRightThumbY(0); // -1..1
 
@@ -326,10 +323,10 @@ void Player::Reticle()
 			lastCursor.x += rx * padReticleSpeed;
 			lastCursor.y -= ry * padReticleSpeed; // 上下反転を補正
 		}
-		// 現在のカーソルとして lastCursor を使う（マウス無視）
+		// 現在のカーソルとしてlastCursorを使う
 		cursor = lastCursor;
 	} else {
-		// マウス優先: 実際のマウス位置で lastCursor を更新する
+		// マウス優先:実際のマウス位置でlastCursorを更新する
 		Vector2 mousePos = input_->GetCursorClientPos2();
 		lastCursor = mousePos;
 		cursor = lastCursor;
@@ -345,20 +342,20 @@ void Player::Reticle()
 
 	reticleSprite_->SetPosition(cursor);
 	reticleSprite_->Update();
-	// NDC に変換
+	// NDCに変換
 	float nx = (cursor.x / width) * 2.0f - 1.0f;
 	float ny = -((cursor.y / height) * 2.0f - 1.0f); // 上下反転
 
-	// 近クリップ・遠クリップの NDC を定義
+	// 近クリップ,遠クリップのNDCを定義
 	Vector3 ndcNear = { nx, ny, 0.0f };
 	Vector3 ndcFar = { nx, ny, 1.0f };
 
-	// カメラの逆行列を取得して NDC -> ワールド変換
+	// カメラの逆行列を取得してNDC->ワールド変換
 	Matrix4x4 invProj = Inverse(camera->GetProjectionMatrix());
 	Matrix4x4 invView = Inverse(camera->GetViewMatrix());
 
-	Vector3 pNear = TransformS(ndcNear, invProj); // -> eye space (then w division)
-	pNear = TransformS(pNear, invView);           // -> world space
+	Vector3 pNear = TransformS(ndcNear, invProj);
+	pNear = TransformS(pNear, invView);
 
 	Vector3 pFar = TransformS(ndcFar, invProj);
 	pFar = TransformS(pFar, invView);
@@ -371,7 +368,7 @@ void Player::Reticle()
 	Vector3 camPos = camera->GetTranslate();
 	reticleWorldPos_ = { camPos.x + rayDir.x * reticleDistance_, camPos.y + rayDir.y * reticleDistance_, camPos.z + rayDir.z * reticleDistance_ };
 
-	// reticleModel_ にセット（描画時に Updata() しているためここでは SetTranslate のみ）
+	// reticleModel_にセット(描画時に Updata() しているためここでは SetTranslate のみ)
 	if (reticleModel_) {
 		reticleModel_->SetTranslate(reticleWorldPos_);
 	}
@@ -383,7 +380,7 @@ void Player::SetRailCameraVelocity(Vector3 velocity)
 	railCameraVelocity_ = velocity;
 }
 
-// 被弾点滅ロジック。flashTimer_ と flashToggleCounter_ で赤/元色を切り替える。
+// 被弾点滅ロジック。flashTimer_とflashToggleCounter_で赤/元色を切り替える。
 void Player::ChangeColor()
 {
 	if (flashTimer_ > 0 && Model_) {
@@ -413,7 +410,7 @@ void Player::ChangeColor()
 	}
 }
 
-// 追加実装: Position / Scale / Rotate のセッター / ゲッター
+// Position / Scale / Rotate のセッター / ゲッター
 void Player::SetPosition(const Vector3& pos)
 {
 	position_ = pos;

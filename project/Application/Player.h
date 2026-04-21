@@ -17,20 +17,20 @@
 /// プレイヤーを表すクラス
 ///
 /// 概要:
-/// - 3Dモデルを保持し、移動・射撃・被弾処理・レティクル（マウス方向を向く3Dターゲット）を管理するエンティティ。
-/// - 自身で `PlayerBullet` を生成してリストで管理し、弾のライフサイクルを制御する。
+/// - 3Dモデルを保持し、移動・射撃・被弾処理・レティクルを管理するエンティティ。
+/// - 自身で PlayerBulletを生成してリストで管理し、弾を制御する。
 ///
-/// 主な責務:
-/// - `Initialize` : モデルや入力参照の初期設定を行う。
-/// - `Update`     : 移動・レティクル更新・射撃処理・弾の更新・死亡判定を行う。
-/// - `Draw`       : プレイヤー本体と弾、レティクルの描画を行う。
-/// - `Move` / `Fire` : ユーザー入力に基づく移動と弾発射処理を提供する。
-/// - `Reticle`    : マウス位置からワールド空間の照準位置を算出してレティクルを更新する（逆射影を用いる想定）。
+/// 主な機能:
+/// - Initialize:モデルや入力参照の初期設定を行う。
+/// - Update:移動:レティクル更新・射撃処理・弾の更新・死亡判定を行う。
+/// - Draw:プレイヤー本体と弾、レティクルの描画を行う。
+/// - Move/Fire:ユーザー入力に基づく移動と弾発射処理を提供する。
+/// - Reticle:マウス位置からワールド空間の照準位置を算出してレティクルを更新する。
 ///
 /// 注意事項:
 /// - 弾やレティクルは生ポインタで管理されるため、外部参照がある場合は破棄タイミングに注意すること。
 /// - レンダリングと更新はメインスレッドで行う前提でスレッドセーフではない。
-/// - マウス→ワールド変換の実装（`Reticle`）はカメラ行列や座標系に依存するため、必要に応じて NDC・Y 軸反転等を調整してください。
+/// - マウス→ワールド変換の実装はカメラ行列や座標系に依存するため、必要に応じてNDC・Y軸反転等を調整。
 /// </summary>
 class Player
 {
@@ -65,12 +65,12 @@ public:
 	void SetRailCameraVelocity(Vector3 velocity);
 	bool bulletActive = false; //弾発射フラグ
 
-	// 点滅設定 API（任意で外部から変更可能）
+	// 点滅設定API
 	void SetFlashColor(const Vector4& color) { flashColor_ = color; }
 	void SetFlashDuration(int frames) { flashDuration_ = frames; }
 	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
 
-	// 追加 API: Position / Scale / Rotate の外部操作と取得
+	// Position/Scale/Rotateの外部操作と取得
 	void SetPosition(const Vector3& pos);
 	void SetScale(const Vector3& s);
 	void SetRotate(const Vector3& r);
@@ -100,7 +100,7 @@ private:
 	// --- レティクル関連 ---
 	Object3d* reticleModel_;    // 画面上の3Dレティクル表示用
 	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f }; // レティクルのワールド位置
-	float reticleDistance_ = 100.0f; // レティクルまでの距離（代替ターゲット距離）
+	float reticleDistance_ = 100.0f; // レティクルまでの距離
 	Sprite* reticleSprite_ = nullptr;
 	Vector2 lastCursor; // 前フレームのカーソル位置保持用
 	bool controllerActive = false; // コントローラ使用中フラグ

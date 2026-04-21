@@ -4,6 +4,7 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include "Input.h"
+#include "Audio.h"
 #include "Sprite.h"
 #include "SpriteCommon.h"
 #include "TextureManager.h"
@@ -17,6 +18,25 @@
 #include "RailCamera.h"
 #include "Fade.h"
 #include "Poose.h" 
+
+/// <summary>
+/// GameScene
+///
+/// 概要:
+/// - メインゲームプレイを管理するシーンクラス。
+/// - プレイヤー・敵・パーティクル・UI(Ready/Go/ゲームオーバー等)や時間管理、シーン遷移を制御する。
+/// 
+/// 主な機能:
+/// - Initialize:シーン内で使用するオブジェクトや参照を初期化する。
+/// - Update:ゲームロジック(入力、物理、敵挙動、エフェクト、シーン状態遷移)を毎フレーム実行する。
+/// - Draw:3D/2D の描画(オブジェクト・スプライト)を行う。
+/// - Finalize:所有リソースの解放や終了処理を行う。
+/// - IsGameSet:シーンのセットアップ完了状態を管理する。
+/// 
+/// 注意:
+/// - シーン内のオブジェクト所有権とライフサイクルは本クラスの実装に依存するため、外部呼び出し側と整合させること。
+/// </summary>
+
 class GameScene
 {
 public:
@@ -38,6 +58,7 @@ private:
 	DirectXCommon* dxCommon_ = nullptr;
 	RailCamera* railCamera_ = nullptr;
 	ModelCommon* modelCommon_ = nullptr;
+	Audio* audio_ = nullptr;
 	//オブジェクト
 	Player* player_ = nullptr;
 	Enemy* enemy_ = nullptr;
@@ -61,7 +82,7 @@ private:
 	int startTime_ = 0;
 	int goTime_ = 0;
 
-	// シングルトン参照（プロジェクト側 GetInstance() がポインタを返す想定）
+	// シングルトン参照
 	Input* input_ = nullptr;
 	SpriteCommon* spriteCommon_ = nullptr;
 	ObJect3dCommon* object3dCommon_ = nullptr;

@@ -5,8 +5,8 @@
 
 namespace MyMath {
 	// MakeIdentity4x4:
-	// - 単位行列を生成して返すヘルパ。
-	// - 注意: ファイル内に duplicate return 文があるが動作上は後続の return に到達しない（無害）。
+	// - 単位行列を生成して返す。
+	// - 注意: ファイル内にduplicate、return文があるが動作上は後続のreturnに到達しない。
 	Matrix4x4 MyMath::MakeIdentity4x4()
 	{
 		Matrix4x4 result{ 0 };
@@ -110,8 +110,9 @@ namespace MyMath {
 
 	// TransformS:
 	// - 同次座標を含む変換を行い、w で正規化して結果を返す。
-	// - 注意: 現在の実装は w が 0 のときのガードが空になっているため、呼び出し元は
-	//         行列が w=0 を作らないことを保証するか、ここでのエラーハンドリングを追加すること。
+	// - 注意: 
+	//     現在の実装は w が 0 のときのガードが空になっているため、呼び出し元は
+	//     行列が w=0 を作らないことを保証するか、ここでのエラーハンドリングを追加すること。
 	Vector3 TransformS(const Vector3& vector, const Matrix4x4& matrix)
 	{
 		Vector3 result = { 0 };

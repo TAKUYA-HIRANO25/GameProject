@@ -20,6 +20,23 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 
+/// <summary>
+/// MyGame
+///
+/// 概要:
+/// - Frameworkを継承したアプリケーション本体クラス。ゲーム全体の初期化・更新・描画・終了処理を実装する。
+/// - シーン管理(タイトル / ゲーム 等)、主要リソース、およびカメラやフェード等の UI 制御を保持する。
+/// 
+/// 主な機能:
+/// - Initialize:全シーンと共通リソースの生成・初期化を行う。
+/// - Update:現在シーンの更新・入力処理・シーン遷移の管理を行う。
+/// - Draw:現在シーンおよび UI の描画を行う。
+/// - Finalize:所有する全リソース・シーンの解放を行う。
+/// 
+/// 注意:
+/// - シーン切替やフェード完了待ちなどのフロー制御を内部で行うため、派生処理を追加する際はCreateScene/ReleaseResourcesを適切に更新すること。
+/// </summary>
+
 class MyGame : public Framework {
 public:
 	// Framework の仮想関数を実装

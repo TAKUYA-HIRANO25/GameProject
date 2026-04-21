@@ -6,6 +6,23 @@
 
 using namespace MyMath;
 
+/// <summary>
+/// Particle
+///
+/// 概要:
+/// - 単一のパーティクルを表す軽量クラス。位置・速度・寿命を持ち、内部でObject3dを利用して描画する。
+/// 
+/// 主な機能:
+/// - Initialize:ObJect3dCommonと初期位置・速度・寿命・モデルを指定して初期化する。
+/// - Update:位置更新と寿命管理を行い、寿命が尽きれば内部フラグを立てる。
+/// - Draw():内部の `Object3d` を使って描画。
+/// - IsDead:寿命切れかどうかを問い合わせる。
+/// 
+/// 注意:
+/// - Object3dの所有権は本クラスが持つ想定(Initialize で生成/取得する実装に依存)。外部で管理する場合は注意すること。
+/// - デフォルトのモデルファイルはParticle.obj、デフォルトスケールは小さめに設定されている。
+/// </summary>
+
 class Particle {
 public:
 	Particle();

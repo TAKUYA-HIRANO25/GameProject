@@ -9,7 +9,7 @@
 /// - 描画時に共通設定（ルートシグネチャ/PSO/プリミティブトポロジなど）を行うラッパーを提供する。
 /// - Sprite クラス群が描画で必要とする DirectXCommon 参照を保持する。
 ///
-/// 主な機能:
+/// 機能:
 /// - Initialize(DirectXCommon*): DirectXCommon を受け取り、ルートシグネチャとパイプラインを初期化する。
 /// - SettingCommonDraw(): 描画開始時に共通のルートシグネチャと PSO をコマンドリストに設定する。
 /// - getDxCommon(): 内部で保持している DirectXCommon へのアクセスを提供する。

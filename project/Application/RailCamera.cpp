@@ -71,14 +71,6 @@ void RailCamera::StopShake()
 
 void RailCamera::StartPreStartCinematic(const Vector3& center, float startRadius, const Transform& endTransform, float revolutions, float durationSeconds)
 {
-	// デバッグ出力：演出開始
-	{
-		char buf[256];
-		sprintf_s(buf, "RailCamera::StartPreStartCinematic: center=(%f,%f,%f) startRadius=%f revolutions=%f duration=%f end=(%f,%f,%f)\n",
-			center.x, center.y, center.z, startRadius, revolutions, durationSeconds,
-			endTransform.translate.x, endTransform.translate.y, endTransform.translate.z);
-		OutputDebugStringA(buf);
-	}
 
 	if (durationSeconds <= 0.0f) {
 		transform_ = endTransform;
@@ -102,7 +94,7 @@ bool RailCamera::IsBusy() const
 
 void RailCamera::Update()
 {
-	// 固定デルタ（簡易）
+	// 固定デルタ
 	constexpr float kDelta = 1.0f / 60.0f;
 
 	// cinematic
@@ -122,7 +114,7 @@ void RailCamera::Update()
 		orbitTimer_ += kDelta;
 		float t = orbitDuration_ > 0.0f ? (orbitTimer_ / orbitDuration_) : 1.0f;
 		if (t >= 1.0f) {
-			// 終了時は endTransform を厳密にセット
+			// 終了時はendTransformを厳密にセット
 			transform_ = orbitEndTransform_;
 			preStartActive_ = false;
 
@@ -133,47 +125,47 @@ void RailCamera::Update()
 			OutputDebugStringA(buf);
 		}
 		else {
-			// 半径を線形に endRadius へ近づける（endRadius = distance(center, endTransform.translate)）
+			// 半径を線形にendRadiusへ近づける
 			auto dx = orbitEndTransform_.translate.x - orbitCenter_.x;
 			auto dy = orbitEndTransform_.translate.y - orbitCenter_.y;
 			auto dz = orbitEndTransform_.translate.z - orbitCenter_.z;
 			float endRadius = std::sqrt(dx*dx + dy*dy + dz*dz);
 			float radius = LerpF(orbitStartRadius_, endRadius, t);
 
-			// 角度 = 2PI * revolutions * eased_t
+			// 角度 = 2PI*revolutions *eased_t
 			float eased = t * t * (3.0f - 2.0f * t);
 			float angle = 2.0f * 3.14159265358979323846f * orbitRevolutions_ * eased;
 
-			// Y を lerp して上下を演出
+			// Yをlerpして上下を演出
 			float y = LerpF(orbitCenter_.y + 0.5f, orbitEndTransform_.translate.y, eased);
 
-			// カメラ位置（X,Z 平面で円運動）
+			// カメラ位置(X,Z 平面で円運動)
 			Vector3 pos;
 			pos.x = orbitCenter_.x + radius * std::cos(angle);
 			pos.y = y;
 			pos.z = orbitCenter_.z + radius * std::sin(angle);
 
-			// カメラが常に中心を見るように向きを計算（LookAt の簡易計算）
+			// カメラが常に中心を見るように向きを計算(LookAt の簡易計算)
 			Vector3 dir;
 			dir.x = orbitCenter_.x - pos.x;
 			dir.y = orbitCenter_.y - pos.y;
 			dir.z = orbitCenter_.z - pos.z;
 
-			// yaw（Y軸回転）
+			// yaw(Y軸回転)
 			float yaw = std::atan2(dir.x, dir.z); // radians
 
-			// pitch（X軸回転）
+			// pitch(X軸回転)
 			float horizDist = std::sqrt(dir.x * dir.x + dir.z * dir.z);
 			float pitch = std::atan2(dir.y, horizDist); // radians
 
-			// Apply to transform: position と回転を設定
+			// Applytotransform:positionと回転を設定
 			Transform temp = orbitEndTransform_;
 			temp.translate = pos;
 			temp.rotate.x = pitch; // 上下向き
-			temp.rotate.y = yaw;   // 水平向き（ラジアン）
+			temp.rotate.y = yaw;   // 水平向き
 			transform_ = temp;
 
-			// デバッグ出力：毎フレームの位置と角度（軽めに）
+			// デバッグ出力:毎フレームの位置と角度
 			{
 				char buf[256];
 				sprintf_s(buf, "RailCamera::PreStart t=%0.3f pos=(%0.3f,%0.3f,%0.3f) yaw=%0.3f pitch=%0.3f radius=%0.3f\n",

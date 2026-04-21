@@ -25,7 +25,7 @@ void Poose::EnsureSpritesInitialized()
 {
 	if (overlaySprite_) return;
 
-	// 全画面の半透明オーバーレイ（既存の backGround テクスチャを流用）
+	// 全画面の半透明オーバーレイ
 	overlaySprite_ = new Sprite();
 	overlaySprite_->Initialize(spriteCommon_, "resources/backGround.png");
 	overlaySprite_->SetSize(Vector2(kScreenW, kScreenH));
@@ -33,11 +33,11 @@ void Poose::EnsureSpritesInitialized()
 	overlaySprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	overlaySprite_->SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f)); // 半透明
 
-	// 選択肢表示（簡易）
+	// 選択肢表示
 	resumeSprite_ = new Sprite();
 	resumeSprite_->Initialize(spriteCommon_, "resources/GameBack.png");
 
-	// 選択中の色や通常色は UpdateSprites() で切り替えるので基本色は白
+	// 選択中の色や通常色は UpdateSpritesで切り替えるので基本色は白
 	resumeSprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
@@ -88,7 +88,7 @@ void Poose::UpdateInput()
 		input_->SetMouseLockedByPoose(true);
 	}
 
-	// P で復帰（トグル用ショートカット）
+	// Rで復帰
 	if (input_->TriggerKey(DIK_R)) {
 		result_ = Result::Resume;
 		return;
@@ -108,7 +108,7 @@ void Poose::UpdateInput()
 		return;
 	}
 
-	// ショートカット：T でタイトルに戻る
+	// ショートカット：Tでタイトルに戻る
 	if (input_->TriggerKey(DIK_T)) {
 		result_ = Result::ToTitle;
 	}

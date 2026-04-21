@@ -12,10 +12,10 @@ TitleScene::~TitleScene()
 
 void TitleScene::Initialize(RailCamera* railCamera)
 {
-    // WinAPI 初期化（ウィンドウ生成とメッセージループ準備）
+    // WinAPI初期化
     winApp_ = WinApp::GetInstance();
 
-    // DirectX 初期化
+    // DirectX初期化
 	dxCommon_ = DirectXCommon::GetInstance();
 
     // 入力システムの取得・初期化
@@ -37,6 +37,12 @@ void TitleScene::Initialize(RailCamera* railCamera)
     // モデルマネージャ初期化
     ModelManager::GetInstance()->Initialize(dxCommon_);
     
+	//Audioの初期化
+    audio_ = Audio::GetInstance();
+    audio_->Initialize(); //XAudio2とmasterVoiceの初期化を確実に行う
+    audio_->LoadMP3("resources/Suond/GameBGM.mp3", "BGM");
+    //audio_->Play("BGM", true);
+    //audio_->SetMasterVolume(0.5f);
     // カメラ / レールカメラの作成と初期配置
     railCamera_ = railCamera;
     // スプライト群
@@ -55,6 +61,7 @@ void TitleScene::Update()
 {
     title_->Update();
 	backGround_->Update();
+	audio_->Update();
     if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonPush(0, XINPUT_GAMEPAD_A)) {
 		goToGame = true;
     }
@@ -74,6 +81,6 @@ void TitleScene::Finalize()
     delete title_; title_ = nullptr;
     delete titleUI_; titleUI_ = nullptr;
     delete modelCommon_; modelCommon_ = nullptr;
-    // railCamera_ は所有しないので delete しない
+    // railCameraは所有しないのでdeleteしない
     railCamera_ = nullptr;
 }
