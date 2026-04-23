@@ -5,10 +5,10 @@
 /// 文字列変換ユーティリティ.
 /// 
 /// 機能:
-/// UTF-8/ANSIのstd::stringとUTF-16のstd::wstring間の変換を提供する。
-/// Win32APIのワイド文字APIを使う箇所とstd::stringを受け渡す際に使用する。
+/// UTF-8/ANSIのstd::stringとUTF-16のstd::wstring間の変換を提供。
+/// Win32APIのワイド文字APIを使う箇所とstd::stringを受け渡す際に使用。
 /// 
-/// 備考:
+/// 注意:
 /// 文字コードやロケールに依存する変換のため、必要に応じて実装を調整。
 /// </summary>
 

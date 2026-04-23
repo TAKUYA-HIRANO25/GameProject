@@ -11,18 +11,19 @@
 /// 3Dモデル
 ///
 /// 概要:
-/// - .obj ファイルなどから頂点／マテリアルを読み込み、GPU バッファを作成して描画を行うクラス。
-/// - ModelCommon 経由で DirectX の共通機能にアクセスする。
+/// - objファイルなどから頂点/マテリアルを読み込み、GPU バッファを作成して描画を行うクラス。
+/// - ModelCommon経由でDirectXの共通機能にアクセス。
 ///
 /// 機能:
-/// - Initialize: ファイル読み込みとバッファ作成を行う。
-/// - Draw: 作成済みバッファを使って描画コマンドを発行する。
-/// - static LoadObjFile / LoadMaterialTemplateFile: ファイル読み込みユーティリティ（静的）。
+/// - Initialize:ファイル読み込みとバッファ作成。
+/// - Draw:作成済みバッファを使って描画コマンドを発行。
+/// - static:LoadObjFile/LoadMaterialTemplateFileファイル読み込みユーティリティ(静的)。
 ///
 /// 注意:
-/// - Initialize で GPU リソースを確保するため、Finalize 相当の処理（管理側での解放）が必要。
-/// - 大きなモデルの読み込みは I/O と GPU リソース確保のコストがあるため起動時や非同期化を検討すること。
+/// - InitializeでGPUリソースを確保するため、Finalize相当の処理(管理側での解放)が必要。
+/// - 大きなモデルの読み込みはI/OとGPUリソース確保のコストがあるため起動時や非同期化を検討すること。
 /// </summary>
+
 // 3Dモデル
 using namespace MyMath;
 
@@ -54,7 +55,7 @@ public:
 	void Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename);
 	// 描画
 	void Draw();
-	// マテリアル色を外部から変更する
+	// マテリアル色を外部から変更
 	void SetMaterialColor(const Vector4& color);
 	// 頂点バッファビュー取得
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);

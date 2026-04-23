@@ -4,19 +4,19 @@
 /// 概要:
 /// - キーボードとマウスの状態を DirectInput を用いて取得・管理するユーティリティクラス。
 /// - 現在フレーム／前フレームの入力状態を保持し、押下・トリガー判定や
-///   マウスの相対移動・ホイール・クライアント座標の取得を提供する。
+///   マウスの相対移動・ホイール・クライアント座標の取得を提供。
 /// 
 /// 主な責務:
-/// - InitializeでDirectInputとデバイスの初期化を行う。
-/// - Update() でデバイスの状態を読み取り、内部キャッシュを更新する。
-/// - PushKey/TriggerKey` でキーボード入力判定を行う。
-/// - PushMouse/TriggerMouse、GetMouseMoveX/Y、GetMouseWheelでマウス関連情報を取得する。
-/// - GetCursorClientPos2/GetCursorClientPos3でクライアント座標系のカーソル位置を取得する。
+/// - Initialize:でDirectInputとデバイスの初期化を行う。
+/// - Update:でデバイスの状態を読み取り、内部キャッシュを更新。
+/// - PushKey/TriggerKey:でキーボード入力判定を行う。
+/// - PushMouse/TriggerMouse、GetMouseMoveX/Y、GetMouseWheelでマウス関連情報を取得。
+/// - GetCursorClientPos2/GetCursorClientPos3でクライアント座標系のカーソル位置を取得。
 /// 
 /// 注意:
-/// - DirectInput の初期化と更新は通常メインスレッドで行うこと。スレッドセーフではない。
+/// - DirectInputの初期化と更新は通常メインスレッドで行うこと。スレッドセーフではない。
 /// - ウィンドウハンドルはWinApp経由で提供される想定。Initialize に渡すWinAppは有効である必要がある。
-/// - マウスの相対移動はフレームごとの差分を返すため、描画ループ内で毎フレーム Updateを呼び出すこと。
+/// - マウスの相対移動はフレームごとの差分を返すため、描画ループ内で毎フレームUpdateを呼び出すこと。
 /// </summary>
 
 #pragma once

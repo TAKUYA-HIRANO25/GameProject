@@ -10,7 +10,7 @@ Player::Player()
 
 Player::~Player()
 {
-	// デストラクタ: 所有する Model/reticleModel と弾を解放する
+	// デストラクタ:所有するModel/reticleModelと弾を解放する
 	delete Model_;
 	delete reticleModel_;
 	bulletList_.remove_if([](PlayerBullet* bullet) {
@@ -47,7 +47,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	// 入力はシングルトンから取得
 	input_ = Input::GetInstance();
 
-	// bulletList_ を念のためクリア
+	// bulletList_を念のためクリア
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
@@ -82,12 +82,12 @@ void Player::Update()
 		bullet->Update();
 	}
 
-	// HP が 0 なら死亡フラグを立てる
+	// HPが0なら死亡フラグを立てる
 	if (PlayerHP == 0) {
 		isDead_ = true;
 	}
 
-	// モデルに位置を反映して行列更新（Object3d 側で World 行列等を作る想定）
+	// モデルに位置を反映して行列更新(Object3d 側で World 行列等を作る想定)
 	Model_->SetTranslate(position_);
 	Model_->Updata();
 
@@ -95,7 +95,7 @@ void Player::Update()
 
 void Player::SpriteDraw()
 {
-	// スプライト用 PSO 設定（背景/UI 用）
+	// スプライト用PSO設定(背景/UI)
 	spriteCommon_->SettingCommonDraw();
 	if (isDead_ == false) {
 		reticleSprite_->Draw();
@@ -130,7 +130,7 @@ void Player::Move()
 			input_->SetMouseLockedByController(true);
 		}
 		else {
-			// コントローラ非使用時はコントローラ由来のロックを解除する
+			// コントローラ非使用時はコントローラ由来のロックを解除
 			input_->SetKeyboardLockedByController(false);
 			input_->SetMouseLockedByController(false);
 		}
@@ -159,7 +159,7 @@ void Player::Move()
 		}
 	}
 
-	// ----- パッド入力（左スティック・トリガで移動） -----
+	// パッド入力（左スティック・トリガで移動)
 	if (input_->IsGamepadConnected(0)) {
 		const float padSpeedFactor = 0.18f; // パッド感度
 		float lx = input_->GetLeftThumbX(0); // -1..1
@@ -238,7 +238,7 @@ void Player::OnCollision()
 {
 	PlayerHP -= 1;
 
-	// パーティクルの生成（被弾エフェクト）
+	// パーティクルの生成(被弾エフェクト)
 	if (particleManager_) {
 		const int kSpawn = 10;
 		Vector3 spawnBase = Model_->GetTranslate();
@@ -376,7 +376,7 @@ void Player::Reticle()
 	}
 }
 
-// レールカメラの移動速度を受け取り、プレイヤーの動きに反映するために保持する。
+// レールカメラの移動速度を受け取り、プレイヤーの動きに反映するために保持。
 void Player::SetRailCameraVelocity(Vector3 velocity)
 {
 	railCameraVelocity_ = velocity;

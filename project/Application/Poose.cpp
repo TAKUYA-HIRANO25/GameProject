@@ -1,7 +1,7 @@
 #include "Poose.h"
 #include "TextureManager.h"
 
-// 簡易レイアウト定数（プロジェクトの画面サイズに合わせる）
+// 簡易レイアウト定数(プロジェクトの画面サイズに合わせる)
 namespace {
 	constexpr float kScreenW = 1280.0f;
 	constexpr float kScreenH = 720.0f;
@@ -82,7 +82,7 @@ void Poose::UpdateInput()
 {
 	if (!input_) return;
 
-	// コントローラ使用をここで検出したらキーボードとマウスをロック（閉じるまで解除しない）
+	// コントローラ使用をここで検出したらキーボードとマウスをロック(閉じるまで解除しない)
 	if (input_->IsAnyGamepadActive()) {
 		input_->SetKeyboardLockedByPoose(true);
 		input_->SetMouseLockedByPoose(true);
@@ -108,7 +108,7 @@ void Poose::UpdateInput()
 		return;
 	}
 
-	// ショートカット：Tでタイトルに戻る
+	// ショートカット:Tでタイトルに戻る
 	if (input_->TriggerKey(DIK_T)) {
 		result_ = Result::ToTitle;
 	}
@@ -132,7 +132,7 @@ void Poose::UpdateSprites()
 void Poose::Draw()
 {
 
-	// 描画は呼び出し元が spriteCommon_->SettingCommonDraw() を呼んでいる前提
+	// 描画は呼び出し元がspriteCommon_->SettingCommonDrawを呼んでいる前提
 	if (overlaySprite_) overlaySprite_->Draw();
 	if (resumeSprite_) resumeSprite_->Draw();
 

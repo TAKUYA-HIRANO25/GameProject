@@ -47,10 +47,10 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 }
 
 // ProcessMessage:
-// - 非ブロッキングでメッセージを取得してディスパッチする。
+// - 非ブロッキングでメッセージを取得してディスパッチ。
 // - WM_QUIT が来ていれば true を返してアプリケーションループに終了指示を伝える。
 // - 注意: PeekMessage によるポーリングはメインループに組み込まれているため、CPU 使用率に
-//   配慮する場合はスリープやタイミング制御を検討する。
+//   配慮する場合はスリープやタイミング制御を検討。
 bool WinApp::ProcessMessage()
 {
 	MSG msg{};
@@ -103,14 +103,14 @@ void WinApp::Initialize()
 
 	ShowWindow(hwnd, SW_SHOW);
 
-	// 高精度タイマー要求（1ms 単位）
+	// 高精度タイマー要求(1ms単位)
 	timeBeginPeriod(1);
 
 }
 
 // Finalize:
-// - ウィンドウを閉じ、COM 等の後片付けを行う（ここでは CoUninitialize を呼んでいる）。
-// - 注意: CreateWindow で確保したリソースがある場合は適切に解放する。
+// - ウィンドウを閉じ、COM 等の後片付けを行う(ここでは CoUninitialize を呼んでいる)。
+// - 注意:CreateWindowで確保したリソースがある場合は適切に解放する。
 void WinApp::Finalize()
 {
 

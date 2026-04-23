@@ -18,7 +18,7 @@ Enemy::~Enemy()
 		});
 }
 
-// 初期化:object3d 共通・初期位置・モデル・HP・フラグ等を設定
+// 初期化
 void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 {
 	// 3D共通参照を保持
@@ -37,8 +37,11 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	EnemyHp = 5.0f;
 	// 死亡フラグ
 	isDead_ = false;
+	// 爆発フラグリセット
+	hasExploded_ = false;
 	// タイマー初期化
 	FireTime();
+
 	MoveTime();
 
 	// 行動初期化
@@ -52,8 +55,7 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 		});
 }
 
-// 毎フレーム更新:
-// - 弾の寿命チェック、色点滅処理、移動・発射処理、モデル更新を行う
+// 毎フレーム更新
 void Enemy::Update()
 {
 	// 死亡した弾を削除
@@ -174,7 +176,7 @@ void Enemy::Update()
 
 	// 発射カウントダウン
 	Time--;
-	if (Time == 0) {
+	if (Time == 0 && isDead_ == false) {
 		Time = kFireInterval;
 		Fire();
 	}
@@ -184,10 +186,15 @@ void Enemy::Update()
 		bullet->Update();
 	}
 
-	// HP が尽きたら死亡フラグを立てる
+	// HP が尽きたら爆発を一度だけ発生させ、死亡フラグを立てる
 	if (EnemyHp <= 0) {
+		if (!hasExploded_) {
+			Explode();
+			hasExploded_ = true;
+		}
 		isDead_ = true;
 	}
+
 	// モデルに位置を反映して更新
 	if (Model_) {
 		Model_->SetTranslate(position_);
@@ -207,7 +214,7 @@ void Enemy::Draw()
 	}
 }
 
-// 弾を発射する処理:行動に応じて通常弾/拡散/バーストを切り替える
+// 弾を発射する処理
 void Enemy::Fire() {
 
 	// デフォルトの単発追尾
@@ -225,7 +232,7 @@ void Enemy::Fire() {
 	const float kBulletSpeed = -0.5f;
 	bulletVel = { 0, 0, 0 };
 
-	// 弾の軌道:プレイヤー方向へ向かう正規化ベクトルを求める
+	// 弾の軌道
 	Vector3 playerPosition = player_->GetWorldPosition();
 	Vector3 enemyPosition = GetWorldPosition();
 	Vector3 goalPosition = enemyPosition - playerPosition ;
@@ -355,15 +362,19 @@ Vector3 Enemy::GetWorldPosition()
 	return worldPos;
 }
 
-// 当たり判定時の処理:HP減少、パーティクル生成、点滅を行う
+// 当たり判定時の処理
 void Enemy::OnCollision() {
+
+	if (isDead_) {
+		return; // 既に死亡していれば無視
+	}
 
 	EnemyHp -= 1;
 
-	// パーティクル生成
 	if (particleManager_) {
 		const int kSpawn = 10;
-		Vector3 spawnBase = Model_->GetTranslate();
+		// Model_ が無くても安全に位置を取れるように GetWorldPosition を使う
+		Vector3 spawnBase = GetWorldPosition();
 		for (int i = 0; i < kSpawn; ++i) {
 			// ランダムなオフセットと速度を付与
 			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
@@ -376,25 +387,23 @@ void Enemy::OnCollision() {
 
 			// 点滅を開始：複数回トグルする実装
 			if (Model_ && flashFlag_ == false) {
-				// 元色はInitialize時にoriginalColorに保持しているので利用
+				// 元色
 				flashTimer_ = kFlashDuration * kFlashRepeat * 2;
 				flashToggleCounter_ = kFlashDuration;
 
-				// まず赤にする
+				// 赤にする
 				Model_->SetDiffuseColor({ 1.0f, 0.25f, 0.25f, 1.0f });
 			}
 
 			// パーティクルを生成
-			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", { 0.8f,0.8f,0.8f });
+			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", {0.8f,0.8f,0.8f});
 		}
 	}
 }
 
-// 色の点滅処理:
-// - flashTimerとflashToggleCounterを用いて赤/元色を切り替える
+// 色の点滅処理
 void Enemy::ChangeColor()
 {
-
 	// 点滅処理
 	if (flashTimer_ > 0 && Model_) {
 		// フレームを消費
@@ -423,5 +432,68 @@ void Enemy::ChangeColor()
 			Model_->SetDiffuseColor(originalColor_);
 		}
 	}
+}
+
+// 敵の爆発処理
+void Enemy::Explode()
+{
+	if (!particleManager_) {
+		// パーティクルマネージャがなければ単にモデルを削除して終了
+		delete Model_;
+		Model_ = nullptr;
+		return;
+	}
+
+	// 爆発中心位置
+	Vector3 center = position_;
+	if (Model_) {
+		center = Model_->GetTranslate();
+	}
+
+	// 多数のパーティクルを放出
+	const int kExplosionCount = 60;
+	for (int i = 0; i < kExplosionCount; ++i) {
+		// ランダム方向ベクトル
+		float rx = (std::rand() % 200 - 100) / 100.0f; // -1.0 .. 1.0
+		float ry = (std::rand() % 200) / 100.0f;       // 0.0 .. 2.0（上向き強め）
+		float rz = (std::rand() % 200 - 100) / 100.0f; // -1.0 .. 1.0
+		Vector3 dir = { rx, ry, rz };
+		// 正規化（零ベクトル回避）
+		float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+		if (len < 1e-6f) { dir = { 0.0f, 1.0f, 0.0f }; len = 1.0f; }
+		dir.x /= len; dir.y /= len; dir.z /= len;
+
+		// スピード（ランダム）
+		float speed = (std::rand() % 100) / 100.0f * 2.5f + 0.5f; // 0.5 .. 3.0
+		Vector3 vel = { dir.x * speed, dir.y * speed, dir.z * speed };
+
+		// 寿命とスケール
+		int life = (std::rand() % 40) + 40; // 40..79 フレーム
+		float s = 0.6f + (std::rand() % 100) / 200.0f; // 0.6 .. 1.1
+		Vector3 scale = { s, s, s };
+
+		particleManager_->Spawn(center, vel, life, "Particle.obj", scale);
+	}
+
+	// 光る大きめの破片を少数生成
+	const int kLargeCount = 6;
+	for (int i = 0; i < kLargeCount; ++i) {
+		float rx = (std::rand() % 200 - 100) / 100.0f;
+		float ry = (std::rand() % 200) / 100.0f;
+		float rz = (std::rand() % 200 - 100) / 100.0f;
+		Vector3 dir = { rx, ry, rz };
+		float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+		if (len < 1e-6f) { dir = { 0.0f, 1.0f, 0.0f }; len = 1.0f; }
+		dir.x /= len; dir.y /= len; dir.z /= len;
+		float speed = (std::rand() % 100) / 100.0f * 1.8f + 0.8f;
+		Vector3 vel = { dir.x * speed, dir.y * speed, dir.z * speed };
+		int life = 60 + (std::rand() % 40);
+		Vector3 scale = { 1.4f, 1.4f, 1.4f };
+		particleManager_->Spawn(center, vel, life, "Particle.obj", scale);
+	}
+
+	// モデルを削除
+	delete Model_;
+	Model_ = nullptr;
 }
 

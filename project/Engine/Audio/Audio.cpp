@@ -13,13 +13,13 @@ struct ChunkHeader {
 
 // RIFFヘッダチャンク
 struct RiffHeader {
-	ChunkHeader chunk; // "RIFF"
-	char tpye[4];      // "WAVE"
+	ChunkHeader chunk; // RIFF
+	char tpye[4];      // WAVE
 };
 
 // FMTチャンク
 struct FormatChunk {
-	ChunkHeader chunk; // "fmt"
+	ChunkHeader chunk; // fmt
 	WAVEFORMATEX fmt;  // 波形フォーマット
 };
 
@@ -50,7 +50,7 @@ void Audio::Finalize() {
 	soundMap.clear();
 	mp3AudioData.clear();
 
-	// Media FoundationとCOMの終了
+	// MediaFoundationとCOMの終了
 	if (mfStarted) {
 		HRESULT hr = MFShutdown();
 		if (FAILED(hr)) {
@@ -91,29 +91,23 @@ void Audio::Initialize() {
 		return;
 	}
 
-	// mp3読み込みのためのMedia Foundationの初期化
+	// mp3読み込みのためのMediaFoundationの初期化
 	HRESULT co = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	if (SUCCEEDED(co)) {
 		comInitialized = true;
 	} else if (co == RPC_E_CHANGED_MODE) {
-		// 既に別のスレッドモデルで初期化済み（許容） — 継続するがフラグは立てない
+		// 既に別のスレッドモデルで初期化済み
 		Log("CoInitializeEx returned RPC_E_CHANGED_MODE\n");
-	} else {
-		char buf[128];
-		sprintf_s(buf, "CoInitializeEx failed: 0x%08X\n", static_cast<unsigned>(co));
-		Log(buf);
-		// 続けるが Media Foundation が失敗する可能性があるため注意
 	}
+	
+	// 続けるが Media Foundation が失敗する可能性があるため注意
 
 	HRESULT mfr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 	if (SUCCEEDED(mfr)) {
 		mfStarted = true;
-	} else {
-		char buf[128];
-		sprintf_s(buf, "MFStartup failed: 0x%08X\n", static_cast<unsigned>(mfr));
-		Log(buf);
-		// 失敗してもアプリの他機能は動く可能性があるので即終了はしない
 	}
+	
+	// 失敗してもアプリの他機能は動く可能性があるので即終了はしない
 }
 
 bool Audio::LoadWave(const std::string filePath, const std::string soundName, const float volume) {
@@ -135,14 +129,13 @@ bool Audio::LoadWave(const std::string filePath, const std::string soundName, co
 
 
 	/// ファイルオープン
-
 	// ファイル入力ストリームのインスタンス
 	std::ifstream file;
 	// .wavファイルをバイナリモードで開く
 	file.open(filePath, std::ios_base::binary);
 	if (!file.is_open())
 	{
-		// ファイルオープン失敗を検出する
+		// ファイルオープン失敗を検出
 #ifdef _DEBUG
 		assert(0);
 #endif // _DEBUG

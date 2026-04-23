@@ -146,7 +146,7 @@ void GameScene::Update()
 					player_->OnCollision();
 					bullet->OnCollision();
 
-					// カメラ揺れを発生（存在チェック）
+					// カメラ揺れを発生
 					if (railCamera_) {
 						railCamera_->StartShake(0.12f, 0.5f);
 					}
@@ -183,7 +183,11 @@ void GameScene::Update()
 			currentScene_ = Scene::gameOver;
 		}
 		else if (enemy_->IsDead()) {
-			currentScene_ = Scene::clear;
+			// 変更 敵が死亡していても、爆発エフェクトのパーティクルが残っている間は
+			// クリアに遷移しない。ParticleManager が空になってから遷移。
+			if (particleManager_ == nullptr || particleManager_->IsEmpty()) {
+				currentScene_ = Scene::clear;
+			}
 		}
 	SKIP_GAME_UPDATE:
 
@@ -191,15 +195,15 @@ void GameScene::Update()
 	case GameScene::Scene::gameOver:
 		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
-		 isGame_ = false;
-		 isSet_ = true;
+			isGame_ = false;
+			isSet_ = true;
 		}
 		break;
 	case GameScene::Scene::clear:
 		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
-		 isGame_ = false;
-		 isSet_ = true;
+			isGame_ = false;
+			isSet_ = true;
 		}
 		break;
 	default:
@@ -207,7 +211,7 @@ void GameScene::Update()
 	}
 
 	skyDome_->Updata();
-	// imguiフレームはMyGame::Update()で開始されるため、ここではウィジェット作成のみ行う
+	// imguiフレームはMyGame::Update()で開始されるため、ここではウィジェット作成
 #ifdef USE_IMGUI
 	ImGui::ShowDemoWindow();
 
@@ -263,7 +267,7 @@ void GameScene::Update()
 		// RailCameraのTransform参照を取得
 		Transform& t = railCamera_->GetTransform();
 
-		// 現在値をローカル配列へコピー(ImGui は生配列を要求)
+		// 現在値をローカル配列へコピー(ImGuiは生配列を要求)
 		float p[3] = { t.translate.x, t.translate.y, t.translate.z };
 		float s[3] = { t.scale.x, t.scale.y, t.scale.z };
 		float r[3] = { t.rotate.x, t.rotate.y, t.rotate.z };
@@ -353,8 +357,6 @@ void GameScene::Draw()
 			break;
 	}
 
-	
-	
 }
 
 void GameScene::Finalize()

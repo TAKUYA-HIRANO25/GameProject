@@ -22,7 +22,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	// 使用するリソースのサイズはインデックス6つ分のサイズ
 	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
-	// インデックスはuint32_tとする
+	// インデックスはuint32_t
 	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	// アドレスを取得して書き込む
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));

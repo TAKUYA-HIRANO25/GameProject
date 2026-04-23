@@ -125,14 +125,14 @@ void SpriteCommon::GeneratePipelineInitialize()
 		blendDesc.RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	}
 
-	// 深度ステンシルは無効（スプライトは常に前面描画）
+	// 深度ステンシルは無効(スプライトは常に前面描画)
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
 	depthDesc.DepthEnable = FALSE;
 	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 	depthDesc.StencilEnable = FALSE;
 
-	// shaderをコンパイルする
+	// shaderをコンパイル
 	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Object3D.VS.hlsl",L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
 
@@ -174,9 +174,9 @@ void SpriteCommon::GeneratePipelineInitialize()
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	// Depthの昨日を有効化にする
 	depthStencilDesc.DepthEnable = true;
-	// 書き込みします
+	// 書き込み
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual.つまり、近ければ描画される
+	// 近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;

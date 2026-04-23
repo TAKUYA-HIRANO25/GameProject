@@ -4,13 +4,18 @@
 /// 3Dモデル共通部
 ///
 /// 概要:
-/// - モデル読み込み／描画で共通して必要になる DirectXCommon などの参照を保持する軽量クラス。
-/// - Model クラス群がレンダリングやリソース作成で利用する共通機能を提供する場所として機能する。
+/// - モデル読み込み/描画で共通してDirectXCommonなどの参照を保持する軽量クラス。
+/// - Modelクラス群がレンダリングやリソース作成で利用する共通機能を提供する場所として機能する。
 ///
 /// 使用:
-/// - ModelManager や Model の Initialize 時に DirectXCommon を渡して初期化する。
-/// - GetDxCommon() で DirectXCommon へのアクセスを行う。
+/// - ModelManagerやModelのInitialize時にDirectXCommonを渡して初期化。
+/// - GetDxCommonでDirectXCommonへのアクセスを行う。
+/// 
+/// 注意:
+/// - ModelCommonはDirectXCommonの参照を保持するだけの軽量クラスで、リソース管理や描画ロジックはModelやModelManagerに任せる。
+/// 
 /// </summary>
+
 class ModelCommon {
 public:
 	// 初期化

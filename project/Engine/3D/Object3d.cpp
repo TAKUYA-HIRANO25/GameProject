@@ -54,7 +54,7 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 
 Object3d::~Object3d() noexcept
 {
-	// マップされているならアンマップしてから解放する
+	// マップされているならアンマップしてから解放
 	if (transformationMatrixData && transformationMatrixResource) {
 		transformationMatrixResource->Unmap(0, nullptr);
 		transformationMatrixData = nullptr;
@@ -117,7 +117,7 @@ void Object3d::Draw()
 		cmd->SetGraphicsRootConstantBufferView(kMaterialRootIndex, materialResource->GetGPUVirtualAddress());
 	}
 
-	// 3Dモデルが割り当てられていれば描画する
+	// 3Dモデルが割り当てられていれば描画
 	if (model) {
 		model->Draw();
 	}
@@ -125,7 +125,7 @@ void Object3d::Draw()
 
 void Object3d::SetModel(const std::string& filePath)
 {
-	// モデルを検索してセットする
+	// モデルを検索してセット
 	model = ModelManager::GetInstance()->FindModel(filePath);
 	// model->Draw()内でSRV等を設定する想定
 }

@@ -19,7 +19,7 @@
 ///
 /// 概要:
 /// - アプリケーション全体で利用するオーディオマネージャ。シングルトンとして設計されXAudio2とMediaFoundationを内部で利用して
-///   WAV / MP3 等の音声読み込み、再生、停止、音量制御を行う。
+///   WAV/MP3等の音声読み込み、再生、停止、音量制御。
 /// 
 /// 主な機能:
 /// - Initialize/Finalize:XAudio2/Media Foundationの初期化と終了処理。
@@ -29,7 +29,7 @@
 /// - Update:再生状態の管理やフレーム単位のメンテナンス処理。
 /// 
 /// 注意:
-/// - シングルトンのためグローバルに一つだけ存在する想定。GetInstanceで取得して使用する。
+/// - シングルトンのためグローバルに一つだけ存在する想定。GetInstanceで取得して使用。
 /// - Media Foundation や COM の初期化(CoInitializeEx/MFStartup)に依存するため、初期化に失敗した場合は正常に動作しない。
 /// - マルチスレッドでの同時操作には注意。
 /// </summary>
@@ -142,7 +142,7 @@ private:
 	// Media Foundation SourceReader
 	Microsoft::WRL::ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
 
-	// 初期化状態フラグ（CoInitializeEx / MFStartup の成功判定用）
+	// 初期化状態フラグ(CoInitializeEx/MFStartup の成功判定用)
 	bool comInitialized = false;
 	bool mfStarted = false;
 };

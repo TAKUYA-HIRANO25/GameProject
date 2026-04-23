@@ -37,7 +37,7 @@ void ObJect3dCommon::SettingCommonDraw()
 
 void ObJect3dCommon::createRootSignature()
 {
-	// RootSignature 作成(明示的にゼロ初期化）
+	// RootSignature作成(明示的にゼロ初期化）
 	D3D12_ROOT_SIGNATURE_DESC descriptitonRootSignature{};
 	descriptitonRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
@@ -47,22 +47,22 @@ void ObJect3dCommon::createRootSignature()
 
 	// ルートパラメータ配列
 	D3D12_ROOT_PARAMETER rootParameter[4] = {};
-	// CBV(pixel):register(b0)
+	// CBV(pixel)register:(b0)
 	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameter[0].Descriptor.ShaderRegister = 0;
 	rootParameter[0].Descriptor.RegisterSpace = 0;
 
-	// CBV(vertex):register(b0)
+	// CBV(vertex)register:(b0)
 	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameter[1].Descriptor.ShaderRegister = 0;
 	rootParameter[1].Descriptor.RegisterSpace = 0;
 
-	// SRV descriptor table (pixel):t0
+	// SRVdescriptortable(pixel):t0
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	descriptorRange[0].NumDescriptors = 1; // 必要に応じて増やす（DirectXCommon::kMaxSRVCount など）
+	descriptorRange[0].NumDescriptors = 1; // 必要に応じて増やす
 	descriptorRange[0].BaseShaderRegister = 0;
 	descriptorRange[0].RegisterSpace = 0;
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -156,7 +156,7 @@ void ObJect3dCommon::GeneratePipeline()
 	blendDesc.RenderTarget[0].LogicOpEnable = FALSE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-	// RasterizerState の初期化
+	// RasterizerStateの初期化
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;

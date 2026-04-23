@@ -6,17 +6,17 @@ using namespace MyMath;
 /// カメラクラス
 ///
 /// 概要:
-/// - シーンのビュー変換（View）と射影変換（Projection）を管理するクラス。
-/// - Transform（位置・回転・スケール）を保持し、Update でワールド行列／ビュー行列／射影行列／ViewProjection 行列を更新する。
+/// - シーンのビュー変換と射影変換を管理するクラス。
+/// - Transform(位置・回転・スケール)を保持し、Updateでワールド行列/ビュー行列/射影行列/ViewProjection行列を更新。
 ///
 /// 機能:
-/// - SetRotate / SetTranslate / SetTransform: カメラの位置・回転を設定する。
-/// - SetFovY / SetAspect / SetNearClipDistance / SetFarClipDistance: 射影パラメータを設定する。
-/// - GetViewMatrix / GetProjectionMatrix / GetViewProjectionMatrix: 各行列の取得。
+/// - SetRotate/SetTranslate/SetTransform:カメラの位置・回転を設定。
+/// - SetFovY/SetAspect/SetNearClipDistance/SetFarClipDistance:射影パラメータを設定。
+/// - GetViewMatrix/GetProjectionMatrix/GetViewProjectionMatrix:各行列の取得。
 ///
 /// 注意:
-/// - カメラ行列はレンダリング前に Update() を呼んで最新化する必要がある。
-/// - 逆射影やスクリーンスペース変換を行う際には ViewProjection 行列とその逆行列を利用する。
+/// - カメラ行列はレンダリング前にUpdateを呼んで最新化する必要がある。
+/// - 逆射影やスクリーンスペース変換を行う際にはViewProjection行列とその逆行列を利用。
 /// </summary>
 class Camera
 {
@@ -26,7 +26,7 @@ public:
 	// 初期化
 	void Update();
 
-	// Setter(Rotate)
+	// Setter
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 	void SetFarClipDistance(const float& farClip) { farClipDistance = farClip; }

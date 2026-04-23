@@ -18,18 +18,18 @@ class Model;
 ///
 /// 概要:
 /// - 単一のモデルを保持しワールド変換を管理して描画を行う
-/// - 描画に必要な定数バッファを内部で確保し、毎フレーム更新する。
+/// - 描画に必要な定数バッファを内部で確保し、毎フレーム更新。
 ///
 /// 機能:
-/// - Initialize:共通オブジェクト(ObJect3dCommon)を参照してリソースを初期化する。
-/// - Updata:Transformからワールド行列を作成しカメラのViewProjectionを掛け合わせてWVPを更新する。
-/// - Draw:モデルが設定されていれば描画コマンドを発行する。
+/// - Initialize:共通オブジェクト(ObJect3dCommon)を参照してリソースを初期化。
+/// - Updata:Transformからワールド行列を作成しカメラのViewProjectionを掛け合わせてWVPを更新。
+/// - Draw:モデルが設定されていれば描画コマンドを発行。
 /// - SetModel:SetTranslate/SetRotate/SetScale:モデルと変換の設定。
-/// - SetCamera:固有カメラを使用する場合にセット可能(未設定時は ObJect3dCommon のデフォルトカメラを利用)。
+/// - SetCamera:固有カメラを使用する場合にセット可能(未設定時はObJect3dCommonのデフォルトカメラを利用)。
 ///
 /// 注意:
-/// - ModelはModelManager経由で取得した参照を設定する想定(所有権は ModelManager側)。
-/// - 描画前にObJect3dCommon::SettingCommonDrawを呼んでパイプラインを設定しておくこと。
+/// - ModelはModelManager経由で取得した参照を設定する想定(所有権はModelManager側)。
+/// - 描画前にObJect3dCommon::SettingCommonDrawを呼んでパイプラインを設定しておく。
 /// </summary>
 
 // 3Dオブジェクト

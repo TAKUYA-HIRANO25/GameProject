@@ -4,6 +4,24 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
 
+/// <summary>
+/// Poose
+/// 
+/// 概要:
+/// - ゲームプレイ中のポーズメニューを管理するクラス。
+/// 
+/// 主な機能:
+/// - Initialize:SpriteCommonとの参照を受け取って初期化。
+/// - Activate/Deactivate:ポーズの有効化・無効化を切り替える。Activateで入力ロックも行う。
+/// - IsActive:ポーズが現在有効かを問い合わせる。
+/// - Update:ポーズメニューの入力処理と状態更新を行う。選択肢の切り替えや決定を処理し、結果をセット。
+/// - Draw:ポーズメニューのスプライトを描画。
+/// - GetResult/ClearResult:ポーズメニューで選択された結果を取得・クリア。
+/// 
+/// 注意:
+/// - PooseがActivateされている間は、Inputのキーボードとマウス入力がロックされるため、ゲームプレイ側はこれを考慮して入力処理を行う必要がある。 
+/// </summary>
+
 class Poose
 {
 public:

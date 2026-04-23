@@ -17,7 +17,7 @@ public:
 	Fade(SpriteCommon* spriteCommon, const std::string& texturePath);
 	~Fade();
 
-	// 開始（エクスパンド→自動でシリンクは呼ばれない）
+	// 開始(エクスパンド→自動でシリンクは呼ばれない)
 	void Start();
 
 	// 強制的に縮小フェーズに移行
@@ -39,7 +39,7 @@ public:
 	bool IsExpanding() const { return state_ == State::Expanding; }
 	bool IsShrinking() const { return state_ == State::Shrinking; }
 
-	// 現在のサイズ / 位置取得
+	// 現在のサイズ/位置取得
 	Vector2 GetSize() const { return size_; }
 	Vector2 GetPosition() const { return position_; }
 
@@ -48,7 +48,7 @@ public:
 	void SetSpeed(float sx, float sy) { speedX_ = sx; speedY_ = sy; }
 	void SetMaxSize(float w, float h) { maxWidth_ = w; maxHeight_ = h; }
 
-	// 追加: フェード色を動的に変更する setter
+	// フェード色を動的に変更するsetter
 	void SetColor(const Vector4& color);
 
 private:
@@ -66,6 +66,6 @@ private:
 	float maxWidth_ = 1800.0f;
 	float maxHeight_ = 1000.0f; // 任意
 
-	// フェード色（デフォルト: 黒）
+	// フェード色(デフォルト:黒)
 	Vector4 color_{ 1.0f, 1.0f, 1.0f, 1.0f };
 };

@@ -8,10 +8,10 @@
 /// 
 /// 概要:
 /// - カメラの経路制御(シネマティック移動・カメラ揺れ・プリスタート用オービット演出)を提供するユーティリティクラス。
-/// - 内部に保持したCameraとTransformを毎フレームUpdateで更新することで、シーン側はGetCameraを通じて現在のカメラを取得して利用する。
+/// - 内部に保持したCameraとTransformを毎フレームUpdateで更新することで、シーン側はGetCameraを通じて現在のカメラを取得して利用。
 /// 
 /// 主な機能:
-/// - Initialize:管理対象のCameraを設定する。
+/// - Initialize:管理対象のCameraを設定。
 /// - StartCinematicMove/StopCinematicMove:指定Transformへ一定時間で補間して移動するシネマティック移動。
 /// - StartShake/StopShake:カメラ揺れ(強さ・継続時間指定)。
 /// - StartPreStartCinematic: プリスタート用の軌道(中心回転→最終Transform)演出。
