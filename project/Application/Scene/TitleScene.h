@@ -61,13 +61,24 @@ private:
 
 	// スプライト群
 	Sprite* title_ = nullptr;
-	Sprite* titleUI_ = nullptr;
+	Sprite* gameStart_ = nullptr;
+	Sprite* explanation_ = nullptr;
+	Sprite* operation_ = nullptr;
 	Sprite* backGround_ = nullptr;
-
 	// UI/フェード等
 	bool isTitle_ = true;
 
 	// ゲーム開始選択状態
 	bool goToGame = false;
+
+	// 点滅用
+	int blinkTimer_ = 0;
+	int blinkInterval_ = 60; // フレーム間隔
+	bool blinkState_ = false;
+	Vector4 normalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // 通常色
+	Vector4 blinkColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // 黄色
+
+	//操作説明
+	bool isExplanation_ = false;
 };
 

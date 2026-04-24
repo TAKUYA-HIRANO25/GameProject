@@ -94,7 +94,7 @@ void Poose::UpdateInput()
 		return;
 	}
 
-	// 上下で選択
+	// 上下で選択 
 	if (input_->TriggerKey(DIK_UP) || input_->TriggerKey(DIK_W)) {
 		selectedIndex_ = 0;
 	}
@@ -102,7 +102,30 @@ void Poose::UpdateInput()
 		selectedIndex_ = 1;
 	}
 
-	// 決定
+	// ゲームパッド
+	if (input_->IsAnyGamepadActive()) {
+		// D-Pad 上/下
+		if (input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_DPAD_UP)) {
+			selectedIndex_ = 0;
+		}
+		else if (input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_DPAD_DOWN)) {
+			selectedIndex_ = 1;
+		}
+
+		// A ボタンで決定
+		if (input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+			result_ = (selectedIndex_ == 0) ? Result::Resume : Result::ToTitle;
+			return;
+		}
+
+		// B ボタンはキャンセル（復帰）として扱う
+		if (input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_B)) {
+			result_ = Result::Resume;
+			return;
+		}
+	}
+
+	// 決定 (キーボード)
 	if (input_->TriggerKey(DIK_RETURN) || input_->TriggerKey(DIK_SPACE)) {
 		result_ = (selectedIndex_ == 0) ? Result::Resume : Result::ToTitle;
 		return;

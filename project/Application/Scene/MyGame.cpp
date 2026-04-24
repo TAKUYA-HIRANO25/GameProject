@@ -38,15 +38,17 @@ void MyGame::Initialize()
 
 	// 主要テクスチャ・モデルを読み込み
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
-	TextureManager::GetInstance()->LoadTexture("resources/title.png");
-	TextureManager::GetInstance()->LoadTexture("resources/titleUI.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title/gameStart.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title/explanation.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title/operation.png");
 	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Fade.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Ready.png");
 	TextureManager::GetInstance()->LoadTexture("resources/GO.png");
 	TextureManager::GetInstance()->LoadTexture("resources/GameOver.png");
-	TextureManager::GetInstance()->LoadTexture("resources/Over.png");
-	TextureManager::GetInstance()->LoadTexture("resources/Clear.png");
+	TextureManager::GetInstance()->LoadTexture("resources/GameClear.png");
+	TextureManager::GetInstance()->LoadTexture("resources/EndUI.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Particle.png");
 	TextureManager::GetInstance()->LoadTexture("resources/sky.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Player/Player.png");

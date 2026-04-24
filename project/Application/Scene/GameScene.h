@@ -70,6 +70,7 @@ private:
 	Sprite* Black_ = nullptr;
 	Sprite* gameOver_ = nullptr;
 	Sprite* clear_ = nullptr;
+	Sprite* EndUI_ = nullptr;
 	Sprite* explanation_ = nullptr;
 
 	// Poose の追加

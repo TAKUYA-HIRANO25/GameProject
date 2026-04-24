@@ -54,7 +54,9 @@ void GameScene::Initialize(RailCamera* railCamera)
 	gameOver_ = new Sprite();
 	gameOver_->Initialize(spriteCommon_, "resources/GameOver.png");
 	clear_ = new Sprite();
-	clear_->Initialize(spriteCommon_, "resources/Clear.png");
+	clear_->Initialize(spriteCommon_, "resources/GameClear.png");
+	EndUI_ = new Sprite();
+	EndUI_->Initialize(spriteCommon_, "resources/EndUI.png");
 	Black_ = new Sprite();
 	Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
 	explanation_ = new Sprite();
@@ -132,6 +134,7 @@ void GameScene::Update()
 		// UI スプライト更新
 		gameOver_->Update();
 		clear_->Update();
+		EndUI_->Update();
 		Black_->Update();
 		explanation_->Update();
 
@@ -196,14 +199,14 @@ void GameScene::Update()
 
 		break;
 	case GameScene::Scene::gameOver:
-		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
 			isGame_ = false;
 			isSet_ = true;
 		}
 		break;
 	case GameScene::Scene::clear:
-		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
 			isGame_ = false;
 			isSet_ = true;
@@ -350,10 +353,12 @@ void GameScene::Draw()
 		case GameScene::Scene::gameOver:
 			spriteCommon_->SettingCommonDraw();
 			gameOver_->Draw();
+			EndUI_->Draw();
 			break;
 		case GameScene::Scene::clear:
 			spriteCommon_->SettingCommonDraw();
 			clear_->Draw();
+			EndUI_->Draw();
 			break;
 
 		default:
@@ -380,6 +385,8 @@ void GameScene::Finalize()
 	gameOver_ = nullptr;
 	delete clear_;
 	clear_ = nullptr;
+	delete EndUI_;
+	EndUI_ = nullptr;
 	delete Black_;
 	Black_ = nullptr;
 	delete explanation_;
