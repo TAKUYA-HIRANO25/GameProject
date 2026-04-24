@@ -113,6 +113,9 @@ void GameScene::Update()
 				}
 				else if (r == Poose::Result::ToTitle) {
 					poose_->Deactivate();
+					currentScene_ = Scene::ready;
+					isGame_ = false;
+					isSet_ = true;
 				}
 				poose_->ClearResult();
 			}
@@ -193,14 +196,14 @@ void GameScene::Update()
 
 		break;
 	case GameScene::Scene::gameOver:
-		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
 			isGame_ = false;
 			isSet_ = true;
 		}
 		break;
 	case GameScene::Scene::clear:
-		if (input_->TriggerKey(DIK_RETURN) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
+		if (input_->TriggerKey(DIK_T) || input_->GamepadButtonTrigger(0, XINPUT_GAMEPAD_A)) {
 			currentScene_ = Scene::ready;
 			isGame_ = false;
 			isSet_ = true;
