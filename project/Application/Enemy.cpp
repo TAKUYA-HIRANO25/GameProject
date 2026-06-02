@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "Player.h"
 #include <cmath>
+#include "GameObject.h"
 
 Enemy::Enemy()
 {
@@ -18,14 +19,14 @@ Enemy::~Enemy()
 		});
 }
 
-// 初期化
+// 初期化:object3d 共通、初期位置、モデル、HP、フラグ等の設定
 void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 {
 	// 3D共通参照を保持
 	object3dCommon_ = object3dCommon;
 	// 敵のワールド位置を保存
 	position_ = position;
-	// モデル生成・初期化
+	// モデル生成、初期化
 	Model_ = new Object3d();
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("Enemy/Enemy.obj");
@@ -41,7 +42,6 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 	hasExploded_ = false;
 	// タイマー初期化
 	FireTime();
-
 	MoveTime();
 
 	// 行動初期化
@@ -55,7 +55,8 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 		});
 }
 
-// 毎フレーム更新
+// 毎フレーム更新:
+// - 弾の寿命チェック、色点滅処理、移動、発射処理、死亡判定を行う
 void Enemy::Update()
 {
 	// 死亡した弾を削除
@@ -70,7 +71,7 @@ void Enemy::Update()
 	// 被弾点滅
 	ChangeColor();
 
-	// 行動タイマー減算・切り替え
+	// 行動タイマー減算の切り替え
 	behaviorTimer_--;
 	if (behaviorTimer_ <= 0) {
 		MoveTime(); //行動を切り替える
@@ -90,11 +91,6 @@ void Enemy::Update()
 
 	case BehaviorType::Chase:
 		if (player_) {
-			/*
-			Vector3 dir = player_->GetWorldPosition() - position_;
-			dir = MyMath::Normalize(dir);
-			position_ += dir * speed;
-			*/
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
@@ -105,12 +101,6 @@ void Enemy::Update()
 		break;
 
 	case BehaviorType::SineWave:
-		// 前に進みつつ X 軸にサイン波オフセット
-		/*
-		sinePhase_ += kSineFrequency;
-		position_.z += -speed; // 前に進む（z方向）
-		position_.x += std::sin(sinePhase_) * kSineAmplitude;
-		*/
 		moveTime--;
 		if (moveTime == 0) {
 			move.x *= -1;
@@ -121,14 +111,6 @@ void Enemy::Update()
 
 	case BehaviorType::Dash:
 		if (dashTimer_ > 0) {
-			/*
-			// ダッシュ中はプレイヤー方向へ素早く接近
-			if (player_) {
-				Vector3 dir = player_->GetWorldPosition() - position_;
-				dir = MyMath::Normalize(dir);
-				position_ += dir * kDashSpeed;
-			}
-			*/
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
@@ -138,7 +120,6 @@ void Enemy::Update()
 			dashTimer_--;
 		}
 		else {
-			// ノーマルに戻る
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
@@ -149,12 +130,6 @@ void Enemy::Update()
 		break;
 
 	case BehaviorType::Idle:
-		// ほとんど動かない
-		// small idle wiggle
-		/*
-		position_.x += std::sin(sinePhase_) * 0.02f;
-		sinePhase_ += 0.05f;
-		*/
 		moveTime--;
 		if (moveTime == 0) {
 			move.x *= -1;
@@ -170,13 +145,12 @@ void Enemy::Update()
 			moveTime = kMoveInterval;
 		}
 		position_ += move;
-		//position_ += move;
 		break;
 	}
 
 	// 発射カウントダウン
 	Time--;
-	if (Time == 0 && isDead_ == false) {
+	if (Time == 0) {
 		Time = kFireInterval;
 		Fire();
 	}
@@ -195,7 +169,7 @@ void Enemy::Update()
 		isDead_ = true;
 	}
 
-	// モデルに位置を反映して更新
+	// モデルに位置を反映して更新（爆発でモデルを破棄している場合は Model_ == nullptr)
 	if (Model_) {
 		Model_->SetTranslate(position_);
 		Model_->Updata();
@@ -214,7 +188,7 @@ void Enemy::Draw()
 	}
 }
 
-// 弾を発射する処理
+// 弾を発射する処理:行動に応じて通常弾/拡散/バーストを切り替える
 void Enemy::Fire() {
 
 	// デフォルトの単発追尾
@@ -232,13 +206,18 @@ void Enemy::Fire() {
 	const float kBulletSpeed = -0.5f;
 	bulletVel = { 0, 0, 0 };
 
-	// 弾の軌道
-	Vector3 playerPosition = player_->GetWorldPosition();
-	Vector3 enemyPosition = GetWorldPosition();
-	Vector3 goalPosition = enemyPosition - playerPosition ;
-	bulletVel = MyMath::Normalize(goalPosition);
-	particleVel = bulletVel;
-	bulletVel = { bulletVel.x * kBulletSpeed,bulletVel.y * kBulletSpeed, bulletVel.z * kBulletSpeed };
+	// 弾の軌道:プレイヤー方向へ向かう正規化ベクトルを求める
+	Vector3 playerPosition{};
+	Vector3 enemyPosition{};
+	if (player_) {
+		player_->GetWorldPosition(playerPosition.x, playerPosition.y, playerPosition.z);
+	}
+	GetWorldPosition(enemyPosition.x, enemyPosition.y, enemyPosition.z);
+
+	Vector3 goalPosition = { enemyPosition.x - playerPosition.x, enemyPosition.y - playerPosition.y, enemyPosition.z - playerPosition.z };
+	Vector3 dir = MyMath::Normalize(goalPosition);
+	particleVel = dir;
+	bulletVel = { dir.x * kBulletSpeed,dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
 	// 弾オブジェクト生成と初期化
 	EnemyBullet* newBullet = new EnemyBullet();
@@ -256,7 +235,12 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 	const float kBulletSpeed = -0.45f;
 
 	// 基準方向
-	Vector3 baseDir = MyMath::Normalize(GetWorldPosition() - player_->GetWorldPosition());
+	Vector3 selfPos{}, playerPos{};
+	GetWorldPosition(selfPos.x, selfPos.y, selfPos.z);
+	if (player_) {
+		player_->GetWorldPosition(playerPos.x, playerPos.y, playerPos.z);
+	}
+	Vector3 baseDir = MyMath::Normalize(Vector3{ selfPos.x - playerPos.x, selfPos.y - playerPos.y, selfPos.z - playerPos.z });
 
 	// 中心から等間隔で角度を振る
 	float half = totalAngleDeg * 0.5f;
@@ -290,7 +274,13 @@ void Enemy::FireBurst(int count)
 	if (count <= 0) return;
 	const float kBulletSpeed = -0.55f;
 
-	Vector3 baseDir = MyMath::Normalize(GetWorldPosition() - player_->GetWorldPosition());
+	Vector3 selfPos{}, playerPos{};
+	GetWorldPosition(selfPos.x, selfPos.y, selfPos.z);
+	if (player_) {
+		player_->GetWorldPosition(playerPos.x, playerPos.y, playerPos.z);
+	}
+	Vector3 baseDir = MyMath::Normalize(Vector3{ selfPos.x - playerPos.x, selfPos.y - playerPos.y, selfPos.z - playerPos.z });
+
 	for (int i = 0; i < count; ++i) {
 		// 少しランダムに拡散
 		float rx = (std::rand() % 100 - 50) / 500.0f;
@@ -353,28 +343,23 @@ void Enemy::MoveTime()
 	moveTime = 180;
 }
 
-// ワールド位置取得
-Vector3 Enemy::GetWorldPosition()
+// out-params 版に変更
+void Enemy::GetWorldPosition(float& x, float& y, float& z) const
 {
-	Vector3 worldPos;
-	worldPos = position_;
-
-	return worldPos;
+	x = position_.x;
+	y = position_.y;
+	z = position_.z;
 }
 
-// 当たり判定時の処理
+// 当たり判定時の処理:HP減少、パーティクル生成、点滅を行う
 void Enemy::OnCollision() {
-
-	if (isDead_) {
-		return; // 既に死亡していれば無視
-	}
 
 	EnemyHp -= 1;
 
+	// パーティクル生成（被弾エフェクト）
 	if (particleManager_) {
 		const int kSpawn = 10;
-		// Model_ が無くても安全に位置を取れるように GetWorldPosition を使う
-		Vector3 spawnBase = GetWorldPosition();
+		Vector3 spawnBase = Model_->GetTranslate();
 		for (int i = 0; i < kSpawn; ++i) {
 			// ランダムなオフセットと速度を付与
 			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
@@ -387,23 +372,25 @@ void Enemy::OnCollision() {
 
 			// 点滅を開始：複数回トグルする実装
 			if (Model_ && flashFlag_ == false) {
-				// 元色
+				// 元色はInitialize時にoriginalColorに保持しているので利用
 				flashTimer_ = kFlashDuration * kFlashRepeat * 2;
 				flashToggleCounter_ = kFlashDuration;
 
-				// 赤にする
+				// まず赤にする
 				Model_->SetDiffuseColor({ 1.0f, 0.25f, 0.25f, 1.0f });
 			}
 
 			// パーティクルを生成
-			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", {0.8f,0.8f,0.8f});
+			particleManager_->Spawn(spawnBase, vel, 30, "Particle.obj", { 0.8f,0.8f,0.8f });
 		}
 	}
 }
 
-// 色の点滅処理
+// 色の点滅処理:
+// - flashTimerとflashToggleCounterを用いて赤/元色を切り替える
 void Enemy::ChangeColor()
 {
+
 	// 点滅処理
 	if (flashTimer_ > 0 && Model_) {
 		// フレームを消費

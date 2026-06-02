@@ -3,6 +3,8 @@
 #include <Xinput.h>
 #include <algorithm>
 #include <cmath>
+#include "GameObject.h" 
+
 Player::Player()
 {
 	//Initializerで初期化
@@ -16,12 +18,12 @@ Player::~Player()
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
-	});
+		});
 }
 
 void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	// 3D 共通参照を保持
-	object3dCommon_ = object3dCommon;	
+	object3dCommon_ = object3dCommon;
 
 	// プレイヤーモデル生成・初期化
 	Model_ = new Object3d();
@@ -34,7 +36,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 		reticleSprite_ = new Sprite();
 		reticleSprite_->Initialize(spriteCommon_, "resources/Reticle.png");
 		reticleSprite_->SetAnchorPoint({ 0.5f,0.5f });
-		reticleSprite_->SetSize(Vector2(64,64));
+		reticleSprite_->SetSize(Vector2(64, 64));
 		// 初期位置は画面中央
 		reticleSprite_->SetPosition(Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f));
 	}
@@ -51,7 +53,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	bulletList_.remove_if([](PlayerBullet* bullet) {
 		delete bullet;
 		return true;
-	});
+		});
 
 }
 
@@ -64,7 +66,7 @@ void Player::Update()
 			return true;
 		}
 		return false;
-	});
+		});
 	// 被弾時の点滅処理
 	ChangeColor();
 
@@ -87,7 +89,7 @@ void Player::Update()
 		isDead_ = true;
 	}
 
-	// モデルに位置を反映して行列更新(Object3d 側で World 行列等を作る想定)
+	// モデルに位置を反映して行列更新
 	Model_->SetTranslate(position_);
 	Model_->Updata();
 
@@ -226,12 +228,11 @@ void Player::Fire()
 	}
 }
 
-Vector3 Player::GetWorldPosition()
+void Player::GetWorldPosition(float& x, float& y, float& z) const
 {
-	Vector3 worldPos;
-	worldPos = position_;
-
-	return worldPos;
+	x = position_.x;
+	y = position_.y;
+	z = position_.z;
 }
 
 void Player::OnCollision()
@@ -299,7 +300,7 @@ void Player::Reticle()
 		}
 	}
 
-	// Reticle 側でもロック状態を設定
+	// Reticle側でもロック状態を設定
 	if (input_) {
 		if (controllerActive) {
 			input_->SetKeyboardLockedByController(true);
@@ -315,7 +316,7 @@ void Player::Reticle()
 	Vector2 cursor;
 
 	if (controllerActive) {
-		// コントローラ優先:マウスは無視lastCursor に右スティックの移動を適用する。
+		// コントローラ優先:マウスは無視lastCursorに右スティックの移動を適用する。
 		const float padReticleSpeed = 8.0f; // スティック1.0当たりのピクセル移動量
 		float rx = input_->GetRightThumbX(0); // -1..1
 		float ry = input_->GetRightThumbY(0); // -1..1
@@ -327,7 +328,8 @@ void Player::Reticle()
 		}
 		// 現在のカーソルとしてlastCursorを使う
 		cursor = lastCursor;
-	} else {
+	}
+	else {
 		// マウス優先:実際のマウス位置でlastCursorを更新する
 		Vector2 mousePos = input_->GetCursorClientPos2();
 		lastCursor = mousePos;
@@ -348,7 +350,7 @@ void Player::Reticle()
 	float nx = (cursor.x / width) * 2.0f - 1.0f;
 	float ny = -((cursor.y / height) * 2.0f - 1.0f); // 上下反転
 
-	// 近クリップ,遠クリップのNDCを定義
+	// 近クリップ、遠クリップのNDCを定義
 	Vector3 ndcNear = { nx, ny, 0.0f };
 	Vector3 ndcFar = { nx, ny, 1.0f };
 
@@ -370,7 +372,7 @@ void Player::Reticle()
 	Vector3 camPos = camera->GetTranslate();
 	reticleWorldPos_ = { camPos.x + rayDir.x * reticleDistance_, camPos.y + rayDir.y * reticleDistance_, camPos.z + rayDir.z * reticleDistance_ };
 
-	// reticleModel_にセット(描画時に Updata() しているためここでは SetTranslate のみ)
+	// reticleModel_にセット
 	if (reticleModel_) {
 		reticleModel_->SetTranslate(reticleWorldPos_);
 	}
@@ -412,7 +414,7 @@ void Player::ChangeColor()
 	}
 }
 
-// Position / Scale / Rotate のセッター / ゲッター
+// Position/Scale/Rotateのセッター/ゲッター
 void Player::SetPosition(const Vector3& pos)
 {
 	position_ = pos;

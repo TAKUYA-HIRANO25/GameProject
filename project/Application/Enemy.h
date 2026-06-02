@@ -5,11 +5,13 @@
 #include "Player.h"
 #include "ParticleManager.h"
 #include "MyMath.h"
+#include "GameObject.h"
+
 /// <summary>
 ///
 /// 概要:
-/// - 敵の生成・更新・描画・弾発射・被弾エフェクト等を担当するクラス実装。
-/// - このファイルではオブジェクトのライフサイクル管理や当たり判定時の色点滅・パーティクル生成ロジック。
+/// - 敵の生成、更新、描画、弾発射、被弾エフェクト等を担当するクラス実装。
+/// - オブジェクトのライフサイクル管理、当たり判定時の色点滅、パーティクル生成ロジック。
 ///
 /// 主な責務:
 /// - Initialize:モデルや入力参照の初期設定。
@@ -22,8 +24,7 @@
 /// - レンダリングと更新はメインスレッドで行う前提でスレッドセーフではない。
 /// </summary>
 
-// 敵キャラクタークラス
-class Enemy
+class Enemy : public GameObject
 {
 public:
 	Enemy();
@@ -31,9 +32,9 @@ public:
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, Vector3 position);
 	// 更新
-	void Update();
+	void Update() override;
 	// 描画
-	void Draw();
+	void Draw() override;
 	//弾発射
 	void Fire();
 	//発射タイマー初期化
@@ -41,28 +42,19 @@ public:
 	//移動切り替え(行動をランダムに切り替える)
 	void MoveTime();
 	// プレイヤーのワールド位置取得
-	Vector3 GetWorldPosition();
+	void GetWorldPosition(float& x, float& y, float& z) const override;
 	// 当たり判定
-	void OnCollision();
+	void OnCollision() override;
 	// 敵の弾リスト取得
 	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
 	// 敵の生死判定
-	bool IsDead() const { return isDead_; }
+	bool IsDead() const override { return isDead_; }
 	// プレイヤー情報セット
 	void setPlayer(Player* player) { player_ = player; }
-	// パーティクルマネージャのセット
+	// パーティクルマネージャーセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
 	//色変え
 	void ChangeColor();
-
-	bool bulletActive = false; //弾発射フラグ
-
-	static const int kFireInterval = 60; //弾の間隔
-	static const int kMoveInterval = 360; //移動切り替え
-
-	static const int kFlashDuration = 10; // 点滅時間
-	// 点滅を何回繰り返すか
-	static const int kFlashRepeat = 4;
 
 private:
 	// 行動状態
@@ -104,7 +96,7 @@ private:
 	int behaviorTimer_ = 0;
 	int dashTimer_ = 0;
 	float sinePhase_ = 0.0f;
-	
+
 	// 行動パラメータ
 	static constexpr float kDashSpeed = 2.5f;
 	static constexpr int kDashDuration = 30;
@@ -119,7 +111,7 @@ private:
 	Vector3 particleVel = { 0.0f,0.0f,0.0f };
 	int particleTimer_ = 0;
 
-	// 被弾点滅用タイマー(フレーム):残りトグル用総フレーム数
+	// 被弾点滅用タイマー
 	int flashTimer_ = 0;
 	bool flashFlag_ = false; //点滅中フラグ
 	// 点滅で色を切り替える間隔カウンタ
@@ -136,5 +128,13 @@ private:
 	void Explode();
 	// 爆発トリガーが二度実行されないようにするフラグ
 	bool hasExploded_ = false;
-};
 
+	bool bulletActive = false; //弾発射フラグ
+
+	static const int kFireInterval = 60; //弾の間隔
+	static const int kMoveInterval = 360; //移動切り替え
+
+	static const int kFlashDuration = 10; // 点滅時間
+	// 点滅を何回繰り返すか
+	static const int kFlashRepeat = 4;
+};

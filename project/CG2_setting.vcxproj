@@ -106,6 +106,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Application\Enemy.cpp" />
     <ClCompile Include="Application\EnemyBullet.cpp" />
+    <ClCompile Include="Application\Bullet.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\3D\Camera.cpp" />
     <ClCompile Include="Engine\Base\D3DResourceLeakChecker.cpp" />
@@ -137,7 +138,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Fade.cpp" />
     <ClCompile Include="Engine\Base\InputGamepad.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
-    <ClCompile Include="Application\FramWork\GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\3D\Model.cpp" />
     <ClCompile Include="Engine\3D\ModelCommon.cpp" />
@@ -163,6 +163,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
     <ClInclude Include="Application\EnemyBullet.h" />
+    <ClInclude Include="Application\Bullet.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\3D\Camera.h" />
     <ClInclude Include="Engine\Base\D3DResourceLeakChecker.h" />

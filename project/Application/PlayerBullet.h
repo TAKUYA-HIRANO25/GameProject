@@ -1,80 +1,51 @@
 #pragma once
+#include "Bullet.h"
 #include "Object3d.h"
-#include "MyMath.h"
 #include "Object3dCommon.h"
-#include "Input.h"
-#include "WinApp.h"
-#include "ModelManager.h"
-#include "Model.h"
-#include "ModelCommon.h"
-#include "Camera.h"
-#include "MatuilityForText.h"
+#include "MyMath.h"
 
 /// <summary>
 /// PlayerBullet
-///
-/// 概要:
-/// - プレイヤーが発射する弾を表す軽量クラス。位置・速度・回転・スケールを保持し、内部でObject3dを用いて描画。
-/// - 寿命管理（フレーム単位）と当たり判定による消滅処理を持つエンティティ。
-///
-/// 主な機能:
-/// - Initialize:
-///     初期位置・初期速度を設定し、描画用のObject3dを準備。
-/// - Update:
-///     位置の更新・寿命のデクリメント・当たり判定や状態遷移を行う。
-/// - Draw():
-///     内部 `Object3d` を用いて描画を行う。
-/// - OnCollision:
-///     衝突時の処理を行う。
-/// - IsDead/GetWorldPosition:
-///     生死判定と現在位置取得用のユーティリティ。
-///
-/// 注意:
-/// - ObJect3dCommonやObject3dの所有権・ライフサイクルは呼び出し側と整合させてください。
-/// - 現在の寿命管理はフレーム依存です。必要に応じて時間ベースに変更してください。
-/// - スレッドセーフは保証していないため、マルチスレッド環境では外部で同期を行ってください。
+/// - Bullet を継承し、Object3d を使って描画する実装を提供する
+/// - out-params 版 GetWorldPosition を override し、既存コード互換のため Vector3 返却版をラップで残す
 /// </summary>
-
-class PlayerBullet
-{
+class PlayerBullet : public Bullet {
 public:
-	// コンストラクタ
+	// コンストラクタ / デストラクタ
 	PlayerBullet();
-	// デストラクタ
 	~PlayerBullet();
 
-	// 初期化
+	// 初期化（既存シグネチャを維持）
 	void Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity);
 
-	// 更新
-	void Update();
+	// 更新 / 描画
+	void Update() override;
+	void Draw() override;
 
-	// 描画
-	void Draw();
+	// 衝突
+	void OnCollision() override;
 
-	// プレイヤーの生死判定
-	bool IsDead() const { return isDead_; }
+	// GameObject インターフェース準拠: out-params 版
+	void GetWorldPosition(float& x, float& y, float& z) const override;
 
-	// 当たり判定
-	void OnCollision();
+	// 互換用: Vector3 返却版（既存コードが利用する箇所があればこちらを使用）
+	Vector3 GetWorldPosition() const;
 
-	// ワールド位置取得
-	Vector3 GetWorldPosition();
+	// 生死判定は基底を利用
+	bool IsDead() const { return Bullet::IsDead(); }
+
+	// GameObject タイプ
+	Type GetType() const override { return Type::PlayerBullet; }
+
 private:
-	// 基盤
-	ObJect3dCommon* object3dCommon_ = nullptr;
-	// 3Dモデル関連
 	Transform modelTransform_;
-	Object3d* Model_ = nullptr; // 3Dオブジェクト
-	// 位置関連
-	Vector3 position_; // 位置
-	Vector3 rotation_; // 回転
-	Vector3 scale_; // 拡大縮小
-	Vector3 velocity_; // 移動方向
-	float speed_ = 2.0f; // 移動速度
-	//タイマー
+	Object3d* Model_ = nullptr;
+	Vector3 position_{ 0.0f, 0.0f, 0.0f };
+	Vector3 rotation_{ 0.0f,0.0f,0.0f };
+	Vector3 scale_{ 1.0f,1.0f,1.0f };
+
 	static const int32_t kLifeTime = 60 * 5;
-	int32_t deathTimer_ = kLifeTime;
-	bool isDead_ = false;
+
+	ObJect3dCommon* object3dCommon_ = nullptr;
 };
 

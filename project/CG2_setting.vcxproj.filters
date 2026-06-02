@@ -45,7 +45,7 @@
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
-    <ClCompile Include="Application\FramWork\GameObject.cpp" />
+    <ClCompile Include="Application\Bullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -94,6 +94,7 @@
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Application\FramWork\GameObject.h" />
+    <ClInclude Include="Application\Bullet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />

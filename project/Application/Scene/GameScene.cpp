@@ -1,4 +1,6 @@
 #include "GameScene.h"
+#include <windows.h>
+#include <cstdio>
 
 GameScene::GameScene()
 {
@@ -12,13 +14,13 @@ GameScene::~GameScene()
 
 void GameScene::Initialize(RailCamera* railCamera)
 {
-	// WinAPI 初期化
+	// WinAPI初期化
 	winApp_ = WinApp::GetInstance();
-	// DirectX 初期化
+	// DirectX初期化
 	dxCommon_ = DirectXCommon::GetInstance();
-	// 入力システムの取得・初期化
+	// 入力システムの取得、初期化
 	input_ = Input::GetInstance();
-	// テクスチャ管理・スプライト共通設定の初期化
+	// テクスチャ管理、スプライト共通設定の初期化
 	spriteCommon_ = SpriteCommon::GetInstance();
 	object3dCommon_ = ObJect3dCommon::GetInstance();
 
@@ -27,7 +29,7 @@ void GameScene::Initialize(RailCamera* railCamera)
 
 	// カメラ
 	railCamera_ = railCamera;
-	// プレイヤー生成・初期化
+	// プレイヤー生成、初期化
 	player_ = new Player();
 	player_->Initialize(object3dCommon_);
 	player_->SetRailCameraVelocity(railCamera_->GetVelocity());
@@ -38,6 +40,11 @@ void GameScene::Initialize(RailCamera* railCamera)
 	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -1.0f, 60.0f });
 	enemy_->setPlayer(player_);
 	enemy_->SetParticleManager(particleManager_);
+
+	// GameObject一括管理リストに登録
+	objects_.clear();
+	objects_.push_back(static_cast<GameObject*>(player_));
+	objects_.push_back(static_cast<GameObject*>(enemy_));
 
 	// 天球の初期化
 	skyDome_ = new Object3d();
@@ -127,10 +134,12 @@ void GameScene::Update()
 		}
 		// パーティクル更新
 		particleManager_->Update();
-		// プレイヤー更新
-		player_->Update();
-		// 敵更新
-		enemy_->Update();
+
+		// GameObject 一括 Update(Player/Enemy等)
+		for (GameObject* obj : objects_) {
+			if (obj) obj->Update();
+		}
+
 		// UI スプライト更新
 		gameOver_->Update();
 		clear_->Update();
@@ -138,45 +147,71 @@ void GameScene::Update()
 		Black_->Update();
 		explanation_->Update();
 
+		// デバッグ: F1 押下で弾数を出力
+		if (input_ && input_->TriggerKey(DIK_F1)) {
+			char buf[256];
+			sprintf_s(buf, "PlayerBullets=%llu EnemyBullets=%llu\n",
+				(unsigned long long)player_->GetBullets().size(),
+				(unsigned long long)enemy_->GetBullets().size());
+			OutputDebugStringA(buf);
+		}
+
 		// 当たり判定
 		if (player_ && enemy_) {
-			Vector3 posA = player_->GetWorldPosition();
-			const std::list<PlayerBullet*>& playerBullets = player_->GetBullets();
-			const std::list<EnemyBullet*>& enemyBullets = enemy_->GetBullets();
+			// プレイヤー位置
+			float px, py, pz;
+			player_->GetWorldPosition(px, py, pz);
 
-			for (EnemyBullet* bullet : enemyBullets) {
-				Vector3 posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					// プレイヤーにヒット
+			// 敵位置
+			float ex, ey, ez;
+			enemy_->GetWorldPosition(ex, ey, ez);
+
+			// 直接リストを走査して衝突判定（不要なコピーを回避）
+			const float radius = 0.5f + 0.5f;
+			const float radiusSq = radius * radius;
+
+			// 敵弾 -> プレイヤー
+			for (EnemyBullet* eb : enemy_->GetBullets()) {
+				if (!eb || eb->IsDead()) continue;
+				float bx, by, bz;
+				eb->GetWorldPosition(bx, by, bz);
+				float dx = bx - px;
+				float dy = by - py;
+				float dz = bz - pz;
+				if (dx * dx + dy * dy + dz * dz <= radiusSq) {
 					player_->OnCollision();
-					bullet->OnCollision();
-
-					// カメラ揺れを発生
-					if (railCamera_) {
-						railCamera_->StartShake(0.12f, 0.5f);
-					}
+					eb->OnCollision();
+					if (railCamera_) railCamera_->StartShake(0.12f, 0.5f);
 				}
 			}
 
-			posA = enemy_->GetWorldPosition();
-			for (PlayerBullet* bullet : playerBullets) {
-				Vector3 posB = bullet->GetWorldPosition();
-				float coll = (posB.x - posA.x) * (posB.x - posA.x) + (posB.y - posA.y) * (posB.y - posA.y) + (posB.z - posA.z) * (posB.z - posA.z);
-				if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
-					// 敵にヒット
+			// プレイヤー弾 -> 敵
+			for (PlayerBullet* pb : player_->GetBullets()) {
+				if (!pb || pb->IsDead()) continue;
+				float bx, by, bz;
+				pb->GetWorldPosition(bx, by, bz);
+				float dx = bx - ex;
+				float dy = by - ey;
+				float dz = bz - ez;
+				if (dx * dx + dy * dy + dz * dz <= radiusSq) {
 					enemy_->OnCollision();
-					bullet->OnCollision();
+					pb->OnCollision();
 				}
 			}
 
-			// 弾同士の衝突判定
-			for (PlayerBullet* pb : playerBullets) {
-				Vector3 a = pb->GetWorldPosition();
-				for (EnemyBullet* eb : enemyBullets) {
-					Vector3 b = eb->GetWorldPosition();
-					float coll = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z);
-					if (coll <= (0.5f + 0.5f) * (0.5f + 0.5f)) {
+			// 弾同士の衝突（プレイヤー弾 x 敵弾）
+			for (PlayerBullet* pb : player_->GetBullets()) {
+				if (!pb || pb->IsDead()) continue;
+				float pax, pay, paz;
+				pb->GetWorldPosition(pax, pay, paz);
+				for (EnemyBullet* eb : enemy_->GetBullets()) {
+					if (!eb || eb->IsDead()) continue;
+					float ebx, eby, ebz;
+					eb->GetWorldPosition(ebx, eby, ebz);
+					float dx = ebx - pax;
+					float dy = eby - pay;
+					float dz = ebz - paz;
+					if (dx * dx + dy * dy + dz * dz <= radiusSq) {
 						eb->OnCollision();
 						pb->OnCollision();
 					}
@@ -189,8 +224,6 @@ void GameScene::Update()
 			currentScene_ = Scene::gameOver;
 		}
 		else if (enemy_->IsDead()) {
-			// 変更 敵が死亡していても、爆発エフェクトのパーティクルが残っている間は
-			// クリアに遷移しない。ParticleManager が空になってから遷移。
 			if (particleManager_ == nullptr || particleManager_->IsEmpty()) {
 				currentScene_ = Scene::clear;
 			}
@@ -224,11 +257,12 @@ void GameScene::Update()
 	// プレイヤー変換編集ウィンドウ
 	if (player_) {
 		// 現在値を取得
-		Vector3 pos = player_->GetWorldPosition();
+		float px, py, pz;
+		player_->GetWorldPosition(px, py, pz);
 		Vector3 sc = player_->GetScale();
 		Vector3 rt = player_->GetRotate();
 
-		float p[3] = { pos.x, pos.y, pos.z };
+		float p[3] = { px, py, pz };
 		float s[3] = { sc.x, sc.y, sc.z };
 		float r[3] = { rt.x, rt.y, rt.z };
 
@@ -310,11 +344,10 @@ void GameScene::Update()
 
 void GameScene::Draw()
 {
+	Camera* cam = nullptr;
+	if (object3dCommon_) cam = object3dCommon_->GetDefaultCamera();
+
 	object3dCommon_->SettingCommonDraw();
-	// 天球描画
-	if (skyDome_) {
-		skyDome_->Draw();
-	}
 
 	switch (currentScene_) {
 		case GameScene::Scene::ready:
@@ -329,13 +362,9 @@ void GameScene::Draw()
 
 		case GameScene::Scene::main:
 			object3dCommon_->SettingCommonDraw();
-			// プレイヤー描画
-			if (player_) {
-				player_->Draw();
-			}
-			// 敵描画
-			if (enemy_) {
-				enemy_->Draw();
+			// GameObject一括描画(Player/Enemy等)
+			for (GameObject* obj : objects_) {
+				if (obj) obj->Draw();
 			}
 			// パーティクル描画
 			if (particleManager_) {
@@ -347,6 +376,7 @@ void GameScene::Draw()
 				poose_->Draw();
 			}
 			explanation_->Draw();
+			// プレイヤーのスプライトは別扱い
 			player_->SpriteDraw();
 			break;
 
@@ -398,4 +428,7 @@ void GameScene::Finalize()
 	spriteCommon_ = nullptr;
 	object3dCommon_ = nullptr;
 	input_ = nullptr;
+
+	// objects_ は生ポインタ参照のみなのでクリア
+	objects_.clear();
 }

@@ -13,12 +13,13 @@
 #include "MatuilityForText.h"
 #include "PlayerBullet.h"
 #include "ParticleManager.h"
+#include "FramWork/GameObject.h"
 /// <summary>
 /// プレイヤーを表すクラス
 ///
 /// 概要:
-/// - 3Dモデルを保持し、移動・射撃・被弾処理・レティクルを管理するエンティティ。
-/// - 自身で PlayerBulletを生成してリストで管理し、弾を制御。
+/// - 3Dモデルを保持し、移動、射撃、被弾処理、レティクルを管理するエンティティ。
+/// - 自身でPlayerBulletを生成してリストで管理し、弾を制御。
 ///
 /// 主な機能:
 /// - Initialize:モデルや入力参照の初期設定。
@@ -32,7 +33,7 @@
 /// - レンダリングと更新はメインスレッドで行う前提でスレッドセーフではない。
 /// - マウス→ワールド変換の実装はカメラ行列や座標系に依存するため、必要に応じてNDC・Y軸反転等を調整。
 /// </summary>
-class Player
+class Player : public GameObject
 {
 public:
 	Player();
@@ -40,27 +41,27 @@ public:
 	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon);
 	// 更新
-	void Update();
+	void Update() override;
 	//スプライト描画
 	void SpriteDraw();
 	// 描画
-	void Draw();
+	void Draw() override;
 	//移動
 	void Move();
 	//弾発射
 	void Fire();
-	// プレイヤーのワールド位置取得
-	Vector3 GetWorldPosition();
+	// プレイヤーのワールド位置取得（out-params 版）
+	void GetWorldPosition(float& x, float& y, float& z) const override;
 	// 当たり判定
-	void OnCollision();
+	void OnCollision() override;
 	// プレイヤーの弾リスト取得
 	const std::list<PlayerBullet*>& GetBullets() const { return bulletList_; }
 	// レティクル更新
 	void Reticle();
-	// パーティクルマネージャのセット
+	// パーティクルマネージャセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
 	// プレイヤーの生死判定
-	bool IsDead() const { return isDead_; }
+	bool IsDead() const override { return isDead_; }
 	//レールカメラ用にプレイヤーのTransformをセット
 	void SetRailCameraVelocity(Vector3 velocity);
 	bool bulletActive = false; //弾発射フラグ

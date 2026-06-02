@@ -17,19 +17,21 @@
 #include "ParticleManager.h"
 #include "RailCamera.h"
 #include "Fade.h"
-#include "Poose.h" 
+#include "Poose.h"
+#include "FramWork/GameObject.h" 
+#include "Bullet.h"
 
 /// <summary>
 /// GameScene
 ///
 /// 概要:
 /// - メインゲームプレイを管理するシーンクラス。
-/// - プレイヤー・敵・パーティクル・UIや時間管理、シーン遷移を制御。
+/// - プレイヤー、敵、パーティクル、UIや時間管理、シーン遷移を制御。
 /// 
 /// 主な機能:
 /// - Initialize:シーン内で使用するオブジェクトや参照を初期化。
 /// - Update:ゲームロジック(入力、物理、敵挙動、エフェクト、シーン状態遷移)を毎フレーム実行。
-/// - Draw:3D/2Dの描画(オブジェクト・スプライト)を行う。
+/// - Draw:3D/2Dの描画(オブジェクト、スプライト)を行う。
 /// - Finalize:所有リソースの解放や終了処理を行う。
 /// - IsGameSet:シーンのセットアップ完了状態を管理。
 /// 
@@ -59,9 +61,12 @@ private:
 	RailCamera* railCamera_ = nullptr;
 	ModelCommon* modelCommon_ = nullptr;
 	Audio* audio_ = nullptr;
-	//オブジェクト
+	//オブジェクト(個別ポインタは互換のため残す)
 	Player* player_ = nullptr;
 	Enemy* enemy_ = nullptr;
+	// GameObjectベースで一括管理
+	std::vector<GameObject*> objects_;
+
 	Object3d* skyDome_ = nullptr;
 	ParticleManager* particleManager_ = nullptr;
 	//スプライト
@@ -73,7 +78,7 @@ private:
 	Sprite* EndUI_ = nullptr;
 	Sprite* explanation_ = nullptr;
 
-	// Poose の追加
+	// Pooseの追加
 	Poose* poose_ = nullptr;
 
 	// フラグ

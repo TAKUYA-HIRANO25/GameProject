@@ -59,11 +59,12 @@ void MyGame::Initialize()
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("box.obj");
-	ModelManager::GetInstance()->LoadModel("Bullet.obj");
+	ModelManager::GetInstance()->LoadModel("Bullet/Bullet.obj");
 	ModelManager::GetInstance()->LoadModel("Particle.obj");
 	ModelManager::GetInstance()->LoadModel("sphere.obj");
 	ModelManager::GetInstance()->LoadModel("Player/Player.obj");
 	ModelManager::GetInstance()->LoadModel("Enemy/Enemy.obj");
+
 	// シーン構築
 	CreateScene();
 }

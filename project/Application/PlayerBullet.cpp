@@ -1,52 +1,76 @@
 #include "PlayerBullet.h"
+#include <windows.h>
+#include <cstdio>
 
-PlayerBullet::PlayerBullet() {
-    // Initializerで初期化
+PlayerBullet::PlayerBullet() = default;
+PlayerBullet::~PlayerBullet()
+{
+	delete Model_;
+	Model_ = nullptr;
 }
 
-PlayerBullet::~PlayerBullet() {
-    // デストラクタ: 所有するObject3dを解放
-    delete Model_;
+void PlayerBullet::Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity)
+{
+	object3dCommon_ = object3dCommon;
+	position_.x = position.x;
+	position_.y = position.y;
+	position_.z = position.z;
+
+	// Object3d 初期化
+	Model_ = new Object3d();
+	Model_->Initialize(object3dCommon_);
+	// デバッグ: 確実に存在するモデルを一時使用して可視化を確認
+	// 実運用では元の "Player/Bullet.obj" に戻してください
+	Model_->SetModel("Bullet/Bullet.obj");
+	Model_->SetTranslate(position_);
+	// 少し大きめにして見えやすくする
+	Model_->SetScale({ 2.5f, 2.5f, 2.5f });
+	// 目立つ色に変更（デバッグ）
+	Model_->SetDiffuseColor({ 1.0f, 0.85f, 0.0f, 1.0f });
+	// 初期化直後に行列更新
+	Model_->Updata();
+
+	// 基底の物理情報を初期化
+	Bullet::Initialize(position.x, position.y, position.z, velocity.x, velocity.y, velocity.z,kLifeTime);
 }
 
-void PlayerBullet::Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity) {
-    object3dCommon_ = object3dCommon;
-    Model_ = new Object3d();
-    Model_->Initialize(object3dCommon);
-    Model_->SetModel("Bullet.obj");
-    Model_->SetTranslate(position);
-    velocity_.x = velocity.x * speed_;
-	velocity_.y = velocity.y * speed_;
-	velocity_.z = velocity.z * speed_;
-    position_ = position;
+void PlayerBullet::Update()
+{
+	// 基底で位置更新・寿命管理
+	Bullet::Update();
+
+	// 基底の座標を描画用の Vector3 に反映
+	GetWorldPosition(position_.x, position_.y, position_.z);
+
+	// Model を更新
+	if (Model_) {
+		Model_->SetTranslate(position_);
+		Model_->Updata();
+	}
 }
 
-void PlayerBullet::Update() {
-
-    position_ += velocity_;
-
-    if (--deathTimer_ <= 0) {
-        isDead_ = true;
-    }
-
-    // モデルに位置を反映して行列更新
-    Model_->SetTranslate(position_);
-    Model_->Updata();
-}
-
-void PlayerBullet::Draw() {
-    Model_->Draw();
+void PlayerBullet::Draw()
+{
+	if (!IsDead() && Model_) {
+		Model_->Draw();
+	}
 }
 
 void PlayerBullet::OnCollision()
 {
-    isDead_ = true;
+	Bullet::OnCollision();
 }
 
-Vector3 PlayerBullet::GetWorldPosition()
+void PlayerBullet::GetWorldPosition(float& x, float& y, float& z) const
 {
-    Vector3 worldPos;
-    worldPos = position_;
+	Bullet::GetWorldPosition(x, y, z);
+}
 
-    return worldPos;
+Vector3 PlayerBullet::GetWorldPosition() const
+{
+	Vector3 v;
+	float x, y, z;
+	GetWorldPosition(x, y, z);
+	v.x = x; v.y = y; v.z = z;
+	return v;
 }
