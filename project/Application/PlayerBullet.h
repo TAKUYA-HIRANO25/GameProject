@@ -6,8 +6,8 @@
 
 /// <summary>
 /// PlayerBullet
-/// - Bullet を継承し、Object3d を使って描画する実装を提供する
-/// - out-params 版 GetWorldPosition を override し、既存コード互換のため Vector3 返却版をラップで残す
+/// - Bulletを継承し、Object3d を使って描画する実装を提供する
+/// -GetWorldPositionを、既存コード互換のためVector3で残す
 /// </summary>
 class PlayerBullet : public Bullet {
 public:
@@ -15,26 +15,26 @@ public:
 	PlayerBullet();
 	~PlayerBullet();
 
-	// 初期化（既存シグネチャを維持）
+	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity);
 
-	// 更新 / 描画
+	// 更新/描画
 	void Update() override;
 	void Draw() override;
 
 	// 衝突
 	void OnCollision() override;
 
-	// GameObject インターフェース準拠: out-params 版
+	// GameObject インターフェース準拠
 	void GetWorldPosition(float& x, float& y, float& z) const override;
 
-	// 互換用: Vector3 返却版（既存コードが利用する箇所があればこちらを使用）
+	// 互換用:Vector3
 	Vector3 GetWorldPosition() const;
 
 	// 生死判定は基底を利用
 	bool IsDead() const { return Bullet::IsDead(); }
 
-	// GameObject タイプ
+	// GameObjectタイプ
 	Type GetType() const override { return Type::PlayerBullet; }
 
 private:

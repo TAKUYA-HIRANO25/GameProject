@@ -35,7 +35,7 @@ void GameScene::Initialize(RailCamera* railCamera)
 	player_->SetRailCameraVelocity(railCamera_->GetVelocity());
 	player_->SetParticleManager(particleManager_);
 
-	// 敵生成・初期化
+	// 敵生成、初期化
 	enemy_ = new Enemy();
 	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -1.0f, 60.0f });
 	enemy_->setPlayer(player_);
@@ -147,15 +147,6 @@ void GameScene::Update()
 		Black_->Update();
 		explanation_->Update();
 
-		// デバッグ: F1 押下で弾数を出力
-		if (input_ && input_->TriggerKey(DIK_F1)) {
-			char buf[256];
-			sprintf_s(buf, "PlayerBullets=%llu EnemyBullets=%llu\n",
-				(unsigned long long)player_->GetBullets().size(),
-				(unsigned long long)enemy_->GetBullets().size());
-			OutputDebugStringA(buf);
-		}
-
 		// 当たり判定
 		if (player_ && enemy_) {
 			// プレイヤー位置
@@ -166,7 +157,7 @@ void GameScene::Update()
 			float ex, ey, ez;
 			enemy_->GetWorldPosition(ex, ey, ez);
 
-			// 直接リストを走査して衝突判定（不要なコピーを回避）
+			// 直接リストを走査して衝突判定
 			const float radius = 0.5f + 0.5f;
 			const float radiusSq = radius * radius;
 
@@ -185,7 +176,7 @@ void GameScene::Update()
 				}
 			}
 
-			// プレイヤー弾 -> 敵
+			// プレイヤー弾->敵
 			for (PlayerBullet* pb : player_->GetBullets()) {
 				if (!pb || pb->IsDead()) continue;
 				float bx, by, bz;
@@ -199,7 +190,7 @@ void GameScene::Update()
 				}
 			}
 
-			// 弾同士の衝突（プレイヤー弾 x 敵弾）
+			// 弾同士の衝突
 			for (PlayerBullet* pb : player_->GetBullets()) {
 				if (!pb || pb->IsDead()) continue;
 				float pax, pay, paz;

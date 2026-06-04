@@ -14,7 +14,7 @@ public:
 	EnemyBullet();
 	~EnemyBullet();
 
-	// 初期化(既存シグネチャを維持)
+	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, const Vector3& position, const Vector3& velocity);
 
 	// 更新/描画
@@ -24,13 +24,13 @@ public:
 	// 衝突
 	void OnCollision() override;
 
-	// out-params 版ワールド位置取得
+	// ワールド位置取得
 	void GetWorldPosition(float& x, float& y, float& z) const override;
 
-	// 既存互換（必要な場合）
+	// 互換
 	Vector3 GetWorldPosition() const;
 
-	// GameObject タイプ
+	// GameObjectタイプ
 	Type GetType() const override { return Type::EnemyBullet; }
 
 private:

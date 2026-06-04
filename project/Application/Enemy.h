@@ -124,7 +124,7 @@ private:
 	void FireSpread(int count, float totalAngleDeg);
 	void FireBurst(int count);
 
-	// 敵が死亡した際の爆発処理（パーティクル生成・モデル消去）
+	// 敵が死亡した際の爆発処理
 	void Explode();
 	// 爆発トリガーが二度実行されないようにするフラグ
 	bool hasExploded_ = false;

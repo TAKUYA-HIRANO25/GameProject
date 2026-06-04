@@ -71,6 +71,19 @@ void Enemy::Update()
 	// 被弾点滅
 	ChangeColor();
 
+	// ここで死亡判定を先に行う：
+	// - HP が尽きていれば一度だけ Explode() を呼び出し isDead_ を立てて
+	//   それ以降の移動/発射などの処理をスキップする（安全ガード）。
+	if (EnemyHp <= 0) {
+		if (!hasExploded_) {
+			Explode();
+			hasExploded_ = true;
+		}
+		isDead_ = true;
+		// 以降の処理を行わない（発射や移動を止める）
+		return;
+	}
+
 	// 行動タイマー減算の切り替え
 	behaviorTimer_--;
 	if (behaviorTimer_ <= 0) {
@@ -160,16 +173,7 @@ void Enemy::Update()
 		bullet->Update();
 	}
 
-	// HP が尽きたら爆発を一度だけ発生させ、死亡フラグを立てる
-	if (EnemyHp <= 0) {
-		if (!hasExploded_) {
-			Explode();
-			hasExploded_ = true;
-		}
-		isDead_ = true;
-	}
-
-	// モデルに位置を反映して更新（爆発でモデルを破棄している場合は Model_ == nullptr)
+	// モデルに位置を反映して更新
 	if (Model_) {
 		Model_->SetTranslate(position_);
 		Model_->Updata();
@@ -353,13 +357,13 @@ void Enemy::GetWorldPosition(float& x, float& y, float& z) const
 
 // 当たり判定時の処理:HP減少、パーティクル生成、点滅を行う
 void Enemy::OnCollision() {
-
+	if (isDead_) return; // 既に死亡済みなら無視
 	EnemyHp -= 1;
 
-	// パーティクル生成（被弾エフェクト）
 	if (particleManager_) {
 		const int kSpawn = 10;
-		Vector3 spawnBase = Model_->GetTranslate();
+		// Model_ が nullptr なら position_ を代替位置に使う
+		Vector3 spawnBase = (Model_ ? Model_->GetTranslate() : position_);
 		for (int i = 0; i < kSpawn; ++i) {
 			// ランダムなオフセットと速度を付与
 			float rx = (std::rand() % 100 - 50) / 150.0f; // -0.333 .. 0.333
