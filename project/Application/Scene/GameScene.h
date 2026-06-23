@@ -57,11 +57,10 @@ public:
 	// 終了
 	void Finalize();
 
-	// State パターン用 API: State への遷移要求
+	// Stateパターン用API
 	void RequestStateChange(std::unique_ptr<GameSceneState> newState) { pendingState_ = std::move(newState); }
 
 	// Scene 별処理を State から呼べるように公開メソッドに分離
-	// （既存 switch の各ケースに相当するロジックをここに移動）
 	void UpdateReady();
 	void UpdateGo();
 	void UpdateMain();
@@ -81,7 +80,7 @@ private:
 	RailCamera* railCamera_ = nullptr;
 	ModelCommon* modelCommon_ = nullptr;
 	Audio* audio_ = nullptr;
-	//オブジェクト(個別ポインタは互換のため残す)
+	//オブジェクト
 	Player* player_ = nullptr;
 	Enemy* enemy_ = nullptr;
 	// GameObjectベースで一括管理
@@ -113,7 +112,7 @@ private:
 	SpriteCommon* spriteCommon_ = nullptr;
 	ObJect3dCommon* object3dCommon_ = nullptr;
 
-	// シーン管理用の列挙型（互換のため残す）
+	// シーン管理用の列挙型
 	enum class Scene {
 		ready,
 		Go,
@@ -122,10 +121,10 @@ private:
 		clear,
 	};
 
-	// 現在のシーン（互換用）
+	// 現在のシーン
 	Scene currentScene_ = Scene::ready;
 
-	// State パターン用メンバ
+	// Stateパターン用メンバ
 	std::unique_ptr<GameSceneState> state_;
 	std::unique_ptr<GameSceneState> pendingState_;
 };

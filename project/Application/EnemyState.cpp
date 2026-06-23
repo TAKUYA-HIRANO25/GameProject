@@ -15,9 +15,6 @@ static constexpr int kSpreadCount_Local = 5;
 static constexpr float kSpreadAngleDeg_Local = 60.0f;
 static constexpr float kDashSpeed_Local = 2.5f;
 
-//
-// PatrolState
-//
 class PatrolState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -26,23 +23,21 @@ public:
 		// move が適切に初期化済みであればそのまま使う
 	}
 	void Update(Enemy* e) override {
-		// 単純な左右移動（既存の move を利用）
+		// 単純な左右移動
 		Vector3 pos = e->GetPosition();
 		Vector3 mv = e->GetMove();
 		pos.x += mv.x;
 		e->SetPosition(pos);
 
-		// 行動タイマーを減算し、0 なら次状態へ委譲（Enemy::MoveTime を用いる）
+		// 行動タイマーを減算し、0なら次状態へ委譲
 		e->AddBehaviorTimer(-1);
 		if (e->GetBehaviorTimer() <= 0) {
-			e->MoveTime(); // MoveTime は状態を RequestStateChange するように修正済み
+			e->MoveTime(); 
 		}
 	}
 };
 
-//
-// ChaseState
-//
+
 class ChaseState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -54,7 +49,7 @@ public:
 			float px, py, pz;
 			p->GetWorldPosition(px, py, pz);
 			Vector3 pos = e->GetPosition();
-			// 単純にプレイヤー方向へ移動（速度は baseSpeed を利用）
+			// 単純にプレイヤー方向へ移動
 			Vector3 dir = { pos.x - px, pos.y - py, pos.z - pz };
 			dir = MyMath::Normalize(dir);
 			Vector3 newPos = pos;
@@ -70,15 +65,12 @@ public:
 			e->MoveTime();
 		}
 	}
-	// Chase では拡散弾モードで撃つ仕様だったので OnFire を実装
+	// Chaseでは拡散弾モードで撃つ仕様だったのでOnFireを実装
 	void OnFire(Enemy* e) override {
 		e->FireSpreadPublic(kSpreadCount_Local, kSpreadAngleDeg_Local);
 	}
 };
 
-//
-// SineWaveState
-//
 class SineWaveState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -102,9 +94,7 @@ public:
 	}
 };
 
-//
-// DashState
-//
+
 class DashState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -132,9 +122,6 @@ public:
 	}
 };
 
-//
-// SpreadAttackState
-//
 class SpreadAttackState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -157,9 +144,6 @@ public:
 	}
 };
 
-//
-// BurstAttackState
-//
 class BurstAttackState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -181,9 +165,6 @@ public:
 	}
 };
 
-//
-// IdleState
-//
 class IdleState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
@@ -207,9 +188,7 @@ public:
 	}
 };
 
-//
-// ファクトリ実装
-//
+// ファクトリ関数の実装
 std::unique_ptr<EnemyState> CreatePatrolState() {
 	return std::make_unique<PatrolState>();
 }

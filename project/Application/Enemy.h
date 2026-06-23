@@ -41,7 +41,7 @@ public:
 	void Fire();
 	//発射タイマー初期化
 	void FireTime();
-	//移動切り替え(行動をランダムに切り替える)
+	//移動切り替え
 	void MoveTime();
 	// プレイヤーのワールド位置取得
 	void GetWorldPosition(float& x, float& y, float& z) const override;

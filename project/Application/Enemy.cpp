@@ -99,42 +99,6 @@ void Enemy::Update()
 	if (state_) {
 		state_->Update(this);
 	}
-	else {
-		// 旧来の behavior switch（保険）
-		behaviorTimer_--;
-		if (behaviorTimer_ <= 0) {
-			MoveTime(); // 行動を切り替える
-		}
-
-		// 行動タイプによる処理分岐
-		switch (behavior_) {
-		case BehaviorType::Patrol:
-			// 自動 Patrol 行動
-			// ... （省略: 既存の Patrol 処理） ...
-			break;
-		case BehaviorType::Chase:
-			// プレイヤー追跡処理
-			// ... （省略: 既存の Chase 処理） ...
-			break;
-		case BehaviorType::SineWave:
-			// サイン波移動
-			// ... （省略: 既存の SineWave 処理） ...
-			break;
-		case BehaviorType::Dash:
-			// 突撃移動
-			// ... （省略: 既存の Dash 処理） ...
-			break;
-		case BehaviorType::SpreadAttack:
-			// 拡散弾を発射
-			// ... （省略: 既存の SpreadAttack 処理） ...
-			break;
-		case BehaviorType::BurstAttack:
-		default:
-			// 通常弾を連射
-			// ... （省略: 既存の BurstAttack 処理） ...
-			break;
-		}
-	}
 
 	// 発射カウントダウン
 	Time--;
@@ -173,7 +137,7 @@ void Enemy::Draw()
 // 移動タイマー初期化
 void Enemy::MoveTime()
 {
-	// ランダムに次の状態を選択し、State を RequestStateChange する
+	// ランダムに次の状態を選択し、StateをRequestStateChange する
 	int r = std::rand() % 6;
 	switch (r) {
 	case 0:
@@ -211,11 +175,10 @@ void Enemy::MoveTime()
 		break;
 	}
 
-	// 既存のmoveTimeもリセット（内部実装があるため既存値を維持）
+	// 既存のmoveTimeもリセット
 	moveTime = 180;
 }
 
-// out-params 版に変更
 void Enemy::GetWorldPosition(float& x, float& y, float& z) const
 {
 	x = position_.x;
@@ -225,12 +188,12 @@ void Enemy::GetWorldPosition(float& x, float& y, float& z) const
 
 // 当たり判定時の処理:HP減少、パーティクル生成、点滅を行う
 void Enemy::OnCollision() {
-	if (isDead_) return; // 既に死亡済みなら無視
+	if (isDead_) return; // 死亡済みなら無視
 	EnemyHp -= 1;
 
 	if (particleManager_) {
 		const int kSpawn = 10;
-		// Model_ が nullptr なら position_ を代替位置に使う
+		// Modelがnullptrならpositionを代替位置に使う
 		Vector3 spawnBase = (Model_ ? Model_->GetTranslate() : position_);
 		for (int i = 0; i < kSpawn; ++i) {
 			// ランダムなオフセットと速度を付与
@@ -317,12 +280,12 @@ void Enemy::Explode()
 		float ry = (std::rand() % 200) / 100.0f;       // 0.0 .. 2.0（上向き強め）
 		float rz = (std::rand() % 200 - 100) / 100.0f; // -1.0 .. 1.0
 		Vector3 dir = { rx, ry, rz };
-		// 正規化（零ベクトル回避）
+		// 正規化
 		float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 		if (len < 1e-6f) { dir = { 0.0f, 1.0f, 0.0f }; len = 1.0f; }
 		dir.x /= len; dir.y /= len; dir.z /= len;
 
-		// スピード（ランダム）
+		// スピード
 		float speed = (std::rand() % 100) / 100.0f * 2.5f + 0.5f; // 0.5 .. 3.0
 		Vector3 vel = { dir.x * speed, dir.y * speed, dir.z * speed };
 
@@ -397,7 +360,7 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 	if (count <= 0) return;
 	const float kBulletSpeed = -0.45f;
 
-	// スポーン位置 / 基準方向を取得
+	// スポーン位置 基準方向を取得
 	Vector3 selfPos{}, playerPos{};
 	GetWorldPosition(selfPos.x, selfPos.y, selfPos.z);
 	if (player_) {
@@ -405,7 +368,7 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 	}
 	Vector3 baseDir = MyMath::Normalize(Vector3{ selfPos.x - playerPos.x, selfPos.y - playerPos.y, selfPos.z - playerPos.z });
 
-	// 中心から等間隔で角度を振る（XZ 平面回転）
+	// 中心から等間隔で角度を振る
 	float half = totalAngleDeg * 0.5f;
 	for (int i = 0; i < count; ++i) {
 		float t = (count == 1) ? 0.0f : (float(i) / float(count - 1));
@@ -425,7 +388,7 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
 		EnemyBullet* newBullet = new EnemyBullet();
-		// Model_ があればそちらの位置を、なければ position_ を使う
+		// Modelがあればそちらの位置を、なければ positionを使う
 		Vector3 spawnPos = (Model_ ? Model_->GetTranslate() : position_);
 		newBullet->Initialize(object3dCommon_, spawnPos, vel);
 		bullets_.push_back(newBullet);

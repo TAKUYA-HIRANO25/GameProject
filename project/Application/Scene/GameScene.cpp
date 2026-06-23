@@ -84,54 +84,31 @@ void GameScene::Initialize(RailCamera* railCamera)
 	// 現在のシーン
 	Scene currentScene_ = Scene::ready;
 
-	// State パターン: 初期状態をセット（雛形）
+	// Stateパターン:初期状態をセット
 	state_ = CreateReadyState();
 	if (state_) state_->Enter(this);
 }
 
 void GameScene::Update()
 {
-	// pendingState がセットされていればここで適用
+	// pendingStateがセットされていればここで適用
 	if (pendingState_) {
 		if (state_) state_->Exit(this);
 		state_ = std::move(pendingState_);
 		if (state_) state_->Enter(this);
 	}
 
-	// State があれば State に Update を委譲
 	if (state_) {
 		state_->Update(this);
 		return;
 	}
 
-	// （フォールバックは不要だが互換性のため残す）
-	switch (currentScene_)
-	{
-		case GameScene::Scene::ready:
-			UpdateReady();
-			break;
-		case GameScene::Scene::Go:
-			UpdateGo();
-			break;
-		case GameScene::Scene::main:
-			UpdateMain();
-			break;
-		case GameScene::Scene::gameOver:
-			UpdateGameOver();
-			break;
-		case GameScene::Scene::clear:
-			UpdateClear();
-			break;
-		default:
-			break;
-	}
-
 	skyDome_->Updata();
 
 #ifdef USE_IMGUI
-	// (ImGui 部分はそのまま)
+	
 	ImGui::ShowDemoWindow();
-	// ... (省略せず既存処理をそのまま使用)
+	
 #endif
 }
 
