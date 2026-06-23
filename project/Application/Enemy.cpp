@@ -53,6 +53,10 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 		delete bullet;
 		return true;
 		});
+
+	// State パターン初期化: デフォルトで PatrolState をセット（EnemyState のファクトリが提供されている前提）
+	state_ = CreatePatrolState();
+	if (state_) state_->Enter(this);
 }
 
 // 毎フレーム更新:
@@ -66,99 +70,112 @@ void Enemy::Update()
 			return true;
 		}
 		return false;
-	});
+		});
 
 	// 被弾点滅
 	ChangeColor();
 
 	// ここで死亡判定を先に行う：
-	// - HP が尽きていれば一度だけ Explode() を呼び出し isDead_ を立てて
-	//   それ以降の移動/発射などの処理をスキップする（安全ガード）。
+	// - HP が尽きていれば一度だけ Explode()を呼び出しisDead_を立てて
+	//   それ以降の移動/発射などの処理をスキップする
 	if (EnemyHp <= 0) {
 		if (!hasExploded_) {
 			Explode();
 			hasExploded_ = true;
 		}
 		isDead_ = true;
-		// 以降の処理を行わない（発射や移動を止める）
+		// 以降の処理を行わない
 		return;
 	}
 
-	// 行動タイマー減算の切り替え
-	behaviorTimer_--;
-	if (behaviorTimer_ <= 0) {
-		MoveTime(); //行動を切り替える
+	// pendingState がセットされていればここで適用
+	if (pendingState_) {
+		if (state_) state_->Exit(this);
+		state_ = std::move(pendingState_);
+		if (state_) state_->Enter(this);
 	}
 
-	// 行動ごとの移動処理
-	switch (behavior_) {
-	case BehaviorType::Patrol:
-		// 元のランダム左右移動
-		moveTime--;
-		if (moveTime == 0) {
-			move.x *= -1;
-			moveTime = kMoveInterval;
+	// Stateが存在する場合はStateにUpdateを委譲し、既存の behaviorスイッチをスキップする
+	if (state_) {
+		state_->Update(this);
+	}
+	else {
+		// 行動タイマー減算の切り替え
+		behaviorTimer_--;
+		if (behaviorTimer_ <= 0) {
+			MoveTime(); //行動を切り替える
 		}
-		position_ += move;
-		break;
 
-	case BehaviorType::Chase:
-		if (player_) {
+		// 行動ごとの移動処理
+		switch (behavior_) {
+		case BehaviorType::Patrol:
+			// 元のランダム左右移動
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-		}
-		break;
+			break;
 
-	case BehaviorType::SineWave:
-		moveTime--;
-		if (moveTime == 0) {
-			move.x *= -1;
-			moveTime = kMoveInterval;
-		}
-		position_ += move;
-		break;
+		case BehaviorType::Chase:
+			if (player_) {
+				moveTime--;
+				if (moveTime == 0) {
+					move.x *= -1;
+					moveTime = kMoveInterval;
+				}
+				position_ += move;
+			}
+			break;
 
-	case BehaviorType::Dash:
-		if (dashTimer_ > 0) {
+		case BehaviorType::SineWave:
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-			dashTimer_--;
-		}
-		else {
+			break;
+
+		case BehaviorType::Dash:
+			if (dashTimer_ > 0) {
+				moveTime--;
+				if (moveTime == 0) {
+					move.x *= -1;
+					moveTime = kMoveInterval;
+				}
+				position_ += move;
+				dashTimer_--;
+			}
+			else {
+				moveTime--;
+				if (moveTime == 0) {
+					move.x *= -1;
+					moveTime = kMoveInterval;
+				}
+				position_ += move;
+			}
+			break;
+
+		case BehaviorType::Idle:
 			moveTime--;
 			if (moveTime == 0) {
 				move.x *= -1;
 				moveTime = kMoveInterval;
 			}
 			position_ += move;
-		}
-		break;
+			break;
 
-	case BehaviorType::Idle:
-		moveTime--;
-		if (moveTime == 0) {
-			move.x *= -1;
-			moveTime = kMoveInterval;
+		default:
+			moveTime--;
+			if (moveTime == 0) {
+				move.x *= -1;
+				moveTime = kMoveInterval;
+			}
+			position_ += move;
+			break;
 		}
-		position_ += move;
-		break;
-
-	default:
-		moveTime--;
-		if (moveTime == 0) {
-			move.x *= -1;
-			moveTime = kMoveInterval;
-		}
-		position_ += move;
-		break;
 	}
 
 	// 発射カウントダウン

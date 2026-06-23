@@ -77,6 +77,7 @@ public:
 	void SetRotate(const Vector3& r);
 	Vector3 GetScale() const;
 	Vector3 GetRotate() const;
+	Vector3 GetPosition() const { return position_; }
 
 private:
 	// 基盤

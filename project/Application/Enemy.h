@@ -1,11 +1,13 @@
 #pragma once
+#include <memory>
 #include <list>
-#include "Object3d.h"
+#include "GameObject.h"
 #include "EnemyBullet.h"
 #include "Player.h"
 #include "ParticleManager.h"
+#include "Object3d.h"
 #include "MyMath.h"
-#include "GameObject.h"
+#include "EnemyState.h"
 
 /// <summary>
 ///
@@ -56,6 +58,41 @@ public:
 	//色変え
 	void ChangeColor();
 
+	//Stateパターン連携用API
+	// State 切替要求
+	void RequestStateChange(std::unique_ptr<EnemyState> newState) { pendingState_ = std::move(newState); }
+
+	// Stateが利用する簡易API
+	Vector3 GetPosition() const { return position_; }
+	void SetPosition(const Vector3& p) { position_ = p; }
+
+	void SetMove(const Vector3& m) { move = m; }
+	Vector3 GetMove() const { return move; }
+
+	Player* GetPlayer() const { return player_; }
+
+	float GetSpeed() const { return speed; }
+	void SetSpeed(float s) { speed = s; }
+
+	// 行動タイマー操作
+	int GetBehaviorTimer() const { return behaviorTimer_; }
+	void SetBehaviorTimer(int v) { behaviorTimer_ = v; }
+	void AddBehaviorTimer(int v) { behaviorTimer_ += v; }
+
+	// dash/sine 用
+	void SetDashTimer(int v) { dashTimer_ = v; }
+	int GetDashTimer() const { return dashTimer_; }
+	void AddDashTimer(int v) { dashTimer_ += v; }
+
+	void SetSinePhase(float p) { sinePhase_ = p; }
+	float GetSinePhase() const { return sinePhase_; }
+
+	// State から呼ぶための弾発射ラッパー
+	void FireSpreadPublic(int count, float totalAngleDeg) { FireSpread(count, totalAngleDeg); }
+	void FireBurstPublic(int count) { FireBurst(count); }
+
+	float GetBaseSpeed() const { return baseSpeed_; }
+
 private:
 	// 行動状態
 	enum class BehaviorType {
@@ -77,6 +114,7 @@ private:
 	Vector3 rotation_; // 回転
 	Vector3 scale_; // 拡大縮小
 	float speed = 0.1f; // 移動速度
+	float baseSpeed_ = 0.1f;
 	//弾
 	std::list<EnemyBullet*> bullets_;
 	int Time = 0; //弾発射間隔用タイマー
@@ -137,4 +175,8 @@ private:
 	static const int kFlashDuration = 10; // 点滅時間
 	// 点滅を何回繰り返すか
 	static const int kFlashRepeat = 4;
+
+	// State パターン用メンバ
+	std::unique_ptr<EnemyState> state_;
+	std::unique_ptr<EnemyState> pendingState_;
 };
