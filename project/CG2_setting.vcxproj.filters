@@ -47,6 +47,7 @@
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Application\Bullet.cpp" />
     <ClCompile Include="Application\EnemyState.cpp" />
+    <ClCompile Include="Application\GameSceneState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="Application\FramWork\GameObject.h" />
     <ClInclude Include="Application\Bullet.h" />
     <ClInclude Include="Application\EnemyState.h" />
+    <ClInclude Include="Application\GameSceneState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />

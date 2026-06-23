@@ -1,214 +1,233 @@
 #include "EnemyState.h"
 #include "Enemy.h"
+#include "Player.h"
 #include <cmath>
+#include <cstdlib>
 
-// 各 State の持続時間（フレーム）
-static constexpr int kPatrolDuration  = 300;
-static constexpr int kChaseDuration   = 240;
-static constexpr int kSineDuration    = 240;
-static constexpr int kDashDuration    = 60;
-static constexpr int kSpreadDuration  = 30;
-static constexpr int kBurstDuration   = 30;
-static constexpr int kIdleDuration    = 60;
+// 注意: Enemy の内部定数は private のため、一部値をここで再定義しています。
+// 必要なら Enemy に public な定数アクセスを追加してください。
+static constexpr int kMoveInterval_Local = 360;
+static constexpr int kDashDuration_Local = 30;
+static constexpr float kSineAmplitude_Local = 0.6f;
+static constexpr float kSineFrequency_Local = 0.15f;
+static constexpr int kBurstCount_Local = 3;
+static constexpr int kSpreadCount_Local = 5;
+static constexpr float kSpreadAngleDeg_Local = 60.0f;
+static constexpr float kDashSpeed_Local = 2.5f;
 
-// Patrol
+//
+// PatrolState
+//
 class PatrolState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
-		// 初期移動をゼロにするか既存moveを保持するか選べる
-		enemy->SetMove({ 0.02f * enemy->GetSpeed(), 0.0f, 0.0f });
+	void Enter(Enemy* e) override {
+		// デフォルト移動
+		e->SetBehaviorTimer(kMoveInterval_Local);
+		// move が適切に初期化済みであればそのまま使う
 	}
-	void Update(Enemy* enemy) override {
-		// 左右往復をサインで作る
-		int t = enemy->GetBehaviorTimer();
-		float phase = std::sin(t * 0.05f);
-		Vector3 move = { phase * 0.02f * enemy->GetSpeed(), 0.0f, 0.0f };
-		enemy->SetMove(move);
+	void Update(Enemy* e) override {
+		// 単純な左右移動（既存の move を利用）
+		Vector3 pos = e->GetPosition();
+		Vector3 mv = e->GetMove();
+		pos.x += mv.x;
+		e->SetPosition(pos);
 
-		// 位置に反映
-		Vector3 pos = enemy->GetPosition();
-		pos.x += move.x;
-		pos.y += move.y;
-		pos.z += move.z;
-		enemy->SetPosition(pos);
-
-		enemy->AddBehaviorTimer(1);
-
-		// 所定時間でChaseに遷移
-		if (enemy->GetBehaviorTimer() > kPatrolDuration) {
-			enemy->RequestStateChange(CreateChaseState());
+		// 行動タイマーを減算し、0 なら次状態へ委譲（Enemy::MoveTime を用いる）
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime(); // MoveTime は状態を RequestStateChange するように修正済み
 		}
 	}
 };
 
-// Chase
+//
+// ChaseState
+//
 class ChaseState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
+	void Enter(Enemy* e) override {
+		e->SetBehaviorTimer(kMoveInterval_Local);
 	}
-	void Update(Enemy* enemy) override {
-		auto* player = enemy->GetPlayer();
-		if (!player) {
-			// プレイヤー不在ならIdleに遷移
-			enemy->RequestStateChange(CreateIdleState());
-			return;
+	void Update(Enemy* e) override {
+		Player* p = e->GetPlayer();
+		if (p) {
+			float px, py, pz;
+			p->GetWorldPosition(px, py, pz);
+			Vector3 pos = e->GetPosition();
+			// 単純にプレイヤー方向へ移動（速度は baseSpeed を利用）
+			Vector3 dir = { pos.x - px, pos.y - py, pos.z - pz };
+			dir = MyMath::Normalize(dir);
+			Vector3 newPos = pos;
+			float sp = e->GetSpeed();
+			newPos.x += dir.x * sp;
+			newPos.y += dir.y * sp;
+			newPos.z += dir.z * sp;
+			e->SetPosition(newPos);
 		}
 
-		// プレイヤー方向へ移動
-		Vector3 ppos = player->GetPosition();
-		Vector3 epos = enemy->GetPosition();
-		Vector3 dir = { ppos.x - epos.x, ppos.y - epos.y, ppos.z - epos.z };
-		// 正規化
-		float len = std::sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
-		if (len > 1e-6f) {
-			dir.x /= len; dir.y /= len; dir.z /= len;
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
-		Vector3 move = { dir.x * enemy->GetSpeed(), dir.y * enemy->GetSpeed(), dir.z * enemy->GetSpeed() };
-
-		// 位置に反映
-		epos.x += move.x;
-		epos.y += move.y;
-		epos.z += move.z;
-		enemy->SetPosition(epos);
-
-		// 任意の射撃
-		enemy->FireBurstPublic(1);
-
-		enemy->AddBehaviorTimer(1);
-
-		// 所定時間でSineWaveに遷移
-		if (enemy->GetBehaviorTimer() > kChaseDuration) {
-			enemy->RequestStateChange(CreateSineWaveState());
-		}
+	}
+	// Chase では拡散弾モードで撃つ仕様だったので OnFire を実装
+	void OnFire(Enemy* e) override {
+		e->FireSpreadPublic(kSpreadCount_Local, kSpreadAngleDeg_Local);
 	}
 };
 
-// --- SineWave ---
+//
+// SineWaveState
+//
 class SineWaveState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
-		enemy->SetSinePhase(0.0f);
+	void Enter(Enemy* e) override {
+		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetSinePhase(0.0f);
 	}
-	void Update(Enemy* enemy) override {
-		float phase = enemy->GetSinePhase();
-		phase += 0.15f;
-		enemy->SetSinePhase(phase);
+	void Update(Enemy* e) override {
+		Vector3 pos = e->GetPosition();
+		float phase = e->GetSinePhase();
+		phase += kSineFrequency_Local;
+		pos.y += std::sin(phase) * kSineAmplitude_Local;
+		Vector3 mv = e->GetMove();
+		pos.x += mv.x;
+		e->SetPosition(pos);
+		e->SetSinePhase(phase);
 
-		float offsetX = std::sin(phase) * 0.6f;
-		Vector3 move = { offsetX * 0.02f * enemy->GetSpeed(), 0.0f, 0.0f };
-
-		// 位置に反映
-		Vector3 pos = enemy->GetPosition();
-		pos.x += move.x;
-		pos.y += move.y;
-		pos.z += move.z;
-		enemy->SetPosition(pos);
-
-		enemy->AddBehaviorTimer(1);
-
-		// 所定時間でDashに遷移
-		if (enemy->GetBehaviorTimer() > kSineDuration) {
-			enemy->RequestStateChange(CreateDashState());
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
 	}
 };
 
-// --- Dash ---
+//
+// DashState
+//
 class DashState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
-		prevSpeed_ = enemy->GetSpeed();
-		enemy->SetSpeed(prevSpeed_ * kDashMultiplier);
-		// dash開始時に短めの前進を与える
+	void Enter(Enemy* e) override {
+		// ダッシュ時間の設定
+		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetDashTimer(kDashDuration_Local);
 	}
-	void Exit(Enemy* enemy) override {
-		// 速度を元に戻す
-		enemy->SetSpeed(prevSpeed_);
-	}
-	void Update(Enemy* enemy) override {
-		// 単純に前方へ高速移動させる
-		Vector3 pos = enemy->GetPosition();
-		pos.z += -enemy->GetSpeed(); 
-		enemy->SetPosition(pos);
+	void Update(Enemy* e) override {
+		Vector3 pos = e->GetPosition();
+		Vector3 mv = e->GetMove();
+		// ダッシュ中は高速移動、それ以外は通常移動
+		if (e->GetDashTimer() > 0) {
+			pos.x += mv.x * kDashSpeed_Local;
+			e->AddDashTimer(-1);
+		}
+		else {
+			pos.x += mv.x;
+		}
+		e->SetPosition(pos);
 
-		enemy->AddBehaviorTimer(1);
-
-		// 一定時間でSpreadAttackに遷移
-		if (enemy->GetBehaviorTimer() > kDashDuration) {
-			enemy->RequestStateChange(CreateSpreadAttackState());
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
 	}
-private:
-	float prevSpeed_ = 0.0f;
-	static constexpr float kDashMultiplier = 2.5f;
 };
 
-// SpreadAttack
+//
+// SpreadAttackState
+//
 class SpreadAttackState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
-		// 一度だけ拡散発射
-		enemy->FireSpreadPublic(5, 60.0f);
+	void Enter(Enemy* e) override {
+		e->SetBehaviorTimer(kMoveInterval_Local);
 	}
-	void Update(Enemy* enemy) override {
-		// 少しウロウロして時間経過で次へ
-		Vector3 pos = enemy->GetPosition();
-		// 小さく左右にランダム移動
-		float rx = ((std::rand() % 100) - 50) / 500.0f;
-		pos.x += rx * 0.5f;
-		enemy->SetPosition(pos);
+	void Update(Enemy* e) override {
+		// 移動はパトロール風
+		Vector3 pos = e->GetPosition();
+		Vector3 mv = e->GetMove();
+		pos.x += mv.x;
+		e->SetPosition(pos);
 
-		enemy->AddBehaviorTimer(1);
-
-		if (enemy->GetBehaviorTimer() > kSpreadDuration) {
-			enemy->RequestStateChange(CreateBurstAttackState());
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
+	}
+	void OnFire(Enemy* e) override {
+		e->FireSpreadPublic(kSpreadCount_Local, kSpreadAngleDeg_Local);
 	}
 };
 
-// --- BurstAttack ---
+//
+// BurstAttackState
+//
 class BurstAttackState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
-		// 一度だけバースト発射
-		enemy->FireBurstPublic(3);
+	void Enter(Enemy* e) override {
+		e->SetBehaviorTimer(kMoveInterval_Local);
 	}
-	void Update(Enemy* enemy) override {
-		// 待機してから次へ
-		enemy->AddBehaviorTimer(1);
-		if (enemy->GetBehaviorTimer() > kBurstDuration) {
-			enemy->RequestStateChange(CreateIdleState());
+	void Update(Enemy* e) override {
+		Vector3 pos = e->GetPosition();
+		Vector3 mv = e->GetMove();
+		pos.x += mv.x;
+		e->SetPosition(pos);
+
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
+	}
+	void OnFire(Enemy* e) override {
+		e->FireBurstPublic(kBurstCount_Local);
 	}
 };
 
-// Idle
+//
+// IdleState
+//
 class IdleState : public EnemyState {
 public:
-	void Enter(Enemy* enemy) override {
-		enemy->SetBehaviorTimer(0);
+	void Enter(Enemy* e) override {
+		e->SetBehaviorTimer(kMoveInterval_Local);
 	}
-	void Update(Enemy* enemy) override {
-		// 停止
-		// 位置はそのままにする
-		enemy->AddBehaviorTimer(1);
-		if (enemy->GetBehaviorTimer() > kIdleDuration) {
-			enemy->RequestStateChange(CreatePatrolState());
+	void Update(Enemy* e) override {
+		// Idle は微小移動または停止
+		Vector3 pos = e->GetPosition();
+		Vector3 mv = e->GetMove();
+		pos.x += mv.x * 0.2f; // ゆっくり
+		e->SetPosition(pos);
+
+		e->AddBehaviorTimer(-1);
+		if (e->GetBehaviorTimer() <= 0) {
+			e->MoveTime();
 		}
+	}
+	void OnFire(Enemy* e) override {
+		// Idle はバースト射撃指定とされている既存コード仕様に準拠
+		e->FireBurstPublic(kBurstCount_Local);
 	}
 };
 
-// Factory 実装
-std::unique_ptr<EnemyState> CreatePatrolState() { return std::make_unique<PatrolState>(); }
-std::unique_ptr<EnemyState> CreateChaseState() { return std::make_unique<ChaseState>(); }
-std::unique_ptr<EnemyState> CreateSineWaveState() { return std::make_unique<SineWaveState>(); }
-std::unique_ptr<EnemyState> CreateDashState() { return std::make_unique<DashState>(); }
-std::unique_ptr<EnemyState> CreateSpreadAttackState() { return std::make_unique<SpreadAttackState>(); }
-std::unique_ptr<EnemyState> CreateBurstAttackState() { return std::make_unique<BurstAttackState>(); }
-std::unique_ptr<EnemyState> CreateIdleState() { return std::make_unique<IdleState>(); }
+//
+// ファクトリ実装
+//
+std::unique_ptr<EnemyState> CreatePatrolState() {
+	return std::make_unique<PatrolState>();
+}
+std::unique_ptr<EnemyState> CreateChaseState() {
+	return std::make_unique<ChaseState>();
+}
+std::unique_ptr<EnemyState> CreateSineWaveState() {
+	return std::make_unique<SineWaveState>();
+}
+std::unique_ptr<EnemyState> CreateDashState() {
+	return std::make_unique<DashState>();
+}
+std::unique_ptr<EnemyState> CreateSpreadAttackState() {
+	return std::make_unique<SpreadAttackState>();
+}
+std::unique_ptr<EnemyState> CreateBurstAttackState() {
+	return std::make_unique<BurstAttackState>();
+}
+std::unique_ptr<EnemyState> CreateIdleState() {
+	return std::make_unique<IdleState>();
+}

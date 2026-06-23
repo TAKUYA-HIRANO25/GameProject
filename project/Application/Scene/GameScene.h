@@ -1,6 +1,7 @@
 #pragma once
 #include "Framework.h"
 #include <vector>
+#include <memory>
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include "Input.h"
@@ -20,6 +21,7 @@
 #include "Poose.h"
 #include "FramWork/GameObject.h" 
 #include "Bullet.h"
+#include "GameSceneState.h" // 追加
 
 /// <summary>
 /// GameScene
@@ -54,6 +56,24 @@ public:
 	bool IsGameSet() const { return isSet_; }
 	// 終了
 	void Finalize();
+
+	// State パターン用 API: State への遷移要求
+	void RequestStateChange(std::unique_ptr<GameSceneState> newState) { pendingState_ = std::move(newState); }
+
+	// Scene 별処理を State から呼べるように公開メソッドに分離
+	// （既存 switch の各ケースに相当するロジックをここに移動）
+	void UpdateReady();
+	void UpdateGo();
+	void UpdateMain();
+	void UpdateGameOver();
+	void UpdateClear();
+
+	void DrawReady();
+	void DrawGo();
+	void DrawMain();
+	void DrawGameOver();
+	void DrawClear();
+
 private:
 	// 所有リソース
 	WinApp* winApp_ = nullptr;
@@ -93,7 +113,7 @@ private:
 	SpriteCommon* spriteCommon_ = nullptr;
 	ObJect3dCommon* object3dCommon_ = nullptr;
 
-	// シーン管理用の列挙型
+	// シーン管理用の列挙型（互換のため残す）
 	enum class Scene {
 		ready,
 		Go,
@@ -102,7 +122,11 @@ private:
 		clear,
 	};
 
-	// 現在のシーン
+	// 現在のシーン（互換用）
 	Scene currentScene_ = Scene::ready;
+
+	// State パターン用メンバ
+	std::unique_ptr<GameSceneState> state_;
+	std::unique_ptr<GameSceneState> pendingState_;
 };
 

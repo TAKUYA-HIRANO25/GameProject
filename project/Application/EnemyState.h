@@ -15,6 +15,8 @@ public:
 	virtual void Exit(Enemy* enemy) {}
 	// 衝突時のイベントハンドラ
 	virtual void OnCollision(Enemy* enemy) {}
+	// 発射要求（Enemy のタイマー満了時に呼ばれる。既存の Enemy::Fire の代替）
+	virtual void OnFire(Enemy* enemy) {}
 };
 
 // State ファクトリ関数（必要な State を追加する）
