@@ -43,7 +43,7 @@ void Object3d::Initialize(ObJect3dCommon* object3dCommon)
 		// デフォルトのマテリアル値
 		Vector4 defaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		materialData->color = defaultColor;
-		materialData->enableLighting = false;
+		materialData->enableLighting = true;
 		materialData->uvTransform = MakeIdentity4x4();
 	}
 

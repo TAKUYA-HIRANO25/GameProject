@@ -32,7 +32,7 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	Vector4 color{ 1.0f,1.0f,1.0f,1.0f };
 	materialData->color = color;
-	materialData->enableLighting = false;
+	materialData->enableLighting = true;
 	materialData->uvTransform = MakeIdentity4x4();
 
 	// objの参照しているテスクチャファイルの読み込み

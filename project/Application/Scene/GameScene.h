@@ -19,9 +19,9 @@
 #include "RailCamera.h"
 #include "Fade.h"
 #include "Poose.h"
-#include "FramWork/GameObject.h" 
+#include "GameObject.h" 
 #include "Bullet.h"
-#include "GameSceneState.h" // 追加
+#include "GameSceneState.h" 
 
 /// <summary>
 /// GameScene

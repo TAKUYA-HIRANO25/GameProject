@@ -87,6 +87,8 @@ void GameScene::Initialize(RailCamera* railCamera)
 	// Stateパターン:初期状態をセット
 	state_ = CreateReadyState();
 	if (state_) state_->Enter(this);
+
+	
 }
 
 void GameScene::Update()

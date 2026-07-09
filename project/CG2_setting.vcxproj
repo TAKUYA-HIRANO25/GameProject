@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary />
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
