@@ -3,42 +3,37 @@
 #include <Xinput.h>
 #include <algorithm>
 #include <cmath>
-#include "GameObject.h" 
+#include "GameObject.h"
+#include <memory> 
 
 Player::Player()
 {
 	//Initializerで初期化
 }
 
-Player::~Player()
-{
-	// デストラクタ:所有するModel/reticleModelと弾を解放する
-	delete Model_;
-	delete reticleModel_;
-	bulletList_.remove_if([](PlayerBullet* bullet) {
-		delete bullet;
-		return true;
-		});
-}
+// デストラクタ: unique_ptr により自動破棄されるため明示的 delete は不要
+Player::~Player() = default;
 
 void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	// 3D 共通参照を保持
 	object3dCommon_ = object3dCommon;
 
 	// プレイヤーモデル生成・初期化
-	Model_ = new Object3d();
+	Model_ = std::make_unique<Object3d>();
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("Player/Player.obj");
 	Model_->SetTranslate(position_);
 
 	spriteCommon_ = SpriteCommon::GetInstance();
 	if (spriteCommon_) {
-		reticleSprite_ = new Sprite();
+		reticleSprite_ = std::make_unique<Sprite>();
 		reticleSprite_->Initialize(spriteCommon_, "resources/Reticle.png");
 		reticleSprite_->SetAnchorPoint({ 0.5f,0.5f });
 		reticleSprite_->SetSize(Vector2(64, 64));
 		// 初期位置は画面中央
 		reticleSprite_->SetPosition(Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f));
+		// lastCursorを初期化
+		lastCursor = Vector2(float(WinApp::kClientWidth) * 0.5f, float(WinApp::kClientHeight) * 0.5f);
 	}
 
 	// 初期色・ステータスを保存
@@ -50,22 +45,14 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 	input_ = Input::GetInstance();
 
 	// bulletList_を念のためクリア
-	bulletList_.remove_if([](PlayerBullet* bullet) {
-		delete bullet;
-		return true;
-		});
-
+	bulletList_.clear();
 }
 
 void Player::Update()
 {
 	// 死亡した弾の解放
-	bulletList_.remove_if([](PlayerBullet* bullet) {
-		if (bullet->IsDead()) {
-			delete bullet;
-			return true;
-		}
-		return false;
+	bulletList_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) {
+		return bullet->IsDead();
 		});
 	// 被弾時の点滅処理
 	ChangeColor();
@@ -80,7 +67,7 @@ void Player::Update()
 	Fire();
 
 	// 所有弾の更新
-	for (PlayerBullet* bullet : bulletList_) {
+	for (const auto& bullet : bulletList_) {
 		bullet->Update();
 	}
 
@@ -90,29 +77,29 @@ void Player::Update()
 	}
 
 	// モデルに位置を反映して行列更新
-	Model_->SetTranslate(position_);
-	Model_->Updata();
-
+	if (Model_) {
+		Model_->SetTranslate(position_);
+		Model_->Updata();
+	}
 }
 
 void Player::SpriteDraw()
 {
 	// スプライト用PSO設定(背景/UI)
 	spriteCommon_->SettingCommonDraw();
-	if (isDead_ == false) {
+	if (isDead_ == false && reticleSprite_) {
 		reticleSprite_->Draw();
 	}
 }
 
 void Player::Draw()
 {
-
 	object3dCommon_->SettingCommonDraw(); // 3D描画共通設定
-	if (isDead_ == false) {
+	if (isDead_ == false && Model_) {
 		Model_->Draw();
 	}
 
-	for (PlayerBullet* bullet : bulletList_) {
+	for (const auto& bullet : bulletList_) {
 		bullet->Draw();
 	}
 }
@@ -168,11 +155,6 @@ void Player::Move()
 		float ly = input_->GetLeftThumbY(0); // -1..1
 		move.x += lx * padSpeedFactor;
 		move.y += ly * padSpeedFactor;
-		/*
-		float lt = input_->GetLeftTrigger(0);  // 0..1
-		float rt = input_->GetRightTrigger(0); // 0..1
-		move.z += (rt - lt) * kCharacterSpeed * 1.5f;
-		*/
 	}
 
 	// カメラの移動量を加算してワールド位置へ適用
@@ -190,7 +172,6 @@ void Player::Fire()
 	}
 
 	// コントローラからの発射:R2を長押しで発射
-	// 閾値を超えている間はホールド扱いになる
 	const float kTriggerThreshold = 0.35f; // 調整可：0.0-1.0
 	if (!fireTriggered && input_ && input_->IsGamepadConnected(0)) {
 		float rt = input_->GetRightTrigger(0); // 0..1
@@ -215,9 +196,9 @@ void Player::Fire()
 		velocity += railCameraVelocity_; // カメラ移動を弾速に加味
 
 		// 弾オブジェクト生成・初期化
-		PlayerBullet* newBullet = new PlayerBullet();
+		auto newBullet = std::make_unique<PlayerBullet>();
 		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
-		bulletList_.push_back(newBullet);
+		bulletList_.push_back(std::move(newBullet));
 	}
 	else {
 		// 発射インターバルのカウントダウン
@@ -261,6 +242,11 @@ void Player::OnCollision()
 		flashToggleCounter_ = flashDuration_;
 		Model_->SetDiffuseColor(flashColor_);
 	}
+}
+
+std::vector<PlayerBullet*> Player::GetBulletsRaw() const
+{
+	return std::vector<PlayerBullet*>();
 }
 
 void Player::Reticle()
@@ -330,10 +316,24 @@ void Player::Reticle()
 		cursor = lastCursor;
 	}
 	else {
-		// マウス優先:実際のマウス位置でlastCursorを更新する
-		Vector2 mousePos = input_->GetCursorClientPos2();
-		lastCursor = mousePos;
-		cursor = lastCursor;
+		// マウス優先:ロック中なら相対移動を使用、そうでなければ絶対位置を取得してlastCursorを更新する
+		bool mouseLocked = input_->IsMouseLockedByPoose() || input_->IsMouseLockedByController();
+
+		if (mouseLocked) {
+			// 相対移動量を取得してlastCursorに加算する
+
+			int mx = input_->GetMouseMoveX();
+			int my = input_->GetMouseMoveY();
+			lastCursor.x += static_cast<float>(mx);
+			lastCursor.y += static_cast<float>(my);
+			cursor = lastCursor;
+		}
+		else {
+			// 通常はクライアント座標を直接参照してlastCursorを更新
+			Vector2 mousePos = input_->GetCursorClientPos2();
+			lastCursor = mousePos;
+			cursor = lastCursor;
+		}
 	}
 
 	const float width = static_cast<float>(WinApp::kClientWidth);
@@ -344,8 +344,10 @@ void Player::Reticle()
 	cursor.x = std::clamp(cursor.x, 0.0f, width - 1.0f);
 	cursor.y = std::clamp(cursor.y, 0.0f, height - 1.0f);
 
-	reticleSprite_->SetPosition(cursor);
-	reticleSprite_->Update();
+	if (reticleSprite_) {
+		reticleSprite_->SetPosition(cursor);
+		reticleSprite_->Update();
+	}
 	// NDCに変換
 	float nx = (cursor.x / width) * 2.0f - 1.0f;
 	float ny = -((cursor.y / height) * 2.0f - 1.0f); // 上下反転

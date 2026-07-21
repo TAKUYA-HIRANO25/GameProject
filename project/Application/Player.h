@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+#include <list>
 #include "Object3d.h"
 #include "MyMath.h"
 #include "Object3dCommon.h"
@@ -38,40 +40,28 @@ class Player : public GameObject
 public:
 	Player();
 	~Player();
-	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon);
-	// 更新
 	void Update() override;
-	//スプライト描画
 	void SpriteDraw();
-	// 描画
 	void Draw() override;
-	//移動
 	void Move();
-	//弾発射
 	void Fire();
-	// プレイヤーのワールド位置取得（out-params 版）
 	void GetWorldPosition(float& x, float& y, float& z) const override;
-	// 当たり判定
 	void OnCollision() override;
-	// プレイヤーの弾リスト取得
-	const std::list<PlayerBullet*>& GetBullets() const { return bulletList_; }
-	// レティクル更新
+	// 戻り型は unique_ptr のコンテナ参照に変更
+	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return bulletList_; }
+	// 生ポインタ参照が欲しい場合の補助（所有権は移動しない）
+	std::vector<PlayerBullet*> GetBulletsRaw() const;
 	void Reticle();
-	// パーティクルマネージャセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
-	// プレイヤーの生死判定
 	bool IsDead() const override { return isDead_; }
-	//レールカメラ用にプレイヤーのTransformをセット
 	void SetRailCameraVelocity(Vector3 velocity);
-	bool bulletActive = false; //弾発射フラグ
+	bool bulletActive = false;
 
-	// 点滅設定API
 	void SetFlashColor(const Vector4& color) { flashColor_ = color; }
 	void SetFlashDuration(int frames) { flashDuration_ = frames; }
 	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
 
-	// Position/Scale/Rotateの外部操作と取得
 	void SetPosition(const Vector3& pos);
 	void SetScale(const Vector3& s);
 	void SetRotate(const Vector3& r);
@@ -80,55 +70,49 @@ public:
 	Vector3 GetPosition() const { return position_; }
 
 private:
-	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	SpriteCommon* spriteCommon_ = nullptr;
 
-	//プレイヤー
-	Object3d* Model_ = nullptr; // 3Dオブジェクト
-	Vector3 position_ = { 0.0f, -4.0f, 10.0f }; // 位置
-	Vector3 translation; // 位置
-	Vector3 rotation; // 回転
-	Vector3 scale; // 拡大縮小
-	float speed; // 移動速度
-	// 入力関連
-	Input* input_;
-	//弾関連
-	std::list<PlayerBullet*> bulletList_;
-	int bulletTime = 0; //弾発射間隔用タイマー
+	// smart pointers に置き換え
+	std::unique_ptr<Object3d> Model_{};
+	Vector3 position_ = { 0.0f, -4.0f, 10.0f };
+	Vector3 translation;
+	Vector3 rotation;
+	Vector3 scale;
+	float speed;
+	Input* input_ = nullptr;
+
+	// 弾リストもunique_ptrで管理
+	std::list<std::unique_ptr<PlayerBullet>> bulletList_;
+	int bulletTime = 0;
 	int bulletFlag = 0;
 	Vector3 dir = { 0.0f, 0.0f, 1.0f };
 
-	// レティクル関連
-	Object3d* reticleModel_;    // 画面上の3Dレティクル表示用
-	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f }; // レティクルのワールド位置
-	float reticleDistance_ = 100.0f; // レティクルまでの距離
-	Sprite* reticleSprite_ = nullptr;
-	Vector2 lastCursor; // 前フレームのカーソル位置保持用
-	bool controllerActive = false; // コントローラ使用中フラグ
+	// レティクルもunique_ptr
+	std::unique_ptr<Object3d> reticleModel_{};
+	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f };
+	float reticleDistance_ = 100.0f;
+	std::unique_ptr<Sprite> reticleSprite_{};
+	Vector2 lastCursor;
+	bool controllerActive = false;
 
 	float PlayerHP = 10.0f;
 	bool isDead_ = false;
 
-	//パーティクル
-	ParticleManager* particleManager_ = nullptr; 
+	ParticleManager* particleManager_ = nullptr;
 	int particleTimer_ = 0;
 
-	//レールカメラ速度
 	Vector3 railCameraVelocity_ = { 0.0f, 0.0f, 0.0f };
 
-	// 被弾点滅関連
 	static const int kDefaultFlashDuration = 10;
 	static const int kDefaultFlashRepeat = 4;
-	int flashTimer_ = 0;               // 残りフレーム数
-	int flashToggleCounter_ = 0;       // トグル間隔カウンタ
+	int flashTimer_ = 0;
+	int flashToggleCounter_ = 0;
 	int flashDuration_ = kDefaultFlashDuration;
 	int flashRepeat_ = kDefaultFlashRepeat;
-	Vector4 flashColor_ = { 1.0f, 0.25f, 0.25f, 1.0f }; // デフォルト赤
-	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // 元の色保持
+	Vector4 flashColor_ = { 1.0f, 0.25f, 0.25f, 1.0f };
+	Vector4 originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	bool flashFlag = false;
-	// 点滅処理ヘルパ
 	void ChangeColor();
-
 };

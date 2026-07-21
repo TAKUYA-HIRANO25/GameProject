@@ -31,38 +31,23 @@ class Enemy : public GameObject
 public:
 	Enemy();
 	~Enemy();
-	// 初期化
 	void Initialize(ObJect3dCommon* object3dCommon, Vector3 position);
-	// 更新
 	void Update() override;
-	// 描画
 	void Draw() override;
-	//弾発射
 	void Fire();
-	//発射タイマー初期化
 	void FireTime();
-	//移動切り替え
 	void MoveTime();
-	// プレイヤーのワールド位置取得
 	void GetWorldPosition(float& x, float& y, float& z) const override;
-	// 当たり判定
 	void OnCollision() override;
-	// 敵の弾リスト取得
-	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
-	// 敵の生死判定
+	// 戻り型を unique_ptr のコンテナ参照に変更
+	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() const { return bullets_; }
 	bool IsDead() const override { return isDead_; }
-	// プレイヤー情報セット
 	void setPlayer(Player* player) { player_ = player; }
-	// パーティクルマネージャーセット
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
-	//色変え
 	void ChangeColor();
 
-	//Stateパターン連携用API
-	// State 切替要求
 	void RequestStateChange(std::unique_ptr<EnemyState> newState) { pendingState_ = std::move(newState); }
 
-	// Stateが利用する簡易API
 	Vector3 GetPosition() const { return position_; }
 	void SetPosition(const Vector3& p) { position_ = p; }
 
@@ -74,7 +59,6 @@ public:
 	float GetSpeed() const { return speed; }
 	void SetSpeed(float s) { speed = s; }
 
-	// 行動タイマー操作
 	int GetBehaviorTimer() const { return behaviorTimer_; }
 	void SetBehaviorTimer(int v) { behaviorTimer_ = v; }
 	void AddBehaviorTimer(int v) { behaviorTimer_ += v; }
@@ -105,27 +89,22 @@ private:
 		Idle
 	};
 
-	// 基盤
 	ObJect3dCommon* object3dCommon_ = nullptr;
-	//敵の3Dモデル
 	Transform modelTransform_;
-	Object3d* Model_ = nullptr; // 3Dオブジェクト
-	Vector3 position_; // 位置
-	Vector3 rotation_; // 回転
-	Vector3 scale_; // 拡大縮小
-	float speed = 0.1f; // 移動速度
+	// スマートポインタ化
+	std::unique_ptr<Object3d> Model_{};
+	Vector3 position_;
+	Vector3 rotation_;
+	Vector3 scale_;
+	float speed = 0.1f;
 	float baseSpeed_ = 0.1f;
-	//弾
-	std::list<EnemyBullet*> bullets_;
-	int Time = 0; //弾発射間隔用タイマー
+	// 弾はunique_ptr 
+	std::list<std::unique_ptr<EnemyBullet>> bullets_;
+	int Time = 0;
 	Vector3 bulletVel = { 0.0f,0.0f,0.0f };
-	// 敵のHP
 	float EnemyHp = 5.0f;
-	//死亡フラグ
 	bool isDead_ = false;
-	//プレイヤー情報
 	Player* player_ = nullptr;
-	//移動
 	Vector3 move = { 0.1f,0.0f,0.0f };
 	int32_t moveTime = 0;
 

@@ -2,102 +2,96 @@
 #include "GameSceneState.h"
 #include <windows.h>
 #include <cstdio>
+#include <memory>
 
 GameScene::GameScene()
 {
-
 }
 
 GameScene::~GameScene()
 {
-
+	// unique_ptr が自動で破棄するため何もしない
 }
 
 void GameScene::Initialize(RailCamera* railCamera)
 {
-	// WinAPI初期化
 	winApp_ = WinApp::GetInstance();
-	// DirectX初期化
 	dxCommon_ = DirectXCommon::GetInstance();
-	// 入力システムの取得、初期化
 	input_ = Input::GetInstance();
-	// テクスチャ管理、スプライト共通設定の初期化
 	spriteCommon_ = SpriteCommon::GetInstance();
 	object3dCommon_ = ObJect3dCommon::GetInstance();
 
-	// パーティクルマネージャ生成
-	particleManager_ = new ParticleManager(object3dCommon_);
+	// 所有オブジェクトを make_unique で生成
+	particleManager_ = std::make_unique<ParticleManager>(object3dCommon_);
 
-	// カメラ
 	railCamera_ = railCamera;
-	// プレイヤー生成、初期化
-	player_ = new Player();
+
+	player_ = std::make_unique<Player>();
 	player_->Initialize(object3dCommon_);
 	player_->SetRailCameraVelocity(railCamera_->GetVelocity());
-	player_->SetParticleManager(particleManager_);
+	player_->SetParticleManager(particleManager_.get());
 
-	// 敵生成、初期化
-	enemy_ = new Enemy();
+	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(object3dCommon_, Vector3{ 0.0f, -1.0f, 60.0f });
-	enemy_->setPlayer(player_);
-	enemy_->SetParticleManager(particleManager_);
+	enemy_->setPlayer(player_.get());
+	enemy_->SetParticleManager(particleManager_.get());
 
-	// GameObject一括管理リストに登録
 	objects_.clear();
-	objects_.push_back(static_cast<GameObject*>(player_));
-	objects_.push_back(static_cast<GameObject*>(enemy_));
+	objects_.push_back(static_cast<GameObject*>(player_.get()));
+	objects_.push_back(static_cast<GameObject*>(enemy_.get()));
 
-	// 天球の初期化
-	skyDome_ = new Object3d();
+	skyDome_ = std::make_unique<Object3d>();
 	skyDome_->Initialize(object3dCommon_);
 	skyDome_->SetModel("sphere.obj");
 	skyDome_->SetScale({ 50.0f, 50.0f, 50.0f });
 	skyDome_->SetTranslate({ 0.0f, -1.0f, 20.0f });
 
-	// スプライトの初期化
-	Ready_ = new Sprite();
+	Ready_ = std::make_unique<Sprite>();
 	Ready_->Initialize(spriteCommon_, "resources/Ready.png");
-	Go_ = new Sprite();
+	Go_ = std::make_unique<Sprite>();
 	Go_->Initialize(spriteCommon_, "resources/GO.png");
-	gameOver_ = new Sprite();
+	gameOver_ = std::make_unique<Sprite>();
 	gameOver_->Initialize(spriteCommon_, "resources/GameOver.png");
-	clear_ = new Sprite();
+	clear_ = std::make_unique<Sprite>();
 	clear_->Initialize(spriteCommon_, "resources/GameClear.png");
-	EndUI_ = new Sprite();
+	EndUI_ = std::make_unique<Sprite>();
 	EndUI_->Initialize(spriteCommon_, "resources/EndUI.png");
-	Black_ = new Sprite();
+	Black_ = std::make_unique<Sprite>();
 	Black_->Initialize(spriteCommon_, "resources/backGround.png"); Black_->SetSize(Vector2(1280, 720)); Black_->SetColor(Vector4(1, 1, 1, 0));
-	explanation_ = new Sprite();
+	explanation_ = std::make_unique<Sprite>();
 	explanation_->Initialize(spriteCommon_, "resources/Explanation.png");
 
-	// Poose の初期化
-	poose_ = new Poose();
+	poose_ = std::make_unique<Poose>();
 	poose_->Initialize();
 
-	//フラグ
 	isGame_ = true;
 	isSet_ = false;
-	// タイマー初期化
 	startTime_ = 0;
 	goTime_ = 0;
 
-	// 現在のシーン
-	Scene currentScene_ = Scene::ready;
+	currentScene_ = Scene::ready;
 
-	// Stateパターン:初期状態をセット
 	state_ = CreateReadyState();
 	if (state_) state_->Enter(this);
 
-	
+	cursorHidden_ = false;
+	if (!poose_->IsActive()) {
+		ShowCursor(FALSE);
+		cursorHidden_ = true;
+	}
 }
 
 void GameScene::Update()
 {
 	// pendingStateがセットされていればここで適用
 	if (pendingState_) {
-		if (state_) state_->Exit(this);
-		state_ = std::move(pendingState_);
-		if (state_) state_->Enter(this);
+		if (state_) {
+			state_->Exit(this);
+			state_ = std::move(pendingState_);
+		}
+		if (state_) {
+			state_->Enter(this);
+		}
 	}
 
 	if (state_) {
@@ -105,22 +99,24 @@ void GameScene::Update()
 		return;
 	}
 
-	skyDome_->Updata();
+	if (skyDome_) skyDome_->Updata();
 
 #ifdef USE_IMGUI
-	
 	ImGui::ShowDemoWindow();
-	
 #endif
 }
 
 void GameScene::Draw()
 {
-	// pendingState を反映
+	// pendingStateを反映
 	if (pendingState_) {
-		if (state_) state_->Exit(this);
-		state_ = std::move(pendingState_);
-		if (state_) state_->Enter(this);
+		if (state_) {
+			state_->Exit(this);
+		 state_ = std::move(pendingState_);
+		}
+		if (state_) { 
+			state_->Enter(this); 
+		}
 	}
 
 	// State があれば描画を委譲
@@ -189,6 +185,12 @@ void GameScene::UpdateMain()
 	}
 	// ポーズが有効ならPooseを先に更新し
 	if (poose_->IsActive()) {
+		// 表示状態が変わった場合のみShowCursorを呼ぶ
+		if (cursorHidden_) {
+			ShowCursor(TRUE);
+			cursorHidden_ = false;
+		}
+
 		poose_->Update();
 
 		auto r = poose_->GetResult();
@@ -208,10 +210,17 @@ void GameScene::UpdateMain()
 		// ポーズ中はゲームロジック更新をスキップしてフェード処理へ
 		return;
 	}
+	else {
+		// ポーズ解除時は表示を隠す
+		if (!cursorHidden_) {
+			ShowCursor(FALSE);
+			cursorHidden_ = true;
+		}
+	}
 	// パーティクル更新
 	if (particleManager_) particleManager_->Update();
 
-	// GameObject 一括 Update(Player/Enemy等)
+	// GameObject一括Update
 	for (GameObject* obj : objects_) {
 		if (obj) obj->Update();
 	}
@@ -232,7 +241,9 @@ void GameScene::UpdateMain()
 		const float radius = 0.5f + 0.5f;
 		const float radiusSq = radius * radius;
 
-		for (EnemyBullet* eb : enemy_->GetBullets()) {
+		// Enemyの弾
+		for (const auto& eb_up : enemy_->GetBullets()) {
+			EnemyBullet* eb = eb_up.get();
 			if (!eb || eb->IsDead()) continue;
 			float bx, by, bz;
 			eb->GetWorldPosition(bx, by, bz);
@@ -246,7 +257,9 @@ void GameScene::UpdateMain()
 			}
 		}
 
-		for (PlayerBullet* pb : player_->GetBullets()) {
+		// Playerの弾
+		for (const auto& pb_up : player_->GetBullets()) {
+			PlayerBullet* pb = pb_up.get();
 			if (!pb || pb->IsDead()) continue;
 			float bx, by, bz;
 			pb->GetWorldPosition(bx, by, bz);
@@ -259,11 +272,14 @@ void GameScene::UpdateMain()
 			}
 		}
 
-		for (PlayerBullet* pb : player_->GetBullets()) {
+		// 弾同士の衝突判定
+		for (const auto& pb_up : player_->GetBullets()) {
+			PlayerBullet* pb = pb_up.get();
 			if (!pb || pb->IsDead()) continue;
 			float pax, pay, paz;
 			pb->GetWorldPosition(pax, pay, paz);
-			for (EnemyBullet* eb : enemy_->GetBullets()) {
+			for (const auto& eb_up : enemy_->GetBullets()) {
+				EnemyBullet* eb = eb_up.get();
 				if (!eb || eb->IsDead()) continue;
 				float ebx, eby, ebz;
 				eb->GetWorldPosition(ebx, eby, ebz);
@@ -322,7 +338,7 @@ void GameScene::DrawGo()
 void GameScene::DrawMain()
 {
 	object3dCommon_->SettingCommonDraw();
-	// GameObject一括描画(Player/Enemy等)
+	// GameObject一括描画
 	for (GameObject* obj : objects_) {
 		if (obj) obj->Draw();
 	}
@@ -336,7 +352,7 @@ void GameScene::DrawMain()
 		poose_->Draw();
 	}
 	explanation_->Draw();
-	// プレイヤーのスプライトは別扱い
+	// プレイヤーは別扱い
 	player_->SpriteDraw();
 }
 
@@ -356,32 +372,27 @@ void GameScene::DrawClear()
 
 void GameScene::Finalize()
 {
-	delete player_;
-	player_ = nullptr;
-	delete enemy_;
-	enemy_ = nullptr;
-	delete skyDome_;
-	skyDome_ = nullptr;
-	delete particleManager_;
-	particleManager_ = nullptr;
-	delete Ready_;
-	Ready_ = nullptr;
-	delete Go_;
-	Go_ = nullptr;
-	delete gameOver_;
-	gameOver_ = nullptr;
-	delete clear_;
-	clear_ = nullptr;
-	delete EndUI_;
-	EndUI_ = nullptr;
-	delete Black_;
-	Black_ = nullptr;
-	delete explanation_;
-	explanation_ = nullptr;
-	delete poose_;
-	poose_ = nullptr;
+	// マウスポインターが非表示のままなら復帰させる
+	if (cursorHidden_) {
+		ShowCursor(TRUE);
+		cursorHidden_ = false;
+	}
+
+	// unique_ptr のリセットで自動解放
+	player_.reset();
+	enemy_.reset();
+	skyDome_.reset();
+	particleManager_.reset();
+	Ready_.reset();
+	Go_.reset();
+	gameOver_.reset();
+	clear_.reset();
+	EndUI_.reset();
+	Black_.reset();
+	explanation_.reset();
+	poose_.reset();
+
 	railCamera_ = nullptr;
-	// シングルトン参照は解放しない
 	spriteCommon_ = nullptr;
 	object3dCommon_ = nullptr;
 	input_ = nullptr;

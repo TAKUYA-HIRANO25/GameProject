@@ -126,7 +126,7 @@ private:
 	XINPUT_STATE gamepadStatePrev[4]{};
 	bool gamepadConnected[4]{};
 
-	// Poose による入力ロックフラグ
+	// Pooseによる入力ロックフラグ
 	bool keyboardLockedByPoose_ = false;
 	bool mouseLockedByPoose_ = false;
 

@@ -60,7 +60,7 @@ public:
 	// Stateパターン用API
 	void RequestStateChange(std::unique_ptr<GameSceneState> newState) { pendingState_ = std::move(newState); }
 
-	// Scene 별処理を State から呼べるように公開メソッドに分離
+	// Scene処理を tateから呼べるように
 	void UpdateReady();
 	void UpdateGo();
 	void UpdateMain();
@@ -80,30 +80,32 @@ private:
 	RailCamera* railCamera_ = nullptr;
 	ModelCommon* modelCommon_ = nullptr;
 	Audio* audio_ = nullptr;
-	//オブジェクト
-	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
-	// GameObjectベースで一括管理
+
+	// 所有するオブジェクトはunique_ptrに
+	std::unique_ptr<Player> player_ = nullptr;
+	std::unique_ptr<Enemy>  enemy_ = nullptr;
+
+	// GameObjectは非所有参照で一括更新/描画を行う
 	std::vector<GameObject*> objects_;
 
-	Object3d* skyDome_ = nullptr;
-	ParticleManager* particleManager_ = nullptr;
-	//スプライト
-	Sprite* Ready_ = nullptr;
-	Sprite* Go_ = nullptr;
-	Sprite* Black_ = nullptr;
-	Sprite* gameOver_ = nullptr;
-	Sprite* clear_ = nullptr;
-	Sprite* EndUI_ = nullptr;
-	Sprite* explanation_ = nullptr;
+	std::unique_ptr<Object3d> skyDome_ = nullptr;
+	std::unique_ptr<ParticleManager> particleManager_ = nullptr;
 
-	// Pooseの追加
-	Poose* poose_ = nullptr;
+	// スプライト
+	std::unique_ptr<Sprite> Ready_ = nullptr;
+	std::unique_ptr<Sprite> Go_ = nullptr;
+	std::unique_ptr<Sprite> Black_ = nullptr;
+	std::unique_ptr<Sprite> gameOver_ = nullptr;
+	std::unique_ptr<Sprite> clear_ = nullptr;
+	std::unique_ptr<Sprite> EndUI_ = nullptr;
+	std::unique_ptr<Sprite> explanation_ = nullptr;
+
+	// Poose
+	std::unique_ptr<Poose> poose_ = nullptr;
 
 	// フラグ
 	bool isGame_ = false;
 	bool isSet_ = false;
-	// スタートタイマー等
 	int startTime_ = 0;
 	int goTime_ = 0;
 
@@ -127,5 +129,8 @@ private:
 	// Stateパターン用メンバ
 	std::unique_ptr<GameSceneState> state_;
 	std::unique_ptr<GameSceneState> pendingState_;
+
+	// マウスポインターを非表示にしたかの状態管理
+	bool cursorHidden_ = false;
 };
 

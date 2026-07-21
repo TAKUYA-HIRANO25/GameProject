@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary />
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,8 +107,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Enemy.cpp" />
     <ClCompile Include="Application\EnemyBullet.cpp" />
     <ClCompile Include="Application\Bullet.cpp" />
-    <ClCompile Include="Application\EnemyState.cpp" />
-    <ClCompile Include="Application\GameSceneState.cpp" />
+    <ClCompile Include="Application\State\EnemyState.cpp" />
+    <ClCompile Include="Application\State\GameSceneState.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\3D\Camera.cpp" />
     <ClCompile Include="Engine\Base\D3DResourceLeakChecker.cpp" />
@@ -166,8 +166,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Enemy.h" />
     <ClInclude Include="Application\EnemyBullet.h" />
     <ClInclude Include="Application\Bullet.h" />
-    <ClInclude Include="Application\EnemyState.h" />
-    <ClInclude Include="Application\GameSceneState.h" />
+    <ClInclude Include="Application\State\EnemyState.h" />
+    <ClInclude Include="Application\State\GameSceneState.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\3D\Camera.h" />
     <ClInclude Include="Engine\Base\D3DResourceLeakChecker.h" />

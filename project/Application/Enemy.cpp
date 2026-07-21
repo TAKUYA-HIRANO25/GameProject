@@ -10,51 +10,33 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
-	// デストラクタ:保持しているモデルと弾を解放
-	delete Model_;
-	// bullets_ 内のEnemyBulletオブジェクトを全て削除
-	bullets_.remove_if([](EnemyBullet* bullet) {
-		delete bullet;
-		return true;
-		});
+	// unique_ptr とコンテナで管理しているため明示的な delete は不要
 }
 
 // 初期化:object3d 共通、初期位置、モデル、HP、フラグ等の設定
 void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 {
-	// 3D共通参照を保持
 	object3dCommon_ = object3dCommon;
-	// 敵のワールド位置を保存
 	position_ = position;
-	// モデル生成、初期化
-	Model_ = new Object3d();
+	// smart pointer でモデル生成
+	Model_ = std::make_unique<Object3d>();
 	Model_->Initialize(object3dCommon);
 	Model_->SetModel("Enemy/Enemy.obj");
 	Model_->SetRotate({ 0.0f,3.14f,0.0f });
 	Model_->SetTranslate(position);
-	// 初期色を保存
 	originalColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
-	// HP 初期値
 	EnemyHp = 5.0f;
-	// 死亡フラグ
 	isDead_ = false;
-	// 爆発フラグリセット
 	hasExploded_ = false;
-	// タイマー初期化
 	FireTime();
 	MoveTime();
 
-	// 行動初期化
 	behavior_ = BehaviorType::Patrol;
 	behaviorTimer_ = kMoveInterval;
 
-	// bulletsを念のためクリア
-	bullets_.remove_if([](EnemyBullet* bullet) {
-		delete bullet;
-		return true;
-		});
+	// bullets をクリア（unique_ptr の破棄を行う）
+	bullets_.clear();
 
-	// State パターン初期化: デフォルトで PatrolState をセット
 	state_ = CreatePatrolState();
 	if (state_) state_->Enter(this);
 }
@@ -63,13 +45,9 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 // - 弾の寿命チェック、色点滅処理、移動、発射処理、死亡判定を行う
 void Enemy::Update()
 {
-	// 死亡した弾を削除
-	bullets_.remove_if([](EnemyBullet* bullet) {
-		if (bullet->IsDead()) {
-			delete bullet;
-			return true;
-		}
-		return false;
+	// 死亡した弾を削除（unique_ptr を削除するとオブジェクトが解放される）
+	bullets_.remove_if([](const std::unique_ptr<EnemyBullet>& bullet) {
+		return bullet->IsDead();
 		});
 
 	// 被弾点滅
@@ -88,14 +66,14 @@ void Enemy::Update()
 		return;
 	}
 
-	// pendingState がセットされていればここで適用
+	// pendingStateがセットされていればここで適用
 	if (pendingState_) {
 		if (state_) state_->Exit(this);
 		state_ = std::move(pendingState_);
 		if (state_) state_->Enter(this);
 	}
 
-	// Stateが存在する場合はStateにUpdateを委譲
+	// StateにUpdateを委譲
 	if (state_) {
 		state_->Update(this);
 	}
@@ -104,14 +82,14 @@ void Enemy::Update()
 	Time--;
 	if (Time == 0) {
 		Time = kFireInterval;
-		// State に発射を委譲。State が未実装の場合は既存 Fire() を使う
+		// Stateに発射を委譲
 		if (state_) {
 			state_->OnFire(this);
 		}
 	}
 
 	// 所持弾のUpdateを呼び出す
-	for (EnemyBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		bullet->Update();
 	}
 
@@ -129,7 +107,7 @@ void Enemy::Draw()
 	{
 		Model_->Draw();
 	}
-	for (EnemyBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
 }
@@ -137,7 +115,6 @@ void Enemy::Draw()
 // 移動タイマー初期化
 void Enemy::MoveTime()
 {
-	// ランダムに次の状態を選択し、StateをRequestStateChange する
 	int r = std::rand() % 6;
 	switch (r) {
 	case 0:
@@ -205,7 +182,7 @@ void Enemy::OnCollision() {
 							bulletVel.z * (0.4f + (std::rand() % 100) / 200.0f) + rz };
 			vel *= -1.0f; // 敵なので下向きに飛ばす
 
-			// 点滅を開始：複数回トグルする実装
+			// 点滅を開始
 			if (Model_ && flashFlag_ == false) {
 				// 元色はInitialize時にoriginalColorに保持しているので利用
 				flashTimer_ = kFlashDuration * kFlashRepeat * 2;
@@ -260,9 +237,8 @@ void Enemy::ChangeColor()
 void Enemy::Explode()
 {
 	if (!particleManager_) {
-		// パーティクルマネージャがなければ単にモデルを削除して終了
-		delete Model_;
-		Model_ = nullptr;
+		// unique_ptr により自動解放
+		Model_.reset();
 		return;
 	}
 
@@ -297,7 +273,7 @@ void Enemy::Explode()
 		particleManager_->Spawn(center, vel, life, "Particle.obj", scale);
 	}
 
-	// 光る大きめの破片を少数生成
+	// 大きめの破片を生成
 	const int kLargeCount = 6;
 	for (int i = 0; i < kLargeCount; ++i) {
 		float rx = (std::rand() % 200 - 100) / 100.0f;
@@ -314,9 +290,7 @@ void Enemy::Explode()
 		particleManager_->Spawn(center, vel, life, "Particle.obj", scale);
 	}
 
-	// モデルを削除
-	delete Model_;
-	Model_ = nullptr;
+	Model_.reset();
 }
 
 void Enemy::FireTime()
@@ -347,10 +321,10 @@ void Enemy::FireBurst(int count)
 		dir = MyMath::Normalize(dir);
 		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
-		EnemyBullet* newBullet = new EnemyBullet();
+		auto newBullet = std::make_unique<EnemyBullet>();
 		Vector3 spawnPos = (Model_ ? Model_->GetTranslate() : position_);
 		newBullet->Initialize(object3dCommon_, spawnPos, vel);
-		bullets_.push_back(newBullet);
+		bullets_.push_back(std::move(newBullet));
 	}
 	bulletActive = true;
 }
@@ -387,11 +361,10 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 		dir = MyMath::Normalize(dir);
 		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
-		EnemyBullet* newBullet = new EnemyBullet();
-		// Modelがあればそちらの位置を、なければ positionを使う
+		auto newBullet = std::make_unique<EnemyBullet>();
 		Vector3 spawnPos = (Model_ ? Model_->GetTranslate() : position_);
 		newBullet->Initialize(object3dCommon_, spawnPos, vel);
-		bullets_.push_back(newBullet);
+		bullets_.push_back(std::move(newBullet));
 	}
 
 	bulletActive = true;
