@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/Object;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/Scene;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary />
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine/2D;$(ProjectDir)Engine/3D;$(ProjectDir)Engine/Base;$(ProjectDir)Engine/Math;$(ProjectDir)Engine/hlsl;$(ProjectDir)Application;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Application/State;$(ProjectDir)Application/Object;$(ProjectDir)Application/Scene;$(ProjectDir)Application/FramWork;$(ProjectDir)Engine/Audio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,8 +104,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\Enemy.cpp" />
-    <ClCompile Include="Application\Bullet.cpp" />
+    <ClCompile Include="Application\Object\Enemy.cpp" />
+    <ClCompile Include="Application\Object\Bullet.cpp" />
     <ClCompile Include="Application\State\EnemyState.cpp" />
     <ClCompile Include="Application\State\GameSceneState.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
@@ -151,18 +151,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\StringUility.cpp" />
     <ClCompile Include="Engine\Base\TextureManager.cpp" />
     <ClCompile Include="Engine\Base\WinApp.cpp" />
-    <ClCompile Include="Application\Player.cpp" />
+    <ClCompile Include="Application\Object\Player.cpp" />
     <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
     <ClCompile Include="Engine\3D\Particle.cpp" />
     <ClCompile Include="Engine\3D\ParticleManager.cpp" />
     <ClCompile Include="Application\RailCamera.cpp" />
     <ClCompile Include="Application\Scene\MyGame.cpp" />
-    <ClCompile Include="Application\Poose.cpp" />
+    <ClCompile Include="Application\Scene\Poose.cpp" />
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Enemy.h" />
-    <ClInclude Include="Application\Bullet.h" />
+    <ClInclude Include="Application\Object\Enemy.h" />
+    <ClInclude Include="Application\Object\Bullet.h" />
     <ClInclude Include="Application\State\EnemyState.h" />
     <ClInclude Include="Application\State\GameSceneState.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -190,7 +190,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Base\StringUility.h" />
     <ClInclude Include="Engine\Base\TextureManager.h" />
     <ClInclude Include="Engine\Base\WinApp.h" />
-    <ClInclude Include="Application\Player.h" />
+    <ClInclude Include="Application\Object\Player.h" />
     <ClInclude Include="Engine\Math\MatuilityForText.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
@@ -203,7 +203,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Application\FramWork\Framework.h" />
     <ClInclude Include="Application\Fade.h" />
-    <ClInclude Include="Application\Poose.h" />
+    <ClInclude Include="Application\Scene\Poose.h" />
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Application\FramWork\GameObject.h" />
     <ClInclude Include="resource.h" />
