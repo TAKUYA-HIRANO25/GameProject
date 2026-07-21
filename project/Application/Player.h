@@ -13,7 +13,7 @@
 #include "ModelCommon.h"
 #include "Camera.h"
 #include "MatuilityForText.h"
-#include "PlayerBullet.h"
+#include "Bullet.h"
 #include "ParticleManager.h"
 #include "FramWork/GameObject.h"
 /// <summary>
@@ -48,16 +48,16 @@ public:
 	void Fire();
 	void GetWorldPosition(float& x, float& y, float& z) const override;
 	void OnCollision() override;
-	// 戻り型は unique_ptr のコンテナ参照に変更
-	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return bulletList_; }
-	// 生ポインタ参照が欲しい場合の補助（所有権は移動しない）
-	std::vector<PlayerBullet*> GetBulletsRaw() const;
+	// 弾リストは unique_ptr<Bullet>
+	const std::list<std::unique_ptr<Bullet>>& GetBullets() const { return bulletList_; }
+	std::vector<Bullet*> GetBulletsRaw() const;
 	void Reticle();
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
 	bool IsDead() const override { return isDead_; }
 	void SetRailCameraVelocity(Vector3 velocity);
 	bool bulletActive = false;
 
+	// フラッシュ等...
 	void SetFlashColor(const Vector4& color) { flashColor_ = color; }
 	void SetFlashDuration(int frames) { flashDuration_ = frames; }
 	void SetFlashRepeat(int repeat) { flashRepeat_ = repeat; }
@@ -73,7 +73,6 @@ private:
 	ObJect3dCommon* object3dCommon_ = nullptr;
 	SpriteCommon* spriteCommon_ = nullptr;
 
-	// smart pointers に置き換え
 	std::unique_ptr<Object3d> Model_{};
 	Vector3 position_ = { 0.0f, -4.0f, 10.0f };
 	Vector3 translation;
@@ -82,13 +81,12 @@ private:
 	float speed;
 	Input* input_ = nullptr;
 
-	// 弾リストもunique_ptrで管理
-	std::list<std::unique_ptr<PlayerBullet>> bulletList_;
+	// 弾リストもunique_ptrで管理（Bullet に統合）
+	std::list<std::unique_ptr<Bullet>> bulletList_;
 	int bulletTime = 0;
 	int bulletFlag = 0;
 	Vector3 dir = { 0.0f, 0.0f, 1.0f };
 
-	// レティクルもunique_ptr
 	std::unique_ptr<Object3d> reticleModel_{};
 	Vector3 reticleWorldPos_ = { 0.0f, 0.0f, 0.0f };
 	float reticleDistance_ = 100.0f;

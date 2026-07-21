@@ -243,7 +243,7 @@ void GameScene::UpdateMain()
 
 		// Enemyの弾
 		for (const auto& eb_up : enemy_->GetBullets()) {
-			EnemyBullet* eb = eb_up.get();
+			Bullet* eb = eb_up.get();
 			if (!eb || eb->IsDead()) continue;
 			float bx, by, bz;
 			eb->GetWorldPosition(bx, by, bz);
@@ -259,7 +259,7 @@ void GameScene::UpdateMain()
 
 		// Playerの弾
 		for (const auto& pb_up : player_->GetBullets()) {
-			PlayerBullet* pb = pb_up.get();
+			Bullet* pb = pb_up.get();
 			if (!pb || pb->IsDead()) continue;
 			float bx, by, bz;
 			pb->GetWorldPosition(bx, by, bz);
@@ -274,12 +274,12 @@ void GameScene::UpdateMain()
 
 		// 弾同士の衝突判定
 		for (const auto& pb_up : player_->GetBullets()) {
-			PlayerBullet* pb = pb_up.get();
+			Bullet* pb = pb_up.get();
 			if (!pb || pb->IsDead()) continue;
 			float pax, pay, paz;
 			pb->GetWorldPosition(pax, pay, paz);
 			for (const auto& eb_up : enemy_->GetBullets()) {
-				EnemyBullet* eb = eb_up.get();
+				Bullet* eb = eb_up.get();
 				if (!eb || eb->IsDead()) continue;
 				float ebx, eby, ebz;
 				eb->GetWorldPosition(ebx, eby, ebz);

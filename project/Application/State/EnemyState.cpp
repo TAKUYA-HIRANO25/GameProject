@@ -4,22 +4,11 @@
 #include <cmath>
 #include <cstdlib>
 
-// 注意: Enemy の内部定数は private のため、一部値をここで再定義しています。
-// 必要なら Enemy に public な定数アクセスを追加してください。
-static constexpr int kMoveInterval_Local = 360;
-static constexpr int kDashDuration_Local = 30;
-static constexpr float kSineAmplitude_Local = 0.6f;
-static constexpr float kSineFrequency_Local = 0.15f;
-static constexpr int kBurstCount_Local = 3;
-static constexpr int kSpreadCount_Local = 5;
-static constexpr float kSpreadAngleDeg_Local = 60.0f;
-static constexpr float kDashSpeed_Local = 2.5f;
-
 class PatrolState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
 		// デフォルト移動
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 		// move が適切に初期化済みであればそのまま使う
 	}
 	void Update(Enemy* e) override {
@@ -41,7 +30,7 @@ public:
 class ChaseState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 	}
 	void Update(Enemy* e) override {
 		Player* p = e->GetPlayer();
@@ -67,21 +56,21 @@ public:
 	}
 	// Chaseでは拡散弾モードで撃つ仕様だったのでOnFireを実装
 	void OnFire(Enemy* e) override {
-		e->FireSpreadPublic(kSpreadCount_Local, kSpreadAngleDeg_Local);
+		e->FireSpreadPublic(Enemy::GetSpreadCount(), Enemy::GetSpreadAngleDeg());
 	}
 };
 
 class SineWaveState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 		e->SetSinePhase(0.0f);
 	}
 	void Update(Enemy* e) override {
 		Vector3 pos = e->GetPosition();
 		float phase = e->GetSinePhase();
-		phase += kSineFrequency_Local;
-		pos.y += std::sin(phase) * kSineAmplitude_Local;
+		phase += Enemy::GetSineFrequency();
+		pos.y += std::sin(phase) * Enemy::GetSineAmplitude();
 		Vector3 mv = e->GetMove();
 		pos.x += mv.x;
 		e->SetPosition(pos);
@@ -99,15 +88,15 @@ class DashState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
 		// ダッシュ時間の設定
-		e->SetBehaviorTimer(kMoveInterval_Local);
-		e->SetDashTimer(kDashDuration_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
+		e->SetDashTimer(Enemy::GetDashDuration());
 	}
 	void Update(Enemy* e) override {
 		Vector3 pos = e->GetPosition();
 		Vector3 mv = e->GetMove();
 		// ダッシュ中は高速移動、それ以外は通常移動
 		if (e->GetDashTimer() > 0) {
-			pos.x += mv.x * kDashSpeed_Local;
+			pos.x += mv.x * Enemy::GetDashSpeed();
 			e->AddDashTimer(-1);
 		}
 		else {
@@ -125,7 +114,7 @@ public:
 class SpreadAttackState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 	}
 	void Update(Enemy* e) override {
 		// 移動はパトロール風
@@ -140,14 +129,14 @@ public:
 		}
 	}
 	void OnFire(Enemy* e) override {
-		e->FireSpreadPublic(kSpreadCount_Local, kSpreadAngleDeg_Local);
+		e->FireSpreadPublic(Enemy::GetSpreadCount(), Enemy::GetSpreadAngleDeg());
 	}
 };
 
 class BurstAttackState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 	}
 	void Update(Enemy* e) override {
 		Vector3 pos = e->GetPosition();
@@ -161,14 +150,14 @@ public:
 		}
 	}
 	void OnFire(Enemy* e) override {
-		e->FireBurstPublic(kBurstCount_Local);
+		e->FireBurstPublic(Enemy::GetBurstCount());
 	}
 };
 
 class IdleState : public EnemyState {
 public:
 	void Enter(Enemy* e) override {
-		e->SetBehaviorTimer(kMoveInterval_Local);
+		e->SetBehaviorTimer(Enemy::GetMoveInterval());
 	}
 	void Update(Enemy* e) override {
 		// Idle は微小移動または停止
@@ -184,7 +173,7 @@ public:
 	}
 	void OnFire(Enemy* e) override {
 		// Idle はバースト射撃指定とされている既存コード仕様に準拠
-		e->FireBurstPublic(kBurstCount_Local);
+		e->FireBurstPublic(Enemy::GetBurstCount());
 	}
 };
 

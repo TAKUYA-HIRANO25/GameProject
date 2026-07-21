@@ -6,7 +6,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Enemy.cpp" />
-    <ClCompile Include="Application\EnemyBullet.cpp" />
     <ClCompile Include="Engine\3D\Camera.cpp" />
     <ClCompile Include="Engine\Base\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Base\DirectXCommon.cpp" />
@@ -33,7 +32,6 @@
     <ClCompile Include="Engine\Base\WinApp.cpp" />
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
-    <ClCompile Include="Application\PlayerBullet.cpp" />
     <ClCompile Include="Engine\3D\Particle.cpp" />
     <ClCompile Include="Engine\3D\ParticleManager.cpp" />
     <ClCompile Include="Application\RailCamera.cpp" />
@@ -51,7 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
-    <ClInclude Include="Application\EnemyBullet.h" />
     <ClInclude Include="Engine\3D\Camera.h" />
     <ClInclude Include="Engine\Base\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Base\DirectXCommon.h" />
@@ -78,7 +75,6 @@
     <ClInclude Include="Engine\Base\WinApp.h" />
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Math\MatuilityForText.h" />
-    <ClInclude Include="Application\PlayerBullet.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
@@ -103,6 +99,7 @@
   <ItemGroup>
     <None Include="resources\shaders\Object3d.hlsli" />
     <None Include="Engine\Base\Direct" />
+    <None Include="diff patch.diff" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

@@ -51,7 +51,7 @@ void Player::Initialize(ObJect3dCommon* object3dCommon) {
 void Player::Update()
 {
 	// 死亡した弾の解放
-	bulletList_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) {
+	bulletList_.remove_if([](const std::unique_ptr<Bullet>& bullet) {
 		return bullet->IsDead();
 		});
 	// 被弾時の点滅処理
@@ -196,8 +196,9 @@ void Player::Fire()
 		velocity += railCameraVelocity_; // カメラ移動を弾速に加味
 
 		// 弾オブジェクト生成・初期化
-		auto newBullet = std::make_unique<PlayerBullet>();
-		newBullet->Initialize(object3dCommon_, Model_->GetTranslate(), velocity);
+		auto newBullet = std::make_unique<Bullet>();
+		Vector4 color = { 1.0f, 0.85f, 0.0f, 1.0f }; // プレイヤー弾色
+		newBullet->Initialize3D(object3dCommon_, Model_->GetTranslate(), velocity, "Bullet/Bullet.obj", color, 60 * 5, Type::PlayerBullet);
 		bulletList_.push_back(std::move(newBullet));
 	}
 	else {
@@ -244,9 +245,14 @@ void Player::OnCollision()
 	}
 }
 
-std::vector<PlayerBullet*> Player::GetBulletsRaw() const
+std::vector<Bullet*> Player::GetBulletsRaw() const
 {
-	return std::vector<PlayerBullet*>();
+	std::vector<Bullet*> raws;
+	raws.reserve(bulletList_.size());
+	for (const auto& b : bulletList_) {
+		raws.push_back(b.get());
+	}
+	return raws;
 }
 
 void Player::Reticle()

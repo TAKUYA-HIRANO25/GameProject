@@ -46,7 +46,7 @@ void Enemy::Initialize(ObJect3dCommon* object3dCommon, Vector3 position)
 void Enemy::Update()
 {
 	// 死亡した弾を削除（unique_ptr を削除するとオブジェクトが解放される）
-	bullets_.remove_if([](const std::unique_ptr<EnemyBullet>& bullet) {
+	bullets_.remove_if([](const std::unique_ptr<Bullet>& bullet) {
 		return bullet->IsDead();
 		});
 
@@ -321,9 +321,10 @@ void Enemy::FireBurst(int count)
 		dir = MyMath::Normalize(dir);
 		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
-		auto newBullet = std::make_unique<EnemyBullet>();
+		auto newBullet = std::make_unique<Bullet>();
 		Vector3 spawnPos = (Model_ ? Model_->GetTranslate() : position_);
-		newBullet->Initialize(object3dCommon_, spawnPos, vel);
+		Vector4 color = { 1.0f, 0.3f, 0.3f, 1.0f }; // 敵弾色
+		newBullet->Initialize3D(object3dCommon_, spawnPos, vel, "Bullet/Bullet.obj", color, 60 * 5, Type::EnemyBullet);
 		bullets_.push_back(std::move(newBullet));
 	}
 	bulletActive = true;
@@ -361,9 +362,10 @@ void Enemy::FireSpread(int count, float totalAngleDeg)
 		dir = MyMath::Normalize(dir);
 		Vector3 vel = { dir.x * kBulletSpeed, dir.y * kBulletSpeed, dir.z * kBulletSpeed };
 
-		auto newBullet = std::make_unique<EnemyBullet>();
+		auto newBullet = std::make_unique<Bullet>();
 		Vector3 spawnPos = (Model_ ? Model_->GetTranslate() : position_);
-		newBullet->Initialize(object3dCommon_, spawnPos, vel);
+		Vector4 color = { 1.0f, 0.3f, 0.3f, 1.0f };
+		newBullet->Initialize3D(object3dCommon_, spawnPos, vel, "Bullet/Bullet.obj", color, 60 * 5, Type::EnemyBullet);
 		bullets_.push_back(std::move(newBullet));
 	}
 

@@ -2,7 +2,7 @@
 #include <memory>
 #include <list>
 #include "GameObject.h"
-#include "EnemyBullet.h"
+#include "Bullet.h"
 #include "Player.h"
 #include "ParticleManager.h"
 #include "Object3d.h"
@@ -40,7 +40,7 @@ public:
 	void GetWorldPosition(float& x, float& y, float& z) const override;
 	void OnCollision() override;
 	// 戻り型を unique_ptr のコンテナ参照に変更
-	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() const { return bullets_; }
+	const std::list<std::unique_ptr<Bullet>>& GetBullets() const { return bullets_; }
 	bool IsDead() const override { return isDead_; }
 	void setPlayer(Player* player) { player_ = player; }
 	void SetParticleManager(ParticleManager* mgr) { particleManager_ = mgr; }
@@ -71,11 +71,22 @@ public:
 	void SetSinePhase(float p) { sinePhase_ = p; }
 	float GetSinePhase() const { return sinePhase_; }
 
-	// State から呼ぶための弾発射ラッパー
+	// Stateから呼ぶための弾発射ラッパー
 	void FireSpreadPublic(int count, float totalAngleDeg) { FireSpread(count, totalAngleDeg); }
 	void FireBurstPublic(int count) { FireBurst(count); }
 
 	float GetBaseSpeed() const { return baseSpeed_; }
+
+	// 行動パラメータにアクセスするためのアクセサ（定数は private のまま外部参照を許可）
+	static inline float GetDashSpeed() { return kDashSpeed; }
+	static inline int   GetDashDuration() { return kDashDuration; }
+	static inline float GetSineAmplitude() { return kSineAmplitude; }
+	static inline float GetSineFrequency() { return kSineFrequency; }
+	static inline int   GetBurstCount() { return kBurstCount; }
+	static inline int   GetSpreadCount() { return kSpreadCount; }
+	static inline float GetSpreadAngleDeg() { return kSpreadAngleDeg; }
+	static inline int   GetFireInterval() { return kFireInterval; }
+	static inline int   GetMoveInterval() { return kMoveInterval; }
 
 private:
 	// 行動状態
@@ -99,7 +110,7 @@ private:
 	float speed = 0.1f;
 	float baseSpeed_ = 0.1f;
 	// 弾はunique_ptr 
-	std::list<std::unique_ptr<EnemyBullet>> bullets_;
+	std::list<std::unique_ptr<Bullet>> bullets_;
 	int Time = 0;
 	Vector3 bulletVel = { 0.0f,0.0f,0.0f };
 	float EnemyHp = 5.0f;

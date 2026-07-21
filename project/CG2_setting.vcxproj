@@ -105,7 +105,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application\Enemy.cpp" />
-    <ClCompile Include="Application\EnemyBullet.cpp" />
     <ClCompile Include="Application\Bullet.cpp" />
     <ClCompile Include="Application\State\EnemyState.cpp" />
     <ClCompile Include="Application\State\GameSceneState.cpp" />
@@ -154,7 +153,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\WinApp.cpp" />
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Math\MatuilityForText.cpp" />
-    <ClCompile Include="Application\PlayerBullet.cpp" />
     <ClCompile Include="Engine\3D\Particle.cpp" />
     <ClCompile Include="Engine\3D\ParticleManager.cpp" />
     <ClCompile Include="Application\RailCamera.cpp" />
@@ -164,7 +162,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Enemy.h" />
-    <ClInclude Include="Application\EnemyBullet.h" />
     <ClInclude Include="Application\Bullet.h" />
     <ClInclude Include="Application\State\EnemyState.h" />
     <ClInclude Include="Application\State\GameSceneState.h" />
@@ -195,7 +192,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Base\WinApp.h" />
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Math\MatuilityForText.h" />
-    <ClInclude Include="Application\PlayerBullet.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
@@ -222,6 +218,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="diff patch.diff" />
     <None Include="Engine\Base\Direct" />
     <None Include="resources\shaders\Object3d.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
